@@ -1,0 +1,239 @@
+/** Css reset: except table{border-collapse:collapse;border-spacing:0;} **/
+html{color:#000;background:#FFF;}body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,button,textarea,p,blockquote,th,td{margin:0;padding:0;}fieldset,img{border:0;}address,caption,cite,code,dfn,em,strong,th,var,optgroup{font-style:inherit;font-weight:inherit;}del,ins{text-decoration:none;}li{list-style:none;}caption,th{text-align:left;}h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}q:before,q:after{content:'';}abbr,acronym{border:0;font-variant:normal;}sup{vertical-align:baseline;}sub{vertical-align:baseline;}legend{color:#000;}input,button,textarea,select,optgroup,option{font-family:inherit;font-size:inherit;font-style:inherit;font-weight:inherit;}input,button,textarea,select{font-size:100%;}
+
+/* Global styles: body, paragraphs, lists etc */
+
+body {
+   font-family: Arial,Helvetica,Sans-serif;
+   background-color: rgb(255,255,255);
+   margin: 0px;
+}
+
+/* Page */
+
+/* Header */
+
+#header-logo {
+    border: 0pt none;
+    padding: 0px;
+    margin: 0px;
+    background-color: transparent;
+  }
+
+/* Content */
+#content {
+    padding-left: 20px;
+}
+
+
+/* Headings */
+
+h1, h2, h3, h4, h5 {
+   color:#32639A;
+   font-weight:normal;
+   margin:0;
+   padding:0;
+   margin-bottom: 0.7em;
+   margin-top: 0.3em;
+}
+
+h1 {
+   font-size: 18pt;
+   background-color:#f3f3f3;
+   border-bottom:1px solid #CCCCCC;
+   padding-top: 6px;
+   text-indent: 3px;
+   margin-top: 0em;
+}
+
+h2 {
+   font-size:14pt;
+   border-bottom: 1px solid #CCCCCC;
+}
+
+h3 {
+
+   font-size:12pt;
+   border-bottom: 1px solid #EEEEEE;
+}
+h4 {
+   font-size:12pt;
+   font-style: italic;
+}
+
+h5, h6 {
+   font-size: small;
+}
+
+p {
+   margin-bottom:0.7em;
+   margin-top:0.3em;
+}
+
+/* Menus */
+
+   /** Nice looking "new" menu style. **/
+   ul.menu {
+      background:none repeat scroll 0 0 #356AA0;
+      border-bottom:2px solid #204061;
+      border-top:2px solid #356AA0;
+
+      font-family:Arial,sans-serif;
+      font-size:15px;
+      font-weight:bold;
+      height:40px;
+      list-style-type:none;
+      padding:0;
+   }
+
+   ul.menu li{
+      float:left;
+      margin:0;
+   }
+
+   ul.menu li a {
+      color:#FFFFFF;
+      display:block;
+      line-height:40px;
+      padding:0 20px;
+      text-decoration:none;
+   }
+
+   ul.menu li.active a, ul.menu li a:hover {
+      background:none repeat scroll 0 0 #3D7BBB;
+      border-bottom:2px solid #356AA0;
+   }
+
+   /** Nice looking "new" submenu style. **/
+   ul.submenu {
+      background:none repeat scroll 0 0 #333333;
+      border-bottom:2px solid #000000;
+      border-top:2px solid #333333;
+
+      font-family:Arial,sans-serif;
+      font-size:13px;
+      height:25px;
+      list-style-type:none;
+      padding:0;
+   }
+
+   ul.submenu li{
+      float:left;
+      margin:0;
+   }
+
+   ul.submenu li a {
+      color:#FFFFFF;
+      display:block;
+      line-height:25px;
+      padding:0 10px;
+      text-decoration:none;
+   }
+
+   ul.submenu li a:hover {
+      background:none repeat scroll 0 0 #555555;
+      border-bottom:2px solid #444444;
+   }
+
+
+/* Forms */
+
+   /* Simple way to create labels-on-top */
+   label {
+      display: block;
+   }
+   /** Error color **/
+   input.error {
+     color:#CC0000;
+     border:solid 1px #CC0000; background:#F7CBCA;
+   }
+   /** When IE6 dies, replace with element-specifics. This is supposed to apply to only text, password and file. **/
+   input.text, input.password, input.file {
+      border:1px solid #DEDEDE;
+      color:#525151;
+      font-size:20px;
+      height:30px;
+      padding:2px 0 0 5px;
+      width:420px;
+      margin-bottom:10px;
+   }
+   select {
+      margin-bottom:10px;
+   }
+   /** Again, without IE6 these would be element type selectors. We need a small margin. **/
+   input.radio, input.checkbox {
+      margin:0 0.4em 0 0;
+   }
+   textarea {
+      border:1px solid #DEDEDE;
+      color:#525151;
+      font-size:12pt;
+      padding:2px 0 0 5px;
+      width:420px;
+      margin-bottom: 10px;
+   }
+
+   /** Contextual help near form elements **/
+
+   div.help {
+      color:#666666;
+      font-family:Verdana;
+      font-size:x-small;
+      padding:0;
+   }
+
+
+/* Messages */
+
+div.success {
+  padding: 6px;
+  color:#008000;
+  border:solid 1px #349534; background:#C9FFCA; margin-left: 2px; margin-top: 4px; margin-bottom: 4px;
+}
+
+div.error {
+  padding: 6px;
+  color:#CC0000;
+  border:solid 1px #CC0000; background:#F7CBCA; margin-left: 2px; margin-top: 4px; margin-bottom: 4px;
+}
+
+/* Content tables  */
+   table.content, table.content th, table.content td {
+      border-collapse: collapse;
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      color: #555;
+      border-bottom: 1px solid #eeeeee;
+   }
+   table.content td.caption {
+     text-align: right;
+   }
+
+   /* Can use either tr.heading and td, or thead and th to create a heading..*/
+   table.content tr.heading td, table.content thead th {
+     border-top:1px solid #CCCCCC;
+     border-bottom:1px solid #CCCCCC;
+     padding-top: 6px;
+     color: #000000;
+   }
+   
+   table.content td, table.content th {
+     padding-bottom:5px;
+     padding-top:5px;
+     padding-left:4px;
+     padding-right:4px;
+   }
+
+   /* Table cells containing a caption have this class */
+   table.content td.caption {
+      text-align:right;
+   }
+
+   /* Row colors */
+
+   table.content tr { background: #FCFDFE; }
+
+   /* Can use TR.odd or TD.odd for odd rows/columns */
+   table.content tr.odd, table.content td.odd { background: #eeeeee; }
+
+
+/* Footer */

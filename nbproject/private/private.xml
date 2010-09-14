@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/1"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/1">
+        <file>file:/D:/VMs/00_Projects/useradmin/trunk/modules/user/classes/controller/user.php</file>
+        <file>file:/D:/VMs/00_Projects/useradmin/trunk/modules/user/views/user/admin/index.php</file>
+        <file>file:/D:/VMs/00_Projects/useradmin/trunk/modules/user/classes/model/user.php</file>
+        <file>file:/D:/VMs/00_Projects/useradmin/trunk/modules/user/views/default/template.php</file>
+        <file>file:/D:/VMs/00_Projects/useradmin/trunk/modules/user/views/user/template.php</file>
+        <file>file:/D:/VMs/00_Projects/useradmin/trunk/www/css/style.css</file>
+        <file>file:/D:/VMs/00_Projects/useradmin/trunk/modules/user/views/user/edit.php</file>
+        <file>file:/D:/VMs/00_Projects/useradmin/trunk/modules/user/views/user/delete.php</file>
+        <file>file:/D:/VMs/00_Projects/useradmin/trunk/modules/user/views/user/unregister.php</file>
+        <file>file:/D:/VMs/00_Projects/useradmin/trunk/modules/user/views/user/profile.php</file>
+        <file>file:/D:/VMs/00_Projects/useradmin/trunk/modules/user/views/user/register.php</file>
+        <file>file:/D:/VMs/00_Projects/useradmin/trunk/modules/user/views/user/login.php</file>
+        <file>file:/D:/VMs/00_Projects/useradmin/trunk/modules/user/views/user/forgot.php</file>
+        <file>file:/D:/VMs/00_Projects/useradmin/trunk/modules/user/views/user/reset.php</file>
+        <file>file:/D:/VMs/00_Projects/useradmin/trunk/modules/user/views/user/profile_edit.php</file>
+        <file>file:/D:/VMs/00_Projects/useradmin/trunk/modules/user/views/user/noaccess.php</file>
+        <file>file:/D:/VMs/00_Projects/useradmin/trunk/modules/user/classes/helper/datatable.php</file>
+        <file>file:/D:/VMs/00_Projects/useradmin/trunk/application/bootstrap.php</file>
+        <file>file:/D:/VMs/00_Projects/useradmin/trunk/modules/pagination/classes/kohana/pagination.php</file>
+        <file>file:/D:/VMs/00_Projects/useradmin/trunk/system/classes/kohana/request.php</file>
+        <file>file:/D:/VMs/00_Projects/useradmin/trunk/system/classes/kohana/url.php</file>
+    </open-files>
+</project-private>
