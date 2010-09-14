@@ -21,6 +21,6 @@
 // to fetch user roles, use $user->roles->find_all()
 // just using $user->roles is insufficient (apparently Kohana 2.X used this?), as Auth::instance()->get_user() uses find() which does not return associated models...
 foreach ($user->roles->find_all() as $role): ?>
-	<p><?php echo $role->name ?> &mdash; <?php echo $role->description ?></p>
+   <p><?php echo $role->name ?> &mdash; <?php echo $role->description ?></p>
 <?php endforeach ?>
 

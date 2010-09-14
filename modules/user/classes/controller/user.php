@@ -66,10 +66,10 @@ class Controller_User extends Controller_App {
    public function action_profile() {
       // set the template title (see Controller_App for implementation)
       $this->template->title = 'User profile';
-		if ( Auth::instance()->logged_in() == false ){
-			// No user is currently logged in
-			Request::instance()->redirect('user/login');
-		}
+      if ( Auth::instance()->logged_in() == false ){
+         // No user is currently logged in
+         Request::instance()->redirect('user/login');
+      }
       $view = $this->template->content = View::factory('user/profile');
       // retrieve the current user and set the view variable accordingly
       $view->set('user', Auth::instance()->get_user() );
@@ -184,13 +184,13 @@ class Controller_User extends Controller_App {
    public function action_unregister() {
       // set the template title (see Controller_App for implementation)
       $this->template->title = 'Close user account';
-		if ( Auth::instance()->logged_in() == false ){
-			// No user is currently logged in
-			Request::instance()->redirect('user/login');
-		}
+      if ( Auth::instance()->logged_in() == false ){
+         // No user is currently logged in
+         Request::instance()->redirect('user/login');
+      }
       // get the user id
       $id = Auth::instance()->get_user()->id;
-		$user = ORM::factory('user', $id);      
+      $user = ORM::factory('user', $id);      
       // KO3 ORM is lazy loading, which means we have to access a single field to actually have something happen.
       if($user->id != $id) {
          // If the user is not the current user, redirect
@@ -206,54 +206,54 @@ class Controller_User extends Controller_App {
          $user->delete($id);
          // message: save success
          Message::add('success', 'User deleted.');
-   		Request::instance()->redirect('user/profile');
+         Request::instance()->redirect('user/profile');
       }
       // display confirmation
       $this->template->content = View::factory('user/unregister')->set('id', $id)->set('data', array('username' => Auth::instance()->get_user()->username));
-	}
+   }
 
    /**
     * View: Login form.
     */
-	public function action_login() {
+   public function action_login() {
       // set the template title (see Controller_App for implementation)
       $this->template->title = 'Login';
-		// If user already signed-in
-		if(Auth::instance()->logged_in() != 0){
-			// redirect to the user account
-			Request::instance()->redirect('user/profile');
-		}
-		$content = $this->template->content = View::factory('user/login');
-		// If there is a post and $_POST is not empty
-		if ($_POST) {
-			// Instantiate a new user
-			$user = ORM::factory('user');
+      // If user already signed-in
+      if(Auth::instance()->logged_in() != 0){
+         // redirect to the user account
+         Request::instance()->redirect('user/profile');
+      }
+      $content = $this->template->content = View::factory('user/login');
+      // If there is a post and $_POST is not empty
+      if ($_POST) {
+         // Instantiate a new user
+         $user = ORM::factory('user');
 
-			// Check Auth
+         // Check Auth
          // more specifically, username and password fields need to be set.
-			$status = $user->login($_POST);
+         $status = $user->login($_POST);
 
-			// If the post data validates using the rules setup in the user model
-			if ($status) {
-				// redirect to the user account
-				Request::instance()->redirect('user/profile');
-			} else {
+         // If the post data validates using the rules setup in the user model
+         if ($status) {
+            // redirect to the user account
+            Request::instance()->redirect('user/profile');
+         } else {
             // Get errors for display in view
-				$content->errors = $_POST->errors('login');
-			}
-		}
-	}
+            $content->errors = $_POST->errors('login');
+         }
+      }
+   }
 
    /**
     * Log the user out.
     */
-	public function action_logout() {
-		// Sign out the user
-		Auth::instance()->logout();
+   public function action_logout() {
+      // Sign out the user
+      Auth::instance()->logout();
 
-		// redirect to the user account and then the signin page if logout worked as expected
-		Request::instance()->redirect('user/profile');
-	}
+      // redirect to the user account and then the signin page if logout worked as expected
+      Request::instance()->redirect('user/profile');
+   }
 
    /**
     * A basic implementation of the "Forgot password" functionality
@@ -262,7 +262,7 @@ class Controller_User extends Controller_App {
       // set the template title (see Controller_App for implementation)
       $this->template->title = 'Forgot password';
       if(isset($_POST['reset_email'])) {
-			$user = ORM::factory('user')->where('email', '=', $_POST['reset_email'])->find();
+         $user = ORM::factory('user')->where('email', '=', $_POST['reset_email'])->find();
          // admin passwords cannot be reset by email
          if (is_numeric($user->id) && ($user->username != 'admin')) {
             // send an email with the account reset token
@@ -330,7 +330,7 @@ class Controller_User extends Controller_App {
                $user->save();
                Message::add('Password reset.');
                Message::add('<p>Your password has been reset to: "'.$password.'".</p><br><p>Please log in below.</p>');
-   				Request::instance()->redirect('user/login');
+               Request::instance()->redirect('user/login');
             }
         }
      }

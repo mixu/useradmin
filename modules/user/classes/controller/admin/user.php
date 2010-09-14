@@ -157,8 +157,8 @@ class Controller_Admin_User extends Controller_App {
       $user = ORM::factory('user', $id);
       // check for confirmation
       if(is_numeric($id) && isset($_POST['confirmation']) && $_POST['confirmation'] == 'Y') {
-   		// Delete the user
-      	$user->delete($id);
+         // Delete the user
+         $user->delete($id);
          // message: save success
          Message::add('success', 'User deleted.');
          // redirect and exit

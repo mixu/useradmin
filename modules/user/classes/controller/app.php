@@ -11,17 +11,17 @@ class Controller_App extends Controller {
 
 
    /**
-	 * @var string Filename of the template file.
-	 */
+    * @var string Filename of the template file.
+    */
    public $template = 'default/template';
 
-	/**
-	 * @var boolean Whether the template file should be rendered automatically.
+   /**
+    * @var boolean Whether the template file should be rendered automatically.
     * 
     * If set, then the template view set above will be created before the controller action begins.
     * You then need to just set $this->template->content to your content, without needing to worry about the containing template.
     *
-	 **/
+    **/
    public $auto_render = TRUE;
 
    /**
@@ -45,10 +45,10 @@ class Controller_App extends Controller {
     * In our template controller we override this method so that we can
     * set up default values. These variables are then available to our
     * controllers if they need to be modified.
-	 *
-	 * @return  void
-	 */
-	public function before() {
+    *
+    * @return  void
+    */
+   public function before() {
       // This codeblock is very useful in development sites:
       // What it does is get rid of invalid sessions which cause exceptions, which may happen
       // 1) when you make errors in your code.
@@ -81,7 +81,7 @@ class Controller_App extends Controller {
 
       if ($this->auto_render) {
 
-			// only load the template if the template has not been set..
+         // only load the template if the template has not been set..
          $this->template = View::factory($this->template);
          
          // Initialize empty values
@@ -99,7 +99,7 @@ class Controller_App extends Controller {
          $this->template->actionName = $this->request->action;
          // next, it is expected that $this->template->content is set e.g. by rendering a view into it.
      }
-	}
+   }
 
    /**
     * The after() method is called after your controller action.
@@ -107,18 +107,18 @@ class Controller_App extends Controller {
     * make any last minute modifications to the template before anything
     * is rendered.
     */
-	public function after() {
-		if ($this->auto_render === TRUE) {
-			// Assign the template as the request response and render it
-			$this->request->response = $this->template;
+   public function after() {
+      if ($this->auto_render === TRUE) {
+         // Assign the template as the request response and render it
+         $this->request->response = $this->template;
          
          $styles = array( 'css/style.css' => 'screen');
          $scripts = array();
 
          $this->template->styles = array_merge( $this->template->styles, $styles );
          $this->template->scripts = array_merge( $this->template->scripts, $scripts );
-		}
+      }
       parent::after();
-	}
+   }
 
 }
