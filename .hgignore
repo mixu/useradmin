@@ -1,4 +1,4 @@
 syntax: regexp
 ^application/cache
 ^application/logs
-
+^nbproject
