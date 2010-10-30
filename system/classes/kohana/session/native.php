@@ -2,17 +2,26 @@
 /**
  * Native PHP session class.
  *
- * @package    Session
+ * @package    Kohana
+ * @category   Session
  * @author     Kohana Team
  * @copyright  (c) 2008-2009 Kohana Team
  * @license    http://kohanaphp.com/license
  */
 class Kohana_Session_Native extends Session {
 
+	public function id()
+	{
+		return session_id();
+	}
+
 	protected function _read($id = NULL)
 	{
-		// Set the cookie lifetime
-		session_set_cookie_params($this->_lifetime);
+		// Sync up the session cookie with Cookie parameters
+		session_set_cookie_params($this->_lifetime, Cookie::$path, Cookie::$domain, Cookie::$secure, Cookie::$httponly);
+
+		// Do not allow PHP to send Cache-Control headers
+		session_cache_limiter(FALSE);
 
 		// Set the session cookie name
 		session_name($this->_name);

@@ -1,4 +1,4 @@
-<?php defined('SYSPATH') OR die('No direct access allowed.');
+<?php defined('SYSPATH') or die('No direct access allowed.');
 
 return array(
 
@@ -59,6 +59,7 @@ return array(
 		'OmniWeb'           => 'OmniWeb',
 		'Chrome'            => 'Chrome',
 		'Safari'            => 'Safari',
+		'CFNetwork'         => 'Safari', // Core Foundation for OSX, WebKit/Safari
 		'Konqueror'         => 'Konqueror',
 		'Epiphany'          => 'Epiphany',
 		'Galeon'            => 'Galeon',

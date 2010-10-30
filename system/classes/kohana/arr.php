@@ -1,8 +1,9 @@
-<?php defined('SYSPATH') OR die('No direct access allowed.');
+<?php defined('SYSPATH') or die('No direct access allowed.');
 /**
  * Array helper.
  *
  * @package    Kohana
+ * @category   Helpers
  * @author     Kohana Team
  * @copyright  (c) 2007-2009 Kohana Team
  * @license    http://kohanaphp.com/license
@@ -10,7 +11,18 @@
 class Kohana_Arr {
 
 	/**
+	 * @var  string  default delimiter for path()
+	 */
+	public static $delimiter = '.';
+
+	/**
 	 * Tests if an array is associative or not.
+	 *
+	 *     // Returns TRUE
+	 *     Arr::is_assoc(array('username' => 'john.doe'));
+	 *
+	 *     // Returns FALSE
+	 *     Arr::is_assoc('foo', 'bar');
 	 *
 	 * @param   array   array to check
 	 * @return  boolean
@@ -31,18 +43,36 @@ class Kohana_Arr {
 	 *     // Get the value of $array['foo']['bar']
 	 *     $value = Arr::path($array, 'foo.bar');
 	 *
+	 * Using a wildcard "*" will search intermediate arrays and return an array.
+	 *
+	 *     // Get the values of "color" in theme
+	 *     $colors = Arr::path($array, 'theme.*.color');
+	 *
 	 * @param   array   array to search
-	 * @param   string  key path, dot separated
+	 * @param   string  key path, delimiter separated
 	 * @param   mixed   default value if the path is not set
+	 * @param   string  key path delimiter
 	 * @return  mixed
 	 */
-	public static function path($array, $path, $default = NULL)
+	public static function path($array, $path, $default = NULL, $delimiter = NULL)
 	{
-		// Remove outer dots, wildcards, or spaces
-		$path = trim($path, '.* ');		
+		if (array_key_exists($path, $array))
+		{
+			// No need to do extra processing
+			return $array[$path];
+		}
 
-		// Split the keys by slashes
-		$keys = explode('.', $path);
+		if ($delimiter === NULL)
+		{
+			// Use the default delimiter
+			$delimiter = Arr::$delimiter;
+		}
+
+		// Remove outer delimiters, wildcards, or spaces
+		$path = trim($path, "{$delimiter}* ");
+
+		// Split the keys by delimiter
+		$keys = explode($delimiter, $path);
 
 		do
 		{
@@ -79,11 +109,6 @@ class Kohana_Arr {
 			{
 				// Handle wildcards
 
-				if (empty($keys))
-				{
-					return $array;
-				}
-
 				$values = array();
 				foreach ($array as $arr)
 				{
@@ -119,6 +144,9 @@ class Kohana_Arr {
 	/**
 	 * Fill an array with a range of numbers.
 	 *
+	 *     // Fill an array with values 5, 10, 15, 20
+	 *     $values = Arr::range(5, 20);
+	 *
 	 * @param   integer  stepping
 	 * @param   integer  ending number
 	 * @return  array
@@ -141,6 +169,12 @@ class Kohana_Arr {
 	 * Retrieve a single key from an array. If the key does not exist in the
 	 * array, the default value will be returned instead.
 	 *
+	 *     // Get the value "username" from $_POST, if it exists
+	 *     $username = Arr::get($_POST, 'username');
+	 *
+	 *     // Get the value "sorting" from $_GET, if it exists
+	 *     $sorting = Arr::get($_GET, 'sorting');
+	 *
 	 * @param   array   array to extract from
 	 * @param   string  key name
 	 * @param   mixed   default value
@@ -154,6 +188,9 @@ class Kohana_Arr {
 	/**
 	 * Retrieves multiple keys from an array. If the key does not exist in the
 	 * array, the default value will be added instead.
+	 *
+	 *     // Get the values "username", "password" from $_POST
+	 *     $auth = Arr::extract($_POST, array('username', 'password'));
 	 *
 	 * @param   array   array to extract keys from
 	 * @param   array   list of key names
@@ -174,6 +211,8 @@ class Kohana_Arr {
 	/**
 	 * Binary search algorithm.
 	 *
+	 * @deprecated  Use [array_search](http://php.net/array_search) instead
+	 *
 	 * @param   mixed    the value to search for
 	 * @param   array    an array of values to search in
 	 * @param   boolean  sort the array now
@@ -182,37 +221,14 @@ class Kohana_Arr {
 	 */
 	public static function binary_search($needle, $haystack, $sort = FALSE)
 	{
-		if ($sort)
-		{
-			sort($haystack);
-		}
-
-		$high = count($haystack) - 1;
-		$low = 0;
-
-		while ($low <= $high)
-		{
-			$mid = ($low + $high) >> 1;
-
-			if ($haystack[$mid] < $needle)
-			{
-				$low = $mid + 1;
-			}
-			elseif ($haystack[$mid] > $needle)
-			{
-				$high = $mid - 1;
-			}
-			else
-			{
-				return $mid;
-			}
-		}
-
-		return FALSE;
+		return array_search($needle, $haystack);
 	}
 
 	/**
 	 * Adds a value to the beginning of an associative array.
+	 *
+	 *     // Add an empty value to the start of a select list
+	 *     Arr::unshift_assoc($array, 'none', 'Select a value');
 	 *
 	 * @param   array   array to modify
 	 * @param   string  array key name
@@ -229,37 +245,97 @@ class Kohana_Arr {
 	}
 
 	/**
+	 * Recursive version of [array_map](http://php.net/array_map), applies the
+	 * same callback to all elements in an array, including sub-arrays.
+	 *
+	 *     // Apply "strip_tags" to every element in the array
+	 *     $array = Arr::map('strip_tags', $array);
+	 *
+	 * [!!] Unlike `array_map`, this method requires a callback and will only map
+	 * a single array.
+	 *
+	 * @param   mixed   callback applied to every element in the array
+	 * @param   array   array to map
+	 * @return  array
+	 */
+	public static function map($callback, $array)
+	{
+		foreach ($array as $key => $val)
+		{
+			if (is_array($val))
+			{
+				$array[$key] = Arr::map($callback, $val);
+			}
+			else
+			{
+				$array[$key] = call_user_func($callback, $val);
+			}
+		}
+
+		return $array;
+	}
+
+	/**
 	 * Merges one or more arrays recursively and preserves all keys.
-	 * Note that this does not work the same the PHP function array_merge_recursive()!
+	 * Note that this does not work the same as [array_merge_recursive](http://php.net/array_merge_recursive)!
+	 *
+	 *     $john = array('name' => 'john', 'children' => array('fred', 'paul', 'sally', 'jane'));
+	 *     $mary = array('name' => 'mary', 'children' => array('jane'));
+	 *
+	 *     // John and Mary are married, merge them together
+	 *     $john = Arr::merge($john, $mary);
+	 *
+	 *     // The output of $john will now be:
+	 *     array('name' => 'mary', 'children' => array('fred', 'paul', 'sally', 'jane'))
 	 *
 	 * @param   array  initial array
 	 * @param   array  array to merge
 	 * @param   array  ...
 	 * @return  array
 	 */
-	public static function merge(array $a1)
+	public static function merge(array $a1, array $a2)
 	{
 		$result = array();
 		for ($i = 0, $total = func_num_args(); $i < $total; $i++)
 		{
-			foreach (func_get_arg($i) as $key => $val)
+			// Get the next array
+			$arr = func_get_arg($i);
+
+			// Is the array associative?
+			$assoc = Arr::is_assoc($arr);
+
+			foreach ($arr as $key => $val)
 			{
 				if (isset($result[$key]))
 				{
-					if (is_array($val))
+					if (is_array($val) && is_array($result[$key]))
 					{
-						// Arrays are merged recursively
-						$result[$key] = Arr::merge($result[$key], $val);
-					}
-					elseif (is_int($key))
-					{
-						// Indexed arrays are appended
-						array_push($result, $val);
+						if (Arr::is_assoc($val))
+						{
+							// Associative arrays are merged recursively
+							$result[$key] = Arr::merge($result[$key], $val);
+						}
+						else
+						{
+							// Find the values that are not already present
+							$diff = array_diff($val, $result[$key]);
+
+							// Indexed arrays are merged to prevent duplicates
+							$result[$key] = array_merge($result[$key], $diff);
+						}
 					}
 					else
 					{
-						// Associative arrays are replaced
-						$result[$key] = $val;
+						if ($assoc)
+						{
+							// Associative values are replaced
+							$result[$key] = $val;
+						}
+						elseif ( ! in_array($val, $result, TRUE))
+						{
+							// Indexed values are added only if they do not yet exist
+							$result[] = $val;
+						}
 					}
 				}
 				else
@@ -274,11 +350,20 @@ class Kohana_Arr {
 	}
 
 	/**
-	 * Overwrites an array with values from input array(s).
-	 * Non-existing keys will not be appended!
+	 * Overwrites an array with values from input arrays.
+	 * Keys that do not exist in the first array will not be added!
 	 *
-	 * @param   array   key array
-	 * @param   array   input array(s) that will overwrite key array values
+	 *     $a1 = array('name' => 'john', 'mood' => 'happy', 'food' => 'bacon');
+	 *     $a2 = array('name' => 'jack', 'food' => 'tacos', 'drink' => 'beer');
+	 *
+	 *     // Overwrite the values of $a1 with $a2
+	 *     $array = Arr::overwrite($a1, $a2);
+	 *
+	 *     // The output of $array will now be:
+	 *     array('name' => 'jack', 'mood' => 'happy', 'food' => 'bacon')
+	 *
+	 * @param   array   master array
+	 * @param   array   input arrays that will overwrite existing values
 	 * @return  array
 	 */
 	public static function overwrite($array1, $array2)
@@ -348,9 +433,38 @@ class Kohana_Arr {
 		return array($command, $params);
 	}
 
-	final private function __construct()
+	/**
+	 * Convert a multi-dimensional array into a single-dimensional array.
+	 *
+	 *     $array = array('set' => array('one' => 'something'), 'two' => 'other');
+	 *
+	 *     // Flatten the array
+	 *     $array = Arr::flatten($array);
+	 *
+	 *     // The array will now be
+	 *     array('one' => 'something', 'two' => 'other');
+	 *
+	 * [!!] The keys of array values will be discarded.
+	 *
+	 * @param   array   array to flatten
+	 * @return  array
+	 * @since   3.0.6
+	 */
+	public static function flatten($array)
 	{
-		// This is a static class
+		$flat = array();
+		foreach ($array as $key => $value)
+		{
+			if (is_array($value))
+			{
+				$flat += Arr::flatten($value);
+			}
+			else
+			{
+				$flat[$key] = $value;
+			}
+		}
+		return $flat;
 	}
 
 } // End arr

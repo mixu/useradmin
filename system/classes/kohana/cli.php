@@ -3,6 +3,7 @@
  * Helper functions for working in a command-line environment.
  *
  * @package    Kohana
+ * @category   Helpers
  * @author     Kohana Team
  * @copyright  (c) 2009 Kohana Team
  * @license    http://kohanaphp.com/license
@@ -13,7 +14,10 @@ class Kohana_CLI {
 	 * Returns one or more command-line options. Options are specified using
 	 * standard CLI syntax:
 	 *
-	 *     php index.php --option "value"
+	 *     php index.php --username=john.smith --password=secret --var="some value with spaces"
+	 *
+	 *     // Get the values of "username" and "password"
+	 *     $auth = CLI::options('username', 'password');
 	 *
 	 * @param   string  option name
 	 * @param   ...

@@ -1,8 +1,9 @@
-<?php defined('SYSPATH') OR die('No direct access allowed.');
+<?php defined('SYSPATH') or die('No direct access allowed.');
 /**
  * Codebench — A benchmarking module.
  *
- * @package    Benchmarking
+ * @package    Kohana/Codebench
+ * @category   Controllers
  * @author     Kohana Team
  * @copyright  (c) 2009 Kohana Team
  * @license    http://kohanaphp.com/license.html

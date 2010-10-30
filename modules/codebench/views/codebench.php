@@ -1,4 +1,4 @@
-<?php defined('SYSPATH') OR die('No direct access allowed.');
+<?php defined('SYSPATH') or die('No direct access allowed.');
 /**
  * Codebench — A benchmarking module.
  *
@@ -8,22 +8,22 @@
  * @license    http://kohanaphp.com/license.html
  */
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<html lang="en">
 <head>
 
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta charset="utf-8" />
 	<title><?php if ($class !== '') echo $class, ' · ' ?>Codebench</title>
 
-	<style type="text/css">
+	<style>
 		/* General styles*/
 		body { position:relative; margin:1em 2em; font:12px monaco,monospace; }
 		h1 { font-size:24px; letter-spacing:-0.05em; }
 		h2 { font-size:18px; letter-spacing:-0.1em; }
 		input, code { font:inherit; }
 		code { background:#e5e5e5; }
+		caption { display:none; }
 
 		/* Form */
 		#runner { margin-bottom:2em; }
@@ -74,8 +74,8 @@
 		.help { cursor:help; }
 	</style>
 
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript"></script>
-	<script type="text/javascript">
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+	<script>
 		$(document).ready(function() {
 			// Insert "Toggle All" button
 			var expand_all_text   = '▸ Expand all';
@@ -192,7 +192,8 @@
 					</h2>
 
 					<div>
-						<table summary="Benchmarks per subject for <?php echo $method ?>">
+						<table>
+							<caption>Benchmarks per subject for <?php echo $method ?></caption>
 							<thead>
 								<tr>
 									<th style="width:50%">subject → return</th>
@@ -205,11 +206,11 @@
 							<?php foreach ($benchmark['subjects'] as $subject_key => $subject) { ?>
 								<tr>
 									<td>
-										<strong class="help" title="(<?php echo gettype($codebench['subjects'][$subject_key]) ?>) <?php echo HTML::chars(var_export($codebench['subjects'][$subject_key])) ?>">
+										<strong class="help" title="(<?php echo gettype($codebench['subjects'][$subject_key]) ?>) <?php echo HTML::chars(var_export($codebench['subjects'][$subject_key], TRUE)) ?>">
 											[<?php echo HTML::chars($subject_key) ?>] →
 										</strong>
 										<span class="quiet">(<?php echo gettype($subject['return']) ?>)</span>
-										<?php echo HTML::chars(var_export($subject['return'])) ?>
+										<?php echo HTML::chars(var_export($subject['return'], TRUE)) ?>
 									</td>
 									<td class="numeric">
 										<span title="+<?php echo (int) $subject['percent']['fastest']['memory'] ?>% memory">
@@ -249,7 +250,7 @@
 	<p id="footer">
 		Page executed in <strong><?php echo round(microtime(TRUE) - KOHANA_START_TIME, 2) ?>&nbsp;s</strong>
 		using <strong><?php echo Text::widont(Text::bytes(memory_get_usage(), 'MB')) ?></strong> of memory.<br />
-		<a href="http://github.com/kohana/codebench">Codebench</a>, a <a href="http://www.kohanaphp.com/">Kohana</a> module
+		<a href="http://github.com/kohana/codebench">Codebench</a>, a <a href="http://kohanaframework.org/">Kohana</a> module
 		by <a href="http://www.geertdedeckere.be/article/introducing-codebench">Geert De Deckere</a>.
 	</p>
 

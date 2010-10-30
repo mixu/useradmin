@@ -10,32 +10,38 @@
  * a pattern for the key:
  *
  *     // This route will only match when <id> is a digit
- *     Route::set('user/edit/<id>', array('id' => '\d+'));
+ *     Route::set('user', 'user/<action>/<id>', array('id' => '\d+'));
  *
  *     // This route will match when <path> is anything
- *     Route::set('<path>', array('path' => '.*'));
+ *     Route::set('file', '<path>', array('path' => '.*'));
  *
  * It is also possible to create optional segments by using parentheses in
  * the URI definition:
  *
  *     // This is the standard default route, and no keys are required
- *     Route::set('(<controller>(/<action>(/<id>)))');
+ *     Route::set('default', '(<controller>(/<action>(/<id>)))');
  *
  *     // This route only requires the <file> key
- *     Route::set('(<path>/)<file>(<format>)', array('path' => '.*', 'format' => '\.\w+'));
+ *     Route::set('file', '(<path>/)<file>(.<format>)', array('path' => '.*', 'format' => '\w+'));
  *
  * Routes also provide a way to generate URIs (called "reverse routing"), which
  * makes them an extremely powerful and flexible way to generate internal links.
  *
  * @package    Kohana
+ * @category   Base
  * @author     Kohana Team
  * @copyright  (c) 2008-2009 Kohana Team
  * @license    http://kohanaphp.com/license
  */
 class Kohana_Route {
 
+	// Defines the pattern of a <segment>
 	const REGEX_KEY     = '<([a-zA-Z0-9_]++)>';
+
+	// What can be part of a <segment> value
 	const REGEX_SEGMENT = '[^/.,;?\n]++';
+
+	// What must be escaped in the route regex
 	const REGEX_ESCAPE  = '[.\\+*?[^\\]${}=!|]';
 
 	/**
@@ -47,7 +53,13 @@ class Kohana_Route {
 	protected static $_routes = array();
 
 	/**
-	 * Stores a named route and returns it.
+	 * Stores a named route and returns it. The "action" will always be set to
+	 * "index" if it is not defined.
+	 *
+	 *     Route::set('default', '(<controller>(/<action>(/<id>)))')
+	 *         ->defaults(array(
+	 *             'controller' => 'welcome',
+	 *         ));
 	 *
 	 * @param   string   route name
 	 * @param   string   URI pattern
@@ -62,9 +74,11 @@ class Kohana_Route {
 	/**
 	 * Retrieves a named route.
 	 *
+	 *     $route = Route::get('default');
+	 *
 	 * @param   string  route name
 	 * @return  Route
-	 * @return  FALSE   when no route is found
+	 * @throws  Kohana_Exception
 	 */
 	public static function get($name)
 	{
@@ -80,7 +94,9 @@ class Kohana_Route {
 	/**
 	 * Retrieves all named routes.
 	 *
-	 * @return  array  named routes
+	 *     $routes = Route::all();
+	 *
+	 * @return  array  routes by name
 	 */
 	public static function all()
 	{
@@ -90,6 +106,9 @@ class Kohana_Route {
 	/**
 	 * Get the name of a route.
 	 *
+	 *     $name = Route::name($route)
+	 *
+	 * @param   object  Route instance
 	 * @return  string
 	 */
 	public static function name(Route $route)
@@ -98,11 +117,20 @@ class Kohana_Route {
 	}
 
 	/**
-	 * Saves or loads the route cache.
+	 * Saves or loads the route cache. If your routes will remain the same for
+	 * a long period of time, use this to reload the routes from the cache
+	 * rather than redefining them on every page load.
+	 *
+	 *     if ( ! Route::cache())
+	 *     {
+	 *         // Set routes here
+	 *         Route::cache(TRUE);
+	 *     }
 	 *
 	 * @param   boolean   cache the current routes
 	 * @return  void      when saving routes
 	 * @return  boolean   when loading routes
+	 * @uses    Kohana::cache
 	 */
 	public static function cache($save = FALSE)
 	{
@@ -128,6 +156,24 @@ class Kohana_Route {
 		}
 	}
 
+	/**
+	 * Create a URL from a route name. This is a shortcut for:
+	 *
+	 *     echo URL::site(Route::get($name)->uri($params), $protocol);
+	 *
+	 * @param   string   route name
+	 * @param   array    URI parameters
+	 * @param   mixed   protocol string or boolean, adds protocol and domain
+	 * @return  string
+	 * @since   3.0.7
+	 * @uses    URL::site
+	 */
+	public static function url($name, array $params = NULL, $protocol = NULL)
+	{
+		// Create a URI with the route and convert it to a URL
+		return URL::site(Route::get($name)->uri($params), $protocol);
+	}
+
 	// Route URI string
 	protected $_uri = '';
 
@@ -142,10 +188,15 @@ class Kohana_Route {
 
 	/**
 	 * Creates a new route. Sets the URI and regular expressions for keys.
+	 * Routes should always be created with [Route::set] or they will not
+	 * be properly stored.
+	 *
+	 *     $route = new Route($uri, $regex);
 	 *
 	 * @param   string   route URI pattern
 	 * @param   array    key patterns
 	 * @return  void
+	 * @uses    Route::_compile
 	 */
 	public function __construct($uri = NULL, array $regex = NULL)
 	{
@@ -171,10 +222,13 @@ class Kohana_Route {
 	 * Provides default values for keys when they are not present. The default
 	 * action will always be "index" unless it is overloaded here.
 	 *
-	 *     $route->defaults(array('controller' => 'welcome', 'action' => 'index'));
+	 *     $route->defaults(array(
+	 *         'controller' => 'welcome',
+	 *         'action'     => 'index'
+	 *     ));
 	 *
 	 * @param   array  key values
-	 * @return  Route
+	 * @return  $this
 	 */
 	public function defaults(array $defaults = NULL)
 	{
@@ -188,10 +242,8 @@ class Kohana_Route {
 	 * all of the routed parameters as an array. A failed match will return
 	 * boolean FALSE.
 	 *
-	 *     // This route will only match if the <controller>, <action>, and <id> exist
-	 *     $params = Route::factory('<controller>/<action>/<id>', array('id' => '\d+'))
-	 *         ->matches('users/edit/10');
-	 *     // The parameters are now: controller = users, action = edit, id = 10
+	 *     // Params: controller = users, action = edit, id = 10
+	 *     $params = $route->matches('users/edit/10');
 	 *
 	 * This method should almost always be used within an if/else block:
 	 *
@@ -237,8 +289,17 @@ class Kohana_Route {
 	/**
 	 * Generates a URI for the current route based on the parameters given.
 	 *
+	 *     // Using the "default" route: "users/profile/10"
+	 *     $route->uri(array(
+	 *         'controller' => 'users',
+	 *         'action'     => 'profile',
+	 *         'id'         => '10'
+	 *     ));
+	 *
 	 * @param   array   URI parameters
 	 * @return  string
+	 * @throws  Kohana_Exception
+	 * @uses    Route::REGEX_Key
 	 */
 	public function uri(array $params = NULL)
 	{
@@ -315,8 +376,11 @@ class Kohana_Route {
 	 * Returns the compiled regular expression for the route. This translates
 	 * keys and optional groups to a proper PCRE regular expression.
 	 *
-	 * @access  protected
+	 *     $regex = $route->_compile();
+	 *
 	 * @return  string
+	 * @uses    Route::REGEX_ESCAPE
+	 * @uses    Route::REGEX_SEGMENT
 	 */
 	protected function _compile()
 	{

@@ -14,10 +14,10 @@ rules
 
 callbacks
 :  A callback is custom method that can access the entire Validate object.
-   The return value of a callback is ignored. Instead, the the callback must
+   The return value of a callback is ignored. Instead, the callback must
    manually add an error to the object using [Validate::error] on failure.
 
-[!!] Note that [Validate] callbacks and [PHP callbacks](http://php.net/manual/language.pseudo-types.php#language.types.callback) are two not the same.
+[!!] Note that [Validate] callbacks and [PHP callbacks](http://php.net/manual/language.pseudo-types.php#language.types.callback) are not the same.
 
 Using `TRUE` as the field name when adding a filter, rule, or callback will by applied to all named fields.
 
@@ -50,7 +50,7 @@ Rule name                 | Function
 [Validate::alpha]         | Only alpha characters allowed
 [Validate::alpha_dash]    | Only alpha and hyphens allowed
 [Validate::alpha_numeric] | Only alpha and numbers allowed
-[Validate::digit]         | Value must be an interger digit
+[Validate::digit]         | Value must be an integer digit
 [Validate::decimal]       | Value must be a decimal or float value
 [Validate::numeric]       | Only numeric characters allowed
 [Validate::range]         | Value must be within a range
@@ -83,6 +83,8 @@ All validation rules are defined as a field name, a method or function (using th
 
 To start our example, we will perform validation on a `$_POST` array that contains user registration information:
 
+    $post = Validate::factory($_POST);
+
 Next we need to process the POST'ed information using [Validate]. To start, we need to add some rules:
 
     $post
@@ -103,14 +105,16 @@ Note that all array parameters must still be wrapped in an array! Without the wr
 
 Any custom rules can be added using a [PHP callback](http://php.net/manual/language.pseudo-types.php#language.types.callback]:
 
-    $post->rule('username', array($model, 'unique_username'));
+    $post->rule('username', 'User_Model::unique_username');
 
-The method `$model->unique_username()` would similar to:
+[!!] Currently (v3.0.7) it is not possible to use an object for a rule, only static methods and functions.
 
-    public function unique_username($username)
+The method `User_Model::unique_username()` would be defined similar to:
+
+    public static function unique_username($username)
     {
         // Check if the username already exists in the database
-        return ! DB::select(array(DB::expr('COUNT(username)`), 'total))
+        return ! DB::select(array(DB::expr('COUNT(username)'), 'total'))
             ->from('users')
             ->where('username', '=', $username)
             ->execute()
@@ -125,8 +129,6 @@ All validation callbacks are defined as a field name and a method or function (u
 
     $object->callback($field, $callback);
 
-[!!] Unlike filters and rules, no parameters can be passed to a callback. All additional callback
-
 The user password must be hashed if it validates, so we will hash it using a callback:
 
     $post->callback('password', array($model, 'hash_password'));
@@ -137,7 +139,7 @@ This would assume that the `$model->hash_password()` method would be defined sim
     {
         if ($array[$field])
         {
-            // Hash the password if exists
+            // Hash the password if it exists
             $array[$field] = sha1($array[$field]);
         }
     }
@@ -160,7 +162,7 @@ First, we need a [View] that contains the HTML form, which will be placed in `ap
         <dd><?php echo Form::input('username', $post['username']) ?></dd>
 
         <dt><?php echo Form::label('password', 'Password') ?></dt>
-        <dd><?php echo From::password('password') ?></dd>
+        <dd><?php echo Form::password('password') ?></dd>
         <dd class="help">Passwords must be at least 6 characters long.</dd>
         <dt><?php echo Form::label('confirm', 'Confirm Password') ?></dt>
         <dd><?php echo Form::password('confirm') ?></dd>
@@ -207,7 +209,7 @@ Next, we need a controller and action to process the registration, which will be
                 $user->register($post);
 
                 // Always redirect after a successful POST to prevent refresh warnings
-                URL::redirect('user/profile');
+                $this->request->redirect('user/profile');
             }
 
             // Validation failed, collect the errors

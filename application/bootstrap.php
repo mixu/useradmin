@@ -5,7 +5,7 @@
 /**
  * Set the default time zone.
  *
- * @see  http://docs.kohanaphp.com/about.configuration
+ * @see  http://kohanaframework.org/guide/using.configuration
  * @see  http://php.net/timezones
  */
 date_default_timezone_set('America/Chicago');
@@ -13,7 +13,7 @@ date_default_timezone_set('America/Chicago');
 /**
  * Set the default locale.
  *
- * @see  http://docs.kohanaphp.com/about.configuration
+ * @see  http://kohanaframework.org/guide/using.configuration
  * @see  http://php.net/setlocale
  */
 setlocale(LC_ALL, 'en_US.utf-8');
@@ -21,7 +21,7 @@ setlocale(LC_ALL, 'en_US.utf-8');
 /**
  * Enable the Kohana auto-loader.
  *
- * @see  http://docs.kohanaphp.com/about.autoloading
+ * @see  http://kohanaframework.org/guide/using.autoloading
  * @see  http://php.net/spl_autoload_register
  */
 spl_autoload_register(array('Kohana', 'auto_load'));
@@ -35,6 +35,15 @@ spl_autoload_register(array('Kohana', 'auto_load'));
 ini_set('unserialize_callback_func', 'spl_autoload_call');
 
 //-- Configuration and initialization -----------------------------------------
+
+/**
+ * Set Kohana::$environment if $_ENV['KOHANA_ENV'] has been supplied.
+ * 
+ */
+if (isset($_ENV['KOHANA_ENV']))
+{
+	Kohana::$environment = $_ENV['KOHANA_ENV'];
+}
 
 /**
  * Initialize Kohana, setting the default options.
@@ -88,6 +97,8 @@ Route::set('default', '(<controller>(/<action>(/<id>)))')
 		'action'     => 'index',
 	));
 
+if ( ! defined('SUPPRESS_REQUEST'))
+{
 /**
  * Execute the main request. A source of the URI can be passed, eg: $_SERVER['PATH_INFO'].
  * If no source is specified, the URI will be automatically detected.
@@ -96,3 +107,4 @@ echo Request::instance()
 	->execute()
 	->send_headers()
 	->response;
+}

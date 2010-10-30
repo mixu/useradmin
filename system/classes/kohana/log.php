@@ -2,7 +2,10 @@
 /**
  * Message logging with observer-based log writing.
  *
- * @package    Logging
+ * [!!] This class does not support extensions, only additional writers.
+ *
+ * @package    Kohana
+ * @category   Logging
  * @author     Kohana Team
  * @copyright  (c) 2008-2009 Kohana Team
  * @license    http://kohanaphp.com/license
@@ -10,20 +13,29 @@
 class Kohana_Log {
 
 	/**
-	 * @var  string  timestamp format
+	 * @var  string  timestamp format for log entries
 	 */
 	public static $timestamp = 'Y-m-d H:i:s';
 
 	/**
-	 * @var  string  timezone for dates logged
+	 * @var  string  timezone for log entries
 	 */
 	public static $timezone;
 
-	// Singleton static instance
+	/**
+	 * @var  boolean  immediately write when logs are added
+	 */
+	public static $write_on_add = FALSE;
+
+	/**
+	 * @var  Kohana_Log  Singleton instance container
+	 */
 	private static $_instance;
 
 	/**
 	 * Get the singleton instance of this class and enable writing at shutdown.
+	 *
+	 *     $log = Kohana_Log::instance();
 	 *
 	 * @return  Kohana_Log
 	 */
@@ -48,7 +60,10 @@ class Kohana_Log {
 	private $_writers = array();
 
 	/**
-	 * Attaches a log writer.
+	 * Attaches a log writer, and optionally limits the types of messages that
+	 * will be written by the writer.
+	 *
+	 *     $log->attach($writer);
 	 *
 	 * @param   object  Kohana_Log_Writer instance
 	 * @param   array   messages types to write
@@ -66,7 +81,9 @@ class Kohana_Log {
 	}
 
 	/**
-	 * Detaches a log writer.
+	 * Detaches a log writer. The same writer object must be used.
+	 *
+	 *     $log->detach($writer);
 	 *
 	 * @param   object  Kohana_Log_Writer instance
 	 * @return  $this
@@ -80,40 +97,47 @@ class Kohana_Log {
 	}
 
 	/**
-	 * Adds a message to the log.
+	 * Adds a message to the log. Replacement values must be passed in to be
+	 * replaced using [strtr](http://php.net/strtr).
+	 *
+	 *     $log->add('error', 'Could not locate user: :user', array(
+	 *         ':user' => $username,
+	 *     ));
 	 *
 	 * @param   string  type of message
 	 * @param   string  message body
+	 * @param   array   values to replace in the message
 	 * @return  $this
 	 */
-	public function add($type, $message)
+	public function add($type, $message, array $values = NULL)
 	{
-		if (self::$timezone)
+		if ($values)
 		{
-			// Display the time according to the given timezone
-			$time = new DateTime('now', new DateTimeZone(self::$timezone));
-			$time = $time->format(self::$timestamp);
+			// Insert the values into the message
+			$message = strtr($message, $values);
 		}
-		else
-		{
-			// Display the time in the current locale timezone
-			$time = date(self::$timestamp);
-		}
-
 
 		// Create a new message and timestamp it
 		$this->_messages[] = array
 		(
-			'time' => $time,
+			'time' => Date::formatted_time('now', self::$timestamp, self::$timezone),
 			'type' => $type,
 			'body' => $message,
 		);
+
+		if (self::$write_on_add)
+		{
+			// Write logs as they are added
+			$this->write();
+		}
 
 		return $this;
 	}
 
 	/**
 	 * Write and clear all of the messages.
+	 *
+	 *     $log->write();
 	 *
 	 * @return  void
 	 */
@@ -156,16 +180,6 @@ class Kohana_Log {
 				$writer['object']->write($filtered);
 			}
 		}
-	}
-
-	final private function __construct()
-	{
-		// Enforce singleton behavior
-	}
-
-	private function __clone()
-	{
-		// Enforce singleton behavior
 	}
 
 } // End Kohana_Log

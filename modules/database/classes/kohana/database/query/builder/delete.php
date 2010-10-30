@@ -2,7 +2,8 @@
 /**
  * Database query builder for DELETE statements.
  *
- * @package    Database
+ * @package    Kohana/Database
+ * @category   Query
  * @author     Kohana Team
  * @copyright  (c) 2008-2009 Kohana Team
  * @license    http://kohanaphp.com/license
@@ -18,10 +19,13 @@ class Kohana_Database_Query_Builder_Delete extends Database_Query_Builder_Where 
 	 * @param   mixed  table name or array($table, $alias) or object
 	 * @return  void
 	 */
-	public function __construct($table)
+	public function __construct($table = NULL)
 	{
-		// Set the inital table name
-		$this->_table = $table;
+		if ($table)
+		{
+			// Set the inital table name
+			$this->_table = $table;
+		}
 
 		// Start the query with no SQL
 		return parent::__construct(Database::DELETE, '');

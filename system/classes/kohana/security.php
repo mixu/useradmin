@@ -1,8 +1,9 @@
-<?php defined('SYSPATH') OR die('No direct access allowed.');
+<?php defined('SYSPATH') or die('No direct access allowed.');
 /**
  * Security helper class.
  *
- * @package    Security
+ * @package    Kohana
+ * @category   Security
  * @author     Kohana Team
  * @copyright  (c) 2007-2009 Kohana Team
  * @license    http://kohanaphp.com/license
@@ -10,13 +11,20 @@
 class Kohana_Security {
 
 	/**
+	 * @var  string  key name used for token storage
+	 */
+	public static $token_name = 'security_token';
+
+	/**
 	 * Remove XSS from user input.
+	 *
+	 *     $str = Security::xss_clean($str);
 	 *
 	 * @author     Christian Stocker <chregu@bitflux.ch>
 	 * @copyright  (c) 2001-2006 Bitflux GmbH
-	 *
-	 * @param   mixed    string or array to sanitize
+	 * @param   mixed  string or array to sanitize
 	 * @return  string
+	 * @deprecated  since v3.0.5
 	 */
 	public static function xss_clean($str)
 	{
@@ -98,7 +106,68 @@ class Kohana_Security {
 	}
 
 	/**
+	 * Generate and store a unique token which can be used to help prevent
+	 * [CSRF](http://wikipedia.org/wiki/Cross_Site_Request_Forgery) attacks.
+	 *
+	 *     $token = Security::token();
+	 *
+	 * You can insert this token into your forms as a hidden field:
+	 *
+	 *     echo Form::hidden('csrf', Security::token());
+	 *
+	 * And then check it when using [Validate]:
+	 *
+	 *     $array->rules('csrf', array(
+	 *         'not_empty'       => NULL,
+	 *         'Security::check' => NULL,
+	 *     ));
+	 *
+	 * This provides a basic, but effective, method of preventing CSRF attacks.
+	 *
+	 * @param   boolean  force a new token to be generated?
+	 * @return  string
+	 * @uses    Session::instance
+	 */
+	public static function token($new = FALSE)
+	{
+		$session = Session::instance();
+
+		// Get the current token
+		$token = $session->get(Security::$token_name);
+
+		if ($new === TRUE OR ! $token)
+		{
+			// Generate a new unique token
+			$token = uniqid('security');
+
+			// Store the new token
+			$session->set(Security::$token_name, $token);
+		}
+
+		return $token;
+	}
+
+	/**
+	 * Check that the given token matches the currently stored security token.
+	 *
+	 *     if (Security::check($token))
+	 *     {
+	 *         // Pass
+	 *     }
+	 *
+	 * @param   string   token to check
+	 * @return  boolean
+	 * @uses    Security::token
+	 */
+	public static function check($token)
+	{
+		return Security::token() === $token;
+	}
+
+	/**
 	 * Remove image tags from a string.
+	 *
+	 *     $str = Security::strip_image_tags($str);
 	 *
 	 * @param   string  string to sanitize
 	 * @return  string
@@ -109,7 +178,9 @@ class Kohana_Security {
 	}
 
 	/**
-	 * Remove PHP tags from a string.
+	 * Encodes PHP tags in a string.
+	 *
+	 *     $str = Security::encode_php_tags($str);
 	 *
 	 * @param   string  string to sanitize
 	 * @return  string

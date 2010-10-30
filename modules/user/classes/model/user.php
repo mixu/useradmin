@@ -36,11 +36,13 @@ class Model_User extends Model_Auth_User {
     *
     */
    /**
-    * Validate create
+    * Validates a user when the record is first created.
+    * 
+    * @param $array An array of fields for the user record.
+    * @return Validate Validation object, call check() on the return value to validate.           
     */
    public function validate_create($array) {
       // Initialise the validation library and setup some rules
-
       // See modules/auth/classes/model/auth/user.php for the definitions of $this->_rules.
       $validation = Validate::factory($array)
                   ->rules('password', $this->_rules['password'])
@@ -73,7 +75,10 @@ class Model_User extends Model_Auth_User {
    // See also: login() in modules/auth/classes/model/auth/user.php, which performs logins.
 
    /**
-    * Validate edit
+    * Validates a user when the record it is modified.
+    * 
+    * @param $array An array of fields for the user record.
+    * @return Validate Validation object, call check() on the return value to validate.           
     */
    public function validate_edit($id, $array = array()) {
 
@@ -206,8 +211,6 @@ class Model_User extends Model_Auth_User {
             $array->error('username', 'invalid');
          }
       }
-
       return $status;
    }
-
 }

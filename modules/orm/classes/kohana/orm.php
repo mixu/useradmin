@@ -10,7 +10,8 @@
  *
  * $Id: ORM.php 4427 2009-06-19 23:31:36Z jheathco $
  *
- * @package    ORM
+ * @package    Kohana/ORM
+ * @category   Base
  * @author     Kohana Team
  * @copyright  (c) 2007-2009 Kohana Team
  * @license    http://kohanaphp.com/license.html
@@ -63,7 +64,7 @@ class Kohana_ORM {
 	protected $_reload_on_wakeup   = TRUE;
 
 	// Database configuration
-	protected $_db         = 'default';
+	protected $_db         = NULL;
 	protected $_db_applied = array();
 	protected $_db_pending = array();
 	protected $_db_reset   = TRUE;
@@ -84,7 +85,8 @@ class Kohana_ORM {
 		'where', 'and_where', 'or_where', 'where_open', 'and_where_open', 'or_where_open', 'where_close',
 		'and_where_close', 'or_where_close', 'distinct', 'select', 'from', 'join', 'on', 'group_by',
 		'having', 'and_having', 'or_having', 'having_open', 'and_having_open', 'or_having_open',
-		'having_close', 'and_having_close', 'or_having_close', 'order_by', 'limit', 'offset', 'cached'
+		'having_close', 'and_having_close', 'or_having_close', 'order_by', 'limit', 'offset', 'cached',
+		'count_last_query'
 	);
 
 	// Members that have access methods
@@ -640,11 +642,15 @@ class Kohana_ORM {
 		// Use the keys of the empty object to determine the columns
 		foreach (array_keys($target->_object) as $column)
 		{
-			$name   = $target_path.'.'.$column;
-			$alias  = $target_path.':'.$column;
+			// Skip over ignored columns
+			if( ! in_array($column, $target->_ignored_columns))
+			{
+				$name   = $target_path.'.'.$column;
+				$alias  = $target_path.':'.$column;
 
-			// Add the prefix so that load_result can determine the relationship
-			$this->select(array($name, $alias));
+				// Add the prefix so that load_result can determine the relationship
+				$this->select(array($name, $alias));
+			}
 		}
 
 		if (isset($parent->_belongs_to[$target_alias]))
@@ -661,7 +667,7 @@ class Kohana_ORM {
 		}
 
 		// Join the related object into the result
-		$this->join(array($target->_table_name, $this->_db->table_prefix().$target_path), 'LEFT')->on($join_col1, '=', $join_col2);
+		$this->join(array($target->_table_name, $target_path), 'LEFT')->on($join_col1, '=', $join_col2);
 
 		return $this;
 	}
@@ -695,28 +701,7 @@ class Kohana_ORM {
 
 			$this->_db_applied[$name] = $name;
 
-			switch (count($args))
-			{
-				case 0:
-					$this->_db_builder->$name();
-				break;
-				case 1:
-					$this->_db_builder->$name($args[0]);
-				break;
-				case 2:
-					$this->_db_builder->$name($args[0], $args[1]);
-				break;
-				case 3:
-					$this->_db_builder->$name($args[0], $args[1], $args[2]);
-				break;
-				case 4:
-					$this->_db_builder->$name($args[0], $args[1], $args[2], $args[3]);
-				break;
-				default:
-					// Here comes the snail...
-					call_user_func_array(array($this->_db_builder, $name), $args);
-				break;
-			}
+			call_user_func_array(array($this->_db_builder, $name), $args);
 		}
 
 		return $this;
@@ -1124,7 +1109,7 @@ class Kohana_ORM {
 
 		$this->_build(Database::SELECT);
 
-		$records = $this->_db_builder->from($this->_table_name)
+		$records = (int) $this->_db_builder->from($this->_table_name)
 			->select(array('COUNT("*")', 'records_found'))
 			->execute($this->_db)
 			->get('records_found');

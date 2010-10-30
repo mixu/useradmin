@@ -1,8 +1,9 @@
-<?php defined('SYSPATH') OR die('No direct access allowed.');
+<?php defined('SYSPATH') or die('No direct access allowed.');
 /**
  * File helper class.
  *
  * @package    Kohana
+ * @category   Helpers
  * @author     Kohana Team
  * @copyright  (c) 2007-2009 Kohana Team
  * @license    http://kohanaphp.com/license
@@ -14,7 +15,9 @@ class Kohana_File {
 	 * unreliable, due to PHP being horribly unreliable when it comes to
 	 * determining the mime type of a file.
 	 *
-	 * @param   string  file path
+	 *     $mime = File::mime($file);
+	 *
+	 * @param   string  file name or path
 	 * @return  string  mime type on success
 	 * @return  FALSE   on failure
 	 */
@@ -37,12 +40,10 @@ class Kohana_File {
 
 		if (class_exists('finfo', FALSE))
 		{
-			if ($info = new finfo(FILEINFO_MIME))
+			if ($info = new finfo(FILEINFO_MIME_TYPE))
 			{
 				return $info->file($filename);
 			}
-
-			return $mime;
 		}
 
 		if (ini_get('mime_magic.magicfile') AND function_exists('mime_content_type'))
@@ -63,6 +64,8 @@ class Kohana_File {
 	/**
 	 * Return the mime type of an extension.
 	 *
+	 *     $mime = File::mime_by_ext('png'); // "image/png"
+	 *
 	 * @param   string  extension: php, pdf, txt, etc
 	 * @return  string  mime type on success
 	 * @return  FALSE   on failure
@@ -76,12 +79,15 @@ class Kohana_File {
 	}
 
 	/**
-	 * Split a file into pieces matching a specific size.
+	 * Split a file into pieces matching a specific size. Used when you need to
+	 * split large files into smaller pieces for easy transmission.
+	 *
+	 *     $count = File::split($file);
 	 *
 	 * @param   string   file to be split
 	 * @param   string   directory to output to, defaults to the same directory as the file
 	 * @param   integer  size, in MB, for each piece to be
-	 * @return  integer  The number of pieces that were created.
+	 * @return  integer  The number of pieces that were created
 	 */
 	public static function split($filename, $piece_size = 10)
 	{
@@ -130,7 +136,9 @@ class Kohana_File {
 	}
 
 	/**
-	 * Join a split file into a whole file.
+	 * Join a split file into a whole file. Does the reverse of [File::split].
+	 *
+	 *     $count = File::join($file);
 	 *
 	 * @param   string   split filename, without .000 extension
 	 * @param   string   output filename, if different then an the filename
@@ -166,11 +174,6 @@ class Kohana_File {
 		}
 
 		return $pieces;
-	}
-
-	final private function __construct()
-	{
-		// This is a static class
 	}
 
 } // End file

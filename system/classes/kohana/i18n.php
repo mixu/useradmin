@@ -1,8 +1,21 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * Internationalization (i18n) class.
+ * Internationalization (i18n) class. Provides language loading and translation
+ * methods without dependencies on [gettext](http://php.net/gettext).
  *
- * @package    I18n
+ * Typically this class would never be used directly, but used via the __()
+ * function, which loads the message and replaces parameters:
+ *
+ *     // Display a translated message
+ *     echo __('Hello, world');
+ *
+ *     // With parameter replacement
+ *     echo __('Hello, :user', array(':user' => $username));
+ *
+ * [!!] The __() function is declared in `SYSPATH/base.php`.
+ *
+ * @package    Kohana
+ * @category   Base
  * @author     Kohana Team
  * @copyright  (c) 2008-2009 Kohana Team
  * @license    http://kohanaphp.com/license
@@ -20,8 +33,15 @@ class Kohana_I18n {
 	/**
 	 * Get and set the target language.
 	 *
+	 *     // Get the current language
+	 *     $lang = I18n::lang();
+	 *
+	 *     // Change the current language to Spanish
+	 *     I18n::lang('es-es');
+	 *
 	 * @param   string   new language setting
 	 * @return  string
+	 * @since   3.0.2
 	 */
 	public static function lang($lang = NULL)
 	{
@@ -36,25 +56,34 @@ class Kohana_I18n {
 
 	/**
 	 * Returns translation of a string. If no translation exists, the original
-	 * string will be returned.
+	 * string will be returned. No parameters are replaced.
+	 *
+	 *     $hello = I18n::get('Hello friends, my name is :name');
 	 *
 	 * @param   string   text to translate
+	 * @param   string   target language
 	 * @return  string
 	 */
-	public static function get($string)
+	public static function get($string, $lang = NULL)
 	{
-		if ( ! isset(I18n::$_cache[I18n::$lang]))
+		if ( ! $lang)
 		{
-			// Load the translation table
-			I18n::load(I18n::$lang);
+			// Use the global target language
+			$lang = I18n::$lang;
 		}
 
+		// Load the translation table for this language
+		$table = I18n::load($lang);
+
 		// Return the translated string if it exists
-		return isset(I18n::$_cache[I18n::$lang][$string]) ? I18n::$_cache[I18n::$lang][$string] : $string;
+		return isset($table[$string]) ? $table[$string] : $string;
 	}
 
 	/**
 	 * Returns the translation table for a given language.
+	 *
+	 *     // Get all defined Spanish messages
+	 *     $messages = I18n::load('es-es');
 	 *
 	 * @param   string   language to load
 	 * @return  array
@@ -98,11 +127,6 @@ class Kohana_I18n {
 
 		// Cache the translation table locally
 		return I18n::$_cache[$lang] = $table;
-	}
-
-	final private function __construct()
-	{
-		// This is a static class
 	}
 
 } // End I18n

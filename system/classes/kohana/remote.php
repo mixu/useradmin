@@ -1,10 +1,9 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * Provides remote server communications options using [curl][ref-curl].
- *
- * [ref-curl]: http://php.net/curl
+ * Provides remote server communications options using [curl](http://php.net/curl).
  *
  * @package    Kohana
+ * @category   Helpers
  * @author     Kohana Team
  * @copyright  (c) 2008-2009 Kohana Team
  * @license    http://kohanaphp.com/license
@@ -20,12 +19,22 @@ class Kohana_Remote {
 	);
 
 	/**
-	 * Returns the output of a remote URL.
+	 * Returns the output of a remote URL. Any [curl option](http://php.net/curl_setopt)
+	 * may be used.
 	 *
-	 * @throws  Kohana_Exception
+	 *     // Do a simple GET request
+	 *     $data = Remote::get($url);
+	 *
+	 *     // Do a POST request
+	 *     $data = Remote::get($url, array(
+	 *         CURLOPT_POST       => TRUE,
+	 *         CURLOPT_POSTFIELDS => http_build_query($array),
+	 *     ));
+	 *
 	 * @param   string   remote URL
 	 * @param   array    curl options
-	 * @return  array
+	 * @return  string
+	 * @throws  Kohana_Exception
 	 */
 	public static function get($url, array $options = NULL)
 	{
@@ -47,7 +56,11 @@ class Kohana_Remote {
 		$remote = curl_init($url);
 
 		// Set connection options
-		curl_setopt_array($remote, $options);
+		if ( ! curl_setopt_array($remote, $options))
+		{
+			throw new Kohana_Exception('Failed to set CURL options, check CURL documentation: :url',
+				array(':url' => 'http://php.net/curl_setopt_array'));
+		}
 
 		// Get the response
 		$response = curl_exec($remote);
@@ -55,7 +68,7 @@ class Kohana_Remote {
 		// Get the response information
 		$code = curl_getinfo($remote, CURLINFO_HTTP_CODE);
 
-		if ($code < 200 OR $code > 299)
+		if ($code AND $code < 200 OR $code > 299)
 		{
 			$error = $response;
 		}
@@ -77,7 +90,9 @@ class Kohana_Remote {
 	}
 
 	/**
-	 * Returns the status code for a URL.
+	 * Returns the status code (200, 500, etc) for a URL.
+	 *
+	 *     $status = Remote::status($url);
 	 *
 	 * @param   string  URL to check
 	 * @return  integer
@@ -132,11 +147,6 @@ class Kohana_Remote {
 		fclose($remote);
 
 		return $response;
-	}
-
-	final private function __construct()
-	{
-		// This is a static class
 	}
 
 } // End remote

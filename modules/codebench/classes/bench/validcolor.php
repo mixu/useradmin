@@ -1,7 +1,8 @@
-<?php defined('SYSPATH') OR die('No direct access allowed.');
+<?php defined('SYSPATH') or die('No direct access allowed.');
 /**
- * @package  Benchmarking
- * @author   Geert De Deckere <geert@idoe.be>
+ * @package    Kohana/Codebench
+ * @category   Tests
+ * @author     Geert De Deckere <geert@idoe.be>
  */
 class Bench_ValidColor extends Codebench {
 

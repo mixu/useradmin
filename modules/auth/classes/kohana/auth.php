@@ -1,9 +1,9 @@
-<?php defined('SYSPATH') OR die('No direct access allowed.');
+<?php defined('SYSPATH') or die('No direct access allowed.');
 /**
  * User authorization library. Handles user login and logout, as well as secure
  * password hashing.
  *
- * @package    Auth
+ * @package    Kohana/Auth
  * @author     Kohana Team
  * @copyright  (c) 2007-2009 Kohana Team
  * @license    http://kohanaphp.com/license.html
@@ -11,7 +11,7 @@
 abstract class Kohana_Auth {
 
 	// Auth instances
-	protected static $instance;
+	protected static $_instance;
 
 	/**
 	 * Singleton pattern
@@ -20,7 +20,7 @@ abstract class Kohana_Auth {
 	 */
 	public static function instance()
 	{
-		if ( ! isset(Auth::$instance))
+		if ( ! isset(Auth::$_instance))
 		{
 			// Load the configuration for this type
 			$config = Kohana::config('auth');
@@ -34,10 +34,10 @@ abstract class Kohana_Auth {
 			$class = 'Auth_'.ucfirst($type);
 
 			// Create a new session instance
-			Auth::$instance = new $class($config);
+			Auth::$_instance = new $class($config);
 		}
 
-		return Auth::$instance;
+		return Auth::$_instance;
 	}
 
 	/**
@@ -50,9 +50,9 @@ abstract class Kohana_Auth {
 		return new Auth($config);
 	}
 
-	protected $session;
+	protected $_session;
 
-	protected $config;
+	protected $_config;
 
 	/**
 	 * Loads Session and configuration options.
@@ -65,14 +65,16 @@ abstract class Kohana_Auth {
 		$config['salt_pattern'] = preg_split('/,\s*/', Kohana::config('auth')->get('salt_pattern'));
 
 		// Save the config in the object
-		$this->config = $config;
+		$this->_config = $config;
 
-		$this->session = Session::instance();
+		$this->_session = Session::instance();
 	}
 
 	abstract protected function _login($username, $password, $remember);
 
 	abstract public function password($username);
+
+	abstract public function check_password($password);
 
 	/**
 	 * Gets the currently logged in user from the session.
@@ -82,12 +84,7 @@ abstract class Kohana_Auth {
 	 */
 	public function get_user()
 	{
-		if ($this->logged_in())
-		{
-			return $this->session->get($this->config['session_key']);
-		}
-
-		return FALSE;
+		return $this->_session->get($this->_config['session_key'], FALSE);
 	}
 
 	/**
@@ -95,7 +92,7 @@ abstract class Kohana_Auth {
 	 *
 	 * @param   string   username to log in
 	 * @param   string   password to check against
-	 * @param   boolean  enable auto-login
+	 * @param   boolean  enable autologin
 	 * @return  boolean
 	 */
 	public function login($username, $password, $remember = FALSE)
@@ -119,7 +116,7 @@ abstract class Kohana_Auth {
 	 * Log out a user by removing the related session variables.
 	 *
 	 * @param   boolean  completely destroy the session
-	 * @param	boolean  remove all tokens for user
+	 * @param   boolean  remove all tokens for user
 	 * @return  boolean
 	 */
 	public function logout($destroy = FALSE, $logout_all = FALSE)
@@ -127,15 +124,15 @@ abstract class Kohana_Auth {
 		if ($destroy === TRUE)
 		{
 			// Destroy the session completely
-			$this->session->destroy();
+			$this->_session->destroy();
 		}
 		else
 		{
 			// Remove the user from the session
-			$this->session->delete($this->config['session_key']);
+			$this->_session->delete($this->_config['session_key']);
 
 			// Regenerate session_id
-			$this->session->regenerate();
+			$this->_session->regenerate();
 		}
 
 		// Double check
@@ -144,14 +141,14 @@ abstract class Kohana_Auth {
 
 	/**
 	 * Check if there is an active session. Optionally allows checking for a
-	 * specific role.
+	 * specific role. 
 	 *
 	 * @param   string   role name
-	 * @return  boolean
+	 * @return  mixed
 	 */
 	public function logged_in($role = NULL)
 	{
-		return (bool) $this->session->get($this->config['session_key'], FALSE);
+		return FALSE !== $this->get_user();
 	}
 
 	/**
@@ -166,7 +163,7 @@ abstract class Kohana_Auth {
 		if ($salt === FALSE)
 		{
 			// Create a salt seed, same length as the number of offsets in the pattern
-			$salt = substr($this->hash(uniqid(NULL, TRUE)), 0, count($this->config['salt_pattern']));
+			$salt = substr($this->hash(uniqid(NULL, TRUE)), 0, count($this->_config['salt_pattern']));
 		}
 
 		// Password hash that the salt will be inserted into
@@ -181,7 +178,7 @@ abstract class Kohana_Auth {
 		// Used to calculate the length of splits
 		$last_offset = 0;
 
-		foreach ($this->config['salt_pattern'] as $offset)
+		foreach ($this->_config['salt_pattern'] as $offset)
 		{
 			// Split a new part of the hash off
 			$part = substr($hash, 0, $offset - $last_offset);
@@ -208,7 +205,7 @@ abstract class Kohana_Auth {
 	 */
 	public function hash($str)
 	{
-		return hash($this->config['hash_method'], $str);
+		return hash($this->_config['hash_method'], $str);
 	}
 
 	/**
@@ -221,7 +218,7 @@ abstract class Kohana_Auth {
 	{
 		$salt = '';
 
-		foreach ($this->config['salt_pattern'] as $i => $offset)
+		foreach ($this->_config['salt_pattern'] as $i => $offset)
 		{
 			// Find salt characters, take a good long look...
 			$salt .= substr($password, $offset + $i, 1);
@@ -233,10 +230,10 @@ abstract class Kohana_Auth {
 	protected function complete_login($user)
 	{
 		// Regenerate session_id
-		$this->session->regenerate();
+		$this->_session->regenerate();
 
 		// Store username in session
-		$this->session->set($this->config['session_key'], $user);
+		$this->_session->set($this->_config['session_key'], $user);
 
 		return TRUE;
 	}

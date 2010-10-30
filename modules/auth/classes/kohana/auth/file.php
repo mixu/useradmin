@@ -1,11 +1,9 @@
-<?php defined('SYSPATH') OR die('No direct access allowed.');
+<?php defined('SYSPATH') or die('No direct access allowed.');
 /**
  * File Auth driver.
- * Note: this Auth driver does not support roles nor auto-login.
+ * [!!] this Auth driver does not support roles nor autologin.
  *
- * $Id: File.php 3769 2008-12-15 00:48:56Z zombor $
- *
- * @package    Auth
+ * @package    Kohana/Auth
  * @author     Kohana Team
  * @copyright  (c) 2007-2008 Kohana Team
  * @license    http://kohanaphp.com/license.html
@@ -13,17 +11,17 @@
 class Kohana_Auth_File extends Auth {
 
 	// User list
-	protected $users;
+	protected $_users;
 
 	/**
 	 * Constructor loads the user list into the class.
 	 */
-	public function __construct($config)
+	public function __construct($config = array())
 	{
 		parent::__construct($config);
 
 		// Load user list
-		$this->users = empty($config['users']) ? array() : $config['users'];
+		$this->_users = Arr::get($config, 'users', array());
 	}
 
 	/**
@@ -31,12 +29,12 @@ class Kohana_Auth_File extends Auth {
 	 *
 	 * @param   string   username
 	 * @param   string   password
-	 * @param   boolean  enable auto-login (not supported)
+	 * @param   boolean  enable autologin (not supported)
 	 * @return  boolean
 	 */
-	public function _login($username, $password, $remember)
+	protected function _login($username, $password, $remember)
 	{
-		if (isset($this->users[$username]) AND $this->users[$username] === $password)
+		if (isset($this->_users[$username]) AND $this->_users[$username] === $password)
 		{
 			// Complete the login
 			return $this->complete_login($username);
@@ -66,7 +64,25 @@ class Kohana_Auth_File extends Auth {
 	 */
 	public function password($username)
 	{
-		return isset($this->users[$username]) ? $this->users[$username] : FALSE;
+		return Arr::get($this->_users, $username, FALSE);
 	}
 
-} // End Auth_File_Driver
+	/**
+	 * Compare password with original (plain text). Works for current (logged in) user
+	 *
+	 * @param   string  $password
+	 * @return  boolean
+	 */
+	public function check_password($password)
+	{
+		$username = $this->get_user();
+
+		if ($username === FALSE)
+		{
+			return FALSE;
+		}
+
+		return ($password === $this->password($username));
+	}
+
+} // End Auth File

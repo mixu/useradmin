@@ -2,7 +2,8 @@
 /**
  * Pagination links generator.
  *
- * @package    Kohana
+ * @package    Kohana/Pagination
+ * @category   Base
  * @author     Kohana Team
  * @copyright  (c) 2008-2009 Kohana Team
  * @license    http://kohanaphp.com/license.html
@@ -11,11 +12,12 @@ class Kohana_Pagination {
 
 	// Merged configuration settings
 	protected $config = array(
-		'current_page'   => array('source' => 'query_string', 'key' => 'page'),
-		'total_items'    => 0,
-		'items_per_page' => 10,
-		'view'           => 'pagination/basic',
-		'auto_hide'      => TRUE,
+		'current_page'      => array('source' => 'query_string', 'key' => 'page'),
+		'total_items'       => 0,
+		'items_per_page'    => 10,
+		'view'              => 'pagination/basic',
+		'auto_hide'         => TRUE,
+		'first_page_in_url' => FALSE,
 	);
 
 	// Current page number
@@ -135,17 +137,25 @@ class Kohana_Pagination {
 			OR isset($config['items_per_page']))
 		{
 			// Retrieve the current page number
-			switch ($this->config['current_page']['source'])
+			if ( ! empty($this->config['current_page']['page']))
 			{
-				case 'query_string':
-					$this->current_page = isset($_GET[$this->config['current_page']['key']])
-						? (int) $_GET[$this->config['current_page']['key']]
-						: 1;
-					break;
+				// The current page number has been set manually
+				$this->current_page = (int) $this->config['current_page']['page'];
+			}
+			else
+			{
+				switch ($this->config['current_page']['source'])
+				{
+					case 'query_string':
+						$this->current_page = isset($_GET[$this->config['current_page']['key']])
+							? (int) $_GET[$this->config['current_page']['key']]
+							: 1;
+						break;
 
-				case 'route':
-					$this->current_page = (int) Request::instance()->param($this->config['current_page']['key'], 1);
-					break;
+					case 'route':
+						$this->current_page = (int) Request::current()->param($this->config['current_page']['key'], 1);
+						break;
+				}
 			}
 
 			// Calculate and clean all pagination variables
@@ -177,16 +187,38 @@ class Kohana_Pagination {
 		// Clean the page number
 		$page = max(1, (int) $page);
 
+		// No page number in URLs to first page
+		if ($page === 1 AND ! $this->config['first_page_in_url'])
+		{
+			$page = NULL;
+		}
+
 		switch ($this->config['current_page']['source'])
 		{
 			case 'query_string':
-				return URL::site(Request::instance()->uri).URL::query(array($this->config['current_page']['key'] => $page));
+				return URL::site(Request::current()->uri).URL::query(array($this->config['current_page']['key'] => $page));
 
 			case 'route':
-				return URL::site(Request::instance()->uri(array($this->config['current_page']['key'] => $page))).URL::query();
+				return URL::site(Request::current()->uri(array($this->config['current_page']['key'] => $page))).URL::query();
 		}
 
 		return '#';
+	}
+
+	/**
+	 * Checks whether the given page number exists.
+	 *
+	 * @param   integer  page number
+	 * @return  boolean
+	 * @since   3.0.7
+	 */
+	public function valid_page($page)
+	{
+		// Page number has to be a clean integer
+		if ( ! Validate::digit($page))
+			return FALSE;
+
+		return $page > 0 AND $page <= $this->total_pages;
 	}
 
 	/**
