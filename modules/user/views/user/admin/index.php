@@ -10,7 +10,8 @@
 ?>
 <h1>User administration</h1>
 <ul class="submenu">
- <li><?php echo Html::anchor('admin_user/edit', 'Add new user')?></li>
+   <li><?php echo Html::anchor('admin_user/edit', __('Add new user'))?></li>
+
 </ul>
 <?php
 echo $paging->render();

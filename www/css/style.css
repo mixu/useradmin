@@ -145,7 +145,7 @@ p {
    /** Error color **/
    input.error {
      color:#CC0000;
-     border:solid 1px #CC0000; background:#F7CBCA;
+     border:solid 1px #de888a; background:#ffdddd;
    }
    /** When IE6 dies, replace with element-specifics. This is supposed to apply to only text, password and file. **/
    input.text, input.password, input.file {
@@ -173,17 +173,50 @@ p {
       margin-bottom: 10px;
    }
 
-   /** Contextual help near form elements **/
-
-   div.help {
-      color:#666666;
-      font-family:Verdana;
-      font-size:x-small;
-      padding:0;
+   input.submit {
+      font-size: 18px;
+      padding-left: 10px;
+      padding-right: 10px;
    }
+   
+/** Error and info spans **/
+span.error {
+  padding: 5px;
+  color:#CC0000;
+  border:solid 2px #de888a; background:#ffdddd;
+  margin-top: 0px; margin-bottom: 0px;
+  margin-left: 4px;
+  display: inline-block;
+  vertical-align: top;
+  font-size: smaller;
+  max-width: 465px;
+  /* IE7: haslayout to get inline-block */
+  zoom: 1;
+  *display: inline;
+}
 
+span.info {
+  padding: 5px;
+  color:#5C5C5C;
+  border:solid 2px #CBDFE7; background:#DEF1F8;
+  margin-top: 0px; margin-bottom: 0px;
+  margin-left: 4px;
+  display: inline-block;
+  vertical-align: top;
+  font-size: smaller;
+  max-width: 465px;
+  /* IE7: haslayout to get inline-block */
+  zoom: 1;
+  *display: inline;
+}
 
 /* Messages */
+
+div.info {
+  padding: 6px;
+  color:#5C5C5C;
+  border:solid 1px #CBDFE7; background:#DEF1F8;  margin-top: 4px; margin-bottom: 4px;
+}
 
 div.success {
   padding: 6px;

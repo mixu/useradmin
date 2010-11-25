@@ -1,36 +1,24 @@
+<h1><?php echo __('Login'); ?></h1>
 
-<h1>Login</h1>
+<div class="info"><?php echo __('Don\'t have an account?').' '.Html::anchor('user/register', __('Register new account here.')); ?></div>
+<div class="info"><small><?php echo __('Forgot your username or password?').' '.Html::anchor('user/forgot', __('Send a password reset email.')); ?></small></div>
 
-<p>You can also use your account email address to log in.</p>
-
-<p>If you do not already have an account, <?php echo html::anchor('user/register', 'create one') ?> first.</p>
-
-<p><?php echo html::anchor('user/forgot', 'Forgot your password?') ?></p>
 
 <?php
 
-echo Form::open('user/login');
-
-// show errors
-if ( ! empty($errors)) {
-   // show errors
-   $errors_view = new View('common/errors');
-   echo $errors_view->set('errors', $errors)->render();
+$form = new Appform();
+if(isset($errors)) {
+   $form->errors = $errors;
 }
-
-if(!isset($post)) {
-   $post = array('username' => '', 'password' => '');
+if(isset($username)) {
+   $form->values['username'] = $username;
 }
-?>
-
-<ul>
-   <li><label>Username</label><?php echo Form::input('username', $post['username'], array('class' => 'text')) ?></li>
-   <li><label>Password</label><?php echo Form::password('password', $post['password'], array('class' => 'password')) ?></li>
-</ul>
-
-<p><?php Html::anchor('user/reset', 'Forgot your username or password?'); ?></p>
-
-<?php
-echo Form::submit(NULL, 'Login');
-echo Form::close();
-
+echo $form->open('user/login');
+echo '<ul>';
+echo '<li>'.$form->label('username', __('Username')).'</li>';
+echo $form->input('username', NULL, array('info' => __('You can also log in using your email address instead of your username.')));
+echo '<li>'.$form->label('password', __('Password')).'</li>';
+echo $form->password('password');
+echo '</ul>';
+echo $form->submit(NULL, __('Login'));
+echo $form->close();

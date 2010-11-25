@@ -34,6 +34,7 @@ class Controller_User extends Controller_App {
       'profile_edit' => 'login',
       'unregister' => 'login',
       'logout' => 'login',
+      'change_password' => 'login',
       // the others are public (forgot, login, register, reset, noaccess)
       );
 
@@ -56,7 +57,7 @@ class Controller_User extends Controller_App {
     */
    public function action_noaccess() {
       // set the template title (see Controller_App for implementation)
-      $this->template->title = 'Access not allowed';
+      $this->template->title = __('Access not allowed');
       $view = $this->template->content = View::factory('user/noaccess');
    }
 
@@ -65,7 +66,7 @@ class Controller_User extends Controller_App {
     */
    public function action_profile() {
       // set the template title (see Controller_App for implementation)
-      $this->template->title = 'User profile';
+      $this->template->title = __('User profile');
       if ( Auth::instance()->logged_in() == false ){
          // No user is currently logged in
          Request::instance()->redirect('user/login');
@@ -80,7 +81,7 @@ class Controller_User extends Controller_App {
     */
    public function action_profile_edit() {
       // set the template title (see Controller_App for implementation)
-      $this->template->title = 'Edit user profile';
+      $this->template->title = __('Edit user profile');
       $id = Auth::instance()->get_user()->id;
       // load the content from view
       $view = View::factory('user/profile_edit');
@@ -90,30 +91,25 @@ class Controller_User extends Controller_App {
          $model = null;
          // Load the validation rules, filters etc...
          $model = ORM::factory('user', $id);
-         // password can be empty if an id exists - it will be ignored in save.
-         if (is_numeric($id) && (empty($_POST['password']) || (trim($_POST['password']) == '')) )  {
-            unset($_POST['password']);
-            unset($model->password);
-         }
          // editing requires that the username and email do not exist (EXCEPT for this ID)
-         $post = $model->validate_edit($id, $_POST);
+         $model->values($_POST);
 
          // If the post data validates using the rules setup in the user model
-         if ($post->check()) {
-            // Affects the sanitized vars to the user object
-            $model->values($post);
+         if ($model->check_edit()) {
             // save first, so that the model has an id when the relationships are added
             $model->save();
             // message: save success
-            Message::add('success', 'Values saved.');
+            Message::add('success', __('Values saved.'));
             // redirect and exit
             Request::instance()->redirect('user/profile');
             return;
          } else {
             // Get errors for display in view
-            Message::add('error', 'Validation errors: '.var_export($post->errors(), TRUE));
-            // set the data from POST
-            $view->set('defaults', $post->as_array());
+            // Note how the first param is the path to the message file (e.g. /messages/register.php)
+				$content->errors = $user->validate()->errors('register');
+            // Pass on the old form values
+            $_POST['password'] = $_POST['password_confirm'] = '';
+            $content->set('defaults', $_POST);
          }
       } else {
          // load the information for viewing
@@ -136,7 +132,7 @@ class Controller_User extends Controller_App {
     */
    public function action_register() {
       // set the template title (see Controller_App for implementation)
-      $this->template->title = 'User registration';
+      $this->template->title = __('User registration');
       // If user already signed-in
       if(Auth::instance()->logged_in() != false){
          // redirect to the user account
@@ -148,29 +144,26 @@ class Controller_User extends Controller_App {
       if ($_POST) {
          // Instantiate a new user
          $user = ORM::factory('user');
-         // Load the validation rules, filters etc...
-         $post = $user->validate_create($_POST);
+         // load values from $_POST
+         $user->values($_POST);
 
          // REQUEST: If you do implement CAPTCHA for registration, send me the code so I can publish it. 
 
-
          // If the post data validates using the rules setup in the user model
-         if ($post->check()) {
-            // Affects the sanitized vars to the user object
-            $user->values($post);
+			if ($user->check()) {
             // create the account
             $user->save();
             // Add the login role to the user (add a row to the db)
             $login_role = new Model_Role(array('name' =>'login'));
             $user->add('roles',$login_role);
             // sign the user in
-            Auth::instance()->login($post['username'], $post['password']);
+			Auth::instance()->login($_POST['username'], $_POST['password']);
             // redirect to the user account
             Request::instance()->redirect('user/profile');
          } else {
             // Get errors for display in view
             // Note how the first param is the path to the message file (e.g. /messages/register.php)
-            $content->errors = $post->errors('register');
+			$content->errors = $user->validate()->errors('register');
             // Pass on the old form values
             $_POST['password'] = $_POST['password_confirm'] = '';
             $content->set('defaults', $_POST);
@@ -183,7 +176,7 @@ class Controller_User extends Controller_App {
     */
    public function action_unregister() {
       // set the template title (see Controller_App for implementation)
-      $this->template->title = 'Close user account';
+      $this->template->title = __('Close user account');
       if ( Auth::instance()->logged_in() == false ){
          // No user is currently logged in
          Request::instance()->redirect('user/login');
@@ -205,7 +198,7 @@ class Controller_User extends Controller_App {
          // Delete the user
          $user->delete($id);
          // message: save success
-         Message::add('success', 'User deleted.');
+         Message::add('success', __('User deleted.'));
          Request::instance()->redirect('user/profile');
       }
       // display confirmation
@@ -217,13 +210,18 @@ class Controller_User extends Controller_App {
     */
    public function action_login() {
       // set the template title (see Controller_App for implementation)
-      $this->template->title = 'Login';
+      $this->template->title = __('Login');
       // If user already signed-in
       if(Auth::instance()->logged_in() != 0){
          // redirect to the user account
          Request::instance()->redirect('user/profile');
       }
       $content = $this->template->content = View::factory('user/login');
+      // allow setting the username as a get param
+      if(isset($_GET['username'])) {
+         $content->set('username', Security::xss_clean($_GET['username']));
+      }
+
       // If there is a post and $_POST is not empty
       if ($_POST) {
          // Instantiate a new user
@@ -239,7 +237,7 @@ class Controller_User extends Controller_App {
             Request::instance()->redirect('user/profile');
          } else {
             // Get errors for display in view
-            $content->errors = $_POST->errors('login');
+            $content->set('errors', $_POST->errors('login'));
          }
       }
    }
@@ -260,81 +258,120 @@ class Controller_User extends Controller_App {
     */
    public function action_forgot() {
       // set the template title (see Controller_App for implementation)
-      $this->template->title = 'Forgot password';
+      $this->template->title = __('Forgot password');
       if(isset($_POST['reset_email'])) {
          $user = ORM::factory('user')->where('email', '=', $_POST['reset_email'])->find();
          // admin passwords cannot be reset by email
          if (is_numeric($user->id) && ($user->username != 'admin')) {
             // send an email with the account reset token
-            $user->reset_token = $this->generate_password(32);
+            $user->reset_token = $user->generate_password(32);
             $user->save();
 
             $message = "You have requested a password reset. You can reset password to your account by visiting the page at:\n\n"
-            .Html::anchor('user/reset?reset_token='.$user->reset_token.'&reset_email='.$_POST['reset_email'])."\n\n"
+            .":reset_token_link\n\n"
             ."If the above link is not clickable, please visit the following page:\n"
-            .URL::site('user/reset')."\n\n"
-            ."and copy/paste the following Reset Token: ".$user->reset_token."\n";
+            .":reset_link\n\n"
+            ."and copy/paste the following Reset Token: :reset_token\nYour user account name is: :username\n";
 
-            Message::add('success', 'Password reset. '.$message);
-
-            // Emailing is not implemented.
-            // REQUEST: If you do implement it, send me the code so I can publish it here. 
-
-            Message::add('success', 'Password reset email sent.');
+            $mailer = Email::connect();
+            // Create complex Swift_Message object stored in $message
+            // MUST PASS ALL PARAMS AS REFS
+            $subject = __('Account password reset');
+            $to = $_POST['reset_email'];
+            $from = 'admin@test.example';
+            $body =  __($message, array(
+                ':reset_token_link' => URL::site('user/reset?reset_token='.$user->reset_token.'&reset_email='.$_POST['reset_email'], TRUE),
+                ':reset_link' => URL::site('user/reset', TRUE),
+                ':reset_token' => $user->reset_token,
+                ':username' => $user->username
+            ));
+            $message_swift = Swift_Message::newInstance($subject, $body)
+                    ->setFrom($from)
+                    ->setTo($to);
+            if($mailer->send($message_swift)) {
+               Message::add('success', __('Password reset email sent.'));
+               Request::instance()->redirect('user/login');
+            } else {
+               Message::add('failure', __('Could not send email.'));
+            }
          } else if ($user->username == 'admin') {
-            Message::add('error', 'Admin account password cannot be reset via email.');
+            Message::add('error', __('Admin account password cannot be reset via email.'));
+         } else {
+            Message::add('error', __('User account could not be found.'));
          }
       }
      $this->template->content = View::factory('user/reset/forgot');
    }
 
    /**
-    * Generates a password of given length using mt_rand.
-    * @param int $length
-    * @return string
+    * A basic version of "reset password" functionality.
     */
-   function generate_password($length = 8) {
-      // start with a blank password
-      $password = "";
-      // define possible characters (does not include l, number relatively likely)
-      $possible = "123456789abcdefghjkmnpqrstuvwxyz123456789";
-      $i = 0;
-      // add random characters to $password until $length is reached
-      while ($i < $length) {
-         // pick a random character from the possible ones
-         $char = substr($possible, mt_rand(0, strlen($possible)-1), 1);
-
-         $password .= $char;
-         $i++;
-
-      }
-      return $password;
-   }
-
-  /**
-   * A basic version of "reset password" functionality.
-   */
   function action_reset() {
       // set the template title (see Controller_App for implementation)
-      $this->template->title = 'Reset password';
+      $this->template->title = __('Reset password');
       if(isset($_REQUEST['reset_token']) && isset($_REQUEST['reset_email'])) {
          // make sure that the reset_token has exactly 32 characters (not doing that would allow resets with token length 0)
          if( (strlen($_REQUEST['reset_token']) == 32) && (strlen(trim($_REQUEST['reset_email'])) > 1) ) {
             $user = ORM::factory('user')->where('email', '=', $_REQUEST['reset_email'])->and_where('reset_token', '=', $_REQUEST['reset_token'])->find();
             // admin passwords cannot be reset by email
             if (is_numeric($user->id) && ($user->reset_token == $_REQUEST['reset_token']) && ($user->username != 'admin')) {
-               $password = $this->generate_password();
+               $password = $user->generate_password();
                $user->password = $password;
 // This field does not exist in the default config:
 //               $user->failed_login_count = 0;
                $user->save();
-               Message::add('Password reset.');
-               Message::add('<p>Your password has been reset to: "'.$password.'".</p><br><p>Please log in below.</p>');
-               Request::instance()->redirect('user/login');
+               Message::add('success', __('Password reset.'));
+               Message::add('success', '<p>'.__('Your password has been reset to: ":password".', array(':password' => $password)).'</p><p>'.__('Please log in below.').'</p>');
+   				Request::instance()->redirect('user/login?username='.$user->username);
             }
         }
      }
      $this->template->content = View::factory('user/reset/reset');
   }
 
+  function action_change_password() {
+      // set the template title (see Controller_App for implementation)
+      $this->template->title = __('Change password');
+      $id = Auth::instance()->get_user()->id;
+      // load the content from view
+      $view = View::factory('user/change_password');
+
+      // save the data
+      if ( !empty($_POST) && is_numeric($id) ) {
+         // Load the validation rules, filters etc...
+         $model = ORM::factory('user', $id);
+         // editing requires that the username and email do not exist (EXCEPT for this ID)
+         // If the post data validates using the rules setup in the user model
+         $param_by_ref = array('password' => $_POST['password'], 'password_confirm' => $_POST['password_confirm']);
+         $validate = $model->change_password($param_by_ref, FALSE);
+         if ($validate) {
+            // message: save success
+            Message::add('success', __('Values saved.'));
+            // redirect and exit
+            $this->role_redirect();
+            return;
+         } else {
+            // UNFORTUNATELY, it is NOT possible to get errors for display in view
+            // since they will never be returned by change_password()
+            Message::add('error', __('Password could not be changed, please make sure that the passwords match.'));
+            // Pass on the old form values
+            $_POST['password'] = $_POST['password_confirm'] = '';
+            $view->set('defaults', $_POST);
+         }
+      } else {
+         // load the information for viewing
+         $model = ORM::factory('user', $id);
+         $view->set('data', $model->as_array());
+      }
+      $this->template->content = $view;
+  }
+  
+  function action_change_language($lang) {
+     if(!in_array($lang, array('fi', 'sv', 'en-us'))) {
+        $lang = 'fi';
+     }
+     Cookie::set('lang', $lang);
+     I18n::lang($lang);
+     $this->role_redirect();
+  }
 }

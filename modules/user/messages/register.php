@@ -4,9 +4,11 @@
 return array(
       'username' => array(
          'username_available' => 'This username is already registered, please choose another one.',
+         'username_not_unique' => 'This username is already in use.',
        ),
       'email' => array(
          'email_available' => 'This email address is already in use.',
+         'email_not_unique' => 'This email address is already in use.',
        ),
       'password' => array(
          'matches'      => 'The password and password confirmation are different.',

@@ -18,4 +18,19 @@ class Message {
 
    }
 
+   public static function output() {
+      $str = '';
+      $messages = Session::instance()->get('messages');
+      Session::instance()->delete('messages');
+
+      if(!empty($messages)) {
+         foreach($messages as $type => $messages) {
+            foreach($messages as $message) {
+               $str .= '<div class="'.$type.'">'.$message.'</div>';
+            }
+         }
+      }
+      return $str;
+   }
+
 }

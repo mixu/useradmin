@@ -1,7 +1,7 @@
 <?php
 
-echo '<ul class="errors">';
+echo '<ul>';
 foreach ($errors as $field => $error) {
-   echo '<li>'.ucfirst($error).'</li><br/>';
+   echo '<li><div class="error">'.ucfirst($error).'</div></li>';
 }
 echo '</ul>';

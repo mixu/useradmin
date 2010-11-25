@@ -26,127 +26,57 @@ class Model_User extends Model_Auth_User {
 //   protected $_created_column = array('column' => 'created', 'format' => 'Y-m-d H:i:s');
 //   protected $_updated_column = array('column' => 'modified', 'format' => 'Y-m-d H:i:s');
 
-
-   protected $callback_data_id;
-
-   /*
-    * Note that most of these validation functions are just copied from Model_Auth_User (in /modules/auth/classes/model/auth/user.php)
+	/**
+   * Validates a user when the record is modified.
     *
-    * I have extended login() a bit, but to use the code you will need a couple of non-standard fields.
+   * Different rules are needed (e.g. the email and username do not need to be new, just unique to this user).
     *
-    */
-   /**
-    * Validates a user when the record is first created.
+   * Unobtrusive: we setup the _validate value (see ORM) with custom values, then just run check().
+   * Should not require further changes to surrounding code.
     * 
     * @param $array An array of fields for the user record.
     * @return Validate Validation object, call check() on the return value to validate.           
     */
-   public function validate_create($array) {
-      // Initialise the validation library and setup some rules
-      // See modules/auth/classes/model/auth/user.php for the definitions of $this->_rules.
-      $validation = Validate::factory($array)
-                  ->rules('password', $this->_rules['password'])
+   public function check_edit() {
+      $values = $this->as_array();
+      // since removing validation rules is tricky (this is needed to ignore the password),
+      // we will just create our own alternate _validate object and store it in the model.
+      $this->_validate = Validate::factory($values)
+                  ->label('username', $this->_labels['username'])
+                  ->label('email', $this->_labels['email'])
                   ->rules('username', $this->_rules['username'])
                   ->rules('email', $this->_rules['email'])
-                  ->rules('password_confirm', $this->_rules['password_confirm'])
                   ->filter('username', 'trim')
                   ->filter('email', 'trim')
                   ->filter('password', 'trim')
                   ->filter('password_confirm', 'trim');
-
-      // Executes username callbacks defined in parent
-
-      // These callbacks are defined in modules/auth/classes/model/auth/user.php
-      // As of 3.0.1.2, the only callback is "username_available"
-      foreach($this->_callbacks['username'] as $callback){
-         $validation->callback('username', array($this, $callback));
-      }
-
-      // Executes email callbacks defined in parent   
-      // These callbacks are defined in modules/auth/classes/model/auth/user.php
-      // As of 3.0.1.2, the only callback is "email_available"
-      foreach($this->_callbacks['email'] as $callback){
-         $validation->callback('email', array($this, $callback));
-      }
-
-      return $validation;
-   }
-
-   // See also: login() in modules/auth/classes/model/auth/user.php, which performs logins.
-
-   /**
-    * Validates a user when the record it is modified.
-    * 
-    * @param $array An array of fields for the user record.
-    * @return Validate Validation object, call check() on the return value to validate.           
-    */
-   public function validate_edit($id, $array = array()) {
-
-      $validation = Validate::factory($array)
-                  ->rules('username', $this->_rules['username'])
-                  ->rules('email', $this->_rules['email'])                  
-                  ->filter('username', 'trim')
-                  ->filter('email', 'trim')
-                  ->filter('password', 'trim')
-                  ->filter('password_confirm', 'trim');
-
-      // if the password is set, then validate it - it is unset earlier in the controller if it is empty
-      if(isset($array['password'])) {
-         $validation->rules('password', $this->_rules['password'])
+      // if the password is set, then validate it 
+      // Note: the password field is always set if the model was loaded from DB (since there is a DB value for it)
+      // So we will check for the password_confirm field instead.
+      if(isset($values['password_confirm']) && (trim($values['password_confirm']) != '')) {
+         $this->_validate
+                  ->label('password', $this->_labels['password'])
+                  ->label('password_confirm', $this->_labels['password_confirm'])
+                  ->rules('password', $this->_rules['password'])
                     ->rules('password_confirm', $this->_rules['password_confirm']);
       } 
 
-      // pass parameter via object
-      $this->callback_data_id = $id;
-      $validation->callback('username', array($this, 'username_is_unique'));
-      $validation->callback('email', array($this, 'email_is_unique'));
-      return $validation;
+      // Since new versions of Kohana automatically exclude the current user from the uniqueness checks,
+      // we no longer need to define our own callbacks. 
+		foreach ($this->_callbacks as $field => $callbacks) {
+			foreach ($callbacks as $callback) {
+				if (is_string($callback) AND method_exists($this, $callback)) {
+					// Callback method exists in current ORM model
+					$this->_validate->callback($field, array($this, $callback));
+				} else {
+					// Try global function
+					$this->_validate->callback($field, $callback);
    }
-
-
-   /**
-    * Does the reverse of unique_key_exists() by triggering error if username exists
-    * Validation Rule
-    *
-    * @param    Validate  $array   validate object
-    * @param    string    $field   field name
-    * @return   array
-    */
-   public function username_is_unique(Validate $array, $field) {
-      $exists = (bool) DB::select(array('COUNT("*")', 'total_count'))
-                  ->from($this->_table_name)
-                  ->where('username',   '=',   $array[$field])
-                  ->where('id',     '!=',   $this->callback_data_id)
-                  ->execute($this->_db)
-                  ->get('total_count');
-
-      if ($exists) {
-         $array->error($field, 'username_not_unique', array($array[$field]));
       }
    }
 
-   /**
-    * Does the reverse of unique_key_exists() by triggering error if email exists
-    * Validation Rule
-    *
-    * @param    Validate  $array   validate object
-    * @param    string    $field   field name
-    * @return   array
-    */
-   public function email_is_unique(Validate $array, $field) {
-      $exists = (bool) DB::select(array('COUNT("*")', 'total_count'))
-                  ->from($this->_table_name)
-                  ->where('email',   '=',   $array[$field])
-                  ->where('id',     '!=',   $this->callback_data_id)
-                  ->execute($this->_db)
-                  ->get('total_count');
-
-      if ($exists) {
-         $array->error($field, 'email_not_unique', array($array[$field]));
+      return $this->_validate->check();
       }
-   }
-
-
 
    /**
     * Validates login information from an array, and optionally redirects
@@ -157,7 +87,6 @@ class Model_User extends Model_Auth_User {
     * @return boolean
     */
    public function login(array & $array, $redirect = FALSE) {
-
       $array = Validate::factory($array)
          ->filter(TRUE, 'trim')
          ->rules('username', $this->_rules['username'])
@@ -179,18 +108,15 @@ class Model_User extends Model_Auth_User {
          }
 */
          // if you want to allow 5 logins again after 5 minutes, then set the failed login count to zero here, if it is too high.
-
          if ($this->loaded() AND Auth::instance()->login($this, $array['password'])) {
             // Login is successful
             $status = TRUE;
-
             // set the number of failed logins to 0
 //            $this->failed_login_count = 0;
             if(is_numeric($this->id) && ($this->id != 0)) {
                // only save if the user already exists
                $this->save();
             }
-            
             if (is_string($redirect)) {
                // Redirect after a successful login
                Request::instance()->redirect($redirect);
@@ -198,10 +124,8 @@ class Model_User extends Model_Auth_User {
          } else {
 /*
             // login failed: update failed login count
-
             $this->failed_login_count = $this->failed_login_count+1;
             $this->last_failed_login = date('Y-m-d H:i:s');
-
             if(is_numeric($this->id) && ($this->id != 0) ) {
                // only save if the user already exists
                $this->save();
@@ -213,4 +137,46 @@ class Model_User extends Model_Auth_User {
       }
       return $status;
    }
+   
+   /**
+    * Generates a password of given length using mt_rand.
+    * @param int $length
+    * @return string
+    */
+   function generate_password($length = 8) {
+      // start with a blank password
+      $password = "";
+      // define possible characters (does not include l, number relatively likely)
+      $possible = "123456789abcdefghjkmnpqrstuvwxyz123456789";
+      $i = 0;
+      // add random characters to $password until $length is reached
+      while ($i < $length) {
+         // pick a random character from the possible ones
+         $char = substr($possible, mt_rand(0, strlen($possible)-1), 1);
+
+         $password .= $char;
+         $i++;
+
+      }
+      return $password;
+   }
+
+   /**
+    * Check whether a username exists.
+    * @param string $username
+    * @return boolean
+    */
+   public function check_username($username) {
+       $exists = (bool) DB::select(array('COUNT("*")', 'total_count'))
+                     ->from($this->_table_name)
+                     ->where('username',   '=',   $username)
+                     ->execute($this->_db)
+                     ->get('total_count');
+
+      if ($exists) {
+         return false;
+      }
+      return true;
+   }
+
 }

@@ -29,16 +29,7 @@
    <div id="content">
     <?php
     // output messages
-      $messages = Session::instance()->get('messages');
-      Session::instance()->delete('messages');
-
-      if(!empty($messages)) {
-         foreach($messages as $type => $messages) {
-            foreach($messages as $message) {
-               echo '<div class="'.$type.'">'.$message.'</div>';
-            }
-         }
-      }
+     echo Message::output();
      echo $content ?>
    </div>
 </div>

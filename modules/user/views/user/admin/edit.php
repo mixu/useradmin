@@ -1,42 +1,31 @@
-<h1>Edit/add user</h1>
+<h1><?php echo __('Edit/add user') ?></h1>
 <?php
-echo Form::open('admin_user/edit/'.$id);
 
-// show errors
-if ( ! empty($errors)) {
-  // show errors
-   $errors_view = new View('common/errors');
-   echo $errors_view->set('errors', $errors)->render();
+$form = new Appform();
+if(isset($errors)) {
+   $form->errors = $errors;
 }
-
-if(!isset($data)) {
-   $data = array('email' => '', 'username' => '', 'password' => '', 'password_confirm' => '');
+if(isset($data)) {
+   unset($data['password']);
+   $form->values = $data;
 }
+echo $form->open('admin_user/edit/'.$id);
 ?>
 <?php
-  echo Form::hidden('id', $id);
+  echo $form->hidden('id', $id);
 ?>
 <ul>
-   <li>
-      <label>Username</label>
-      <?php echo Form::input('username', $data['username'], array('class' => 'text')) ?>
-   </li>
-   <li>
-      <label>Email Address</label>
-      <?php echo Form::input('email', $data['email'], array('class' => 'text')) ?>
-   </li>
-   <li>
-      <label>Password</label>
-      <?php echo Form::password('password', '', array('class' => 'password')) ?>
-   </li>
-   <li>
-      <label>Confirm Password</label>
-      <?php echo Form::password('password_confirm', '', array('class' => 'password')) ?>
-   </li>
-   <li>
-      <label>Roles</label>
-      <table class="content">
-            <tr class="heading"><td></td><td>Role</td><td>Description</td></tr>
+   <li><label><?php echo __('Username'); ?></label></li>
+   <?php echo $form->input('username', null, array('info' => __('Length between 4-32 characters. Letters, numbers, dot and underscore are allowed characters.'))); ?>
+   <li><label><?php echo __('Email address'); ?></label></li>
+   <?php echo $form->input('email') ?>
+   <li><label><?php echo __('Password'); ?></label></li>
+   <?php echo $form->password('password', null, array('info' => __('Password should be between 6-42 characters.'))) ?>
+   <li><label><?php echo __('Re-type Password'); ?></label></li>
+   <?php echo $form->password('password_confirm') ?>
+   <li><h2><?php echo __('Roles'); ?></h2></li>
+   <li><table class="content">
+      <tr class="heading"><td></td><td><?php echo __('Role'); ?></td><td><?php echo __('Description'); ?></td></tr>
   <?php
       $i = 0;
       foreach($all_roles as $role => $description) {
@@ -56,5 +45,5 @@ if(!isset($data)) {
 </ul>
 <br>
 <?php
-echo Form::submit(NULL, 'Save Profile');
-echo Form::close();
+echo $form->submit(NULL, __('Save'));
+echo $form->close();

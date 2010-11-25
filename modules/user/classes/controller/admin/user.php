@@ -36,7 +36,7 @@ class Controller_Admin_User extends Controller_App {
     */
    public function action_index() {
       // set the template title (see Controller_App for implementation)
-      $this->template->title = 'User administration';
+      $this->template->title = __('User administration');
       // create a user
       $user = ORM::factory('user');
       // This is an example of how to use Kohana pagination
@@ -73,28 +73,28 @@ class Controller_Admin_User extends Controller_App {
 
       // save the data
       if (!empty($_POST)) {
-         $model = null;
-         // Load the validation rules, filters etc...
+         // sample code paths for edit and create
          if(is_numeric($id)) {
+            // EDIT: load the model with ID
             $model = ORM::factory('user', $id);
-            // password can be empty if an id exists - it will be ignored in save.
-            if ((is_numeric($id)) && (empty($_POST['password']) || (trim($_POST['password']) == '')) )  {
-               unset($_POST['password']);
-               unset($model->password);
-            }
-            // editing requires that the username and email do not exist (EXCEPT for this ID)
-            $post = $model->validate_edit($id, $_POST);
          } else {
+            // CREATE: do not specify id
             $model = ORM::factory('user');
-            // creation requires that the username and email do not exist
-            $post = $model->validate_create($_POST);
+            }
+         unset($_POST['id']);
+         $model->values($_POST);
+         // since we combine both editing and creating here we need a separate variable
+         // you can get rid of it if your actions don't need to do that
+         $result = false;
+         if(is_numeric($id)) {
+            // EDIT: check using alternative rules
+            $result = $model->check_edit();
+         } else {
+            // CREATE: check using default rules
+            $result = $model->check();
          }
-
-         // If the post data validates using the rules setup in the user model
-         if ($post->check()) {
-            // Affects the sanitized vars to the user object
-            $model->values($post);
-            // save first, so that the model has an id when the relationships are added
+         if($result) {
+            // validation passed, save model
             $model->save();
             // roles have to be added separately, and all users have to have the login role
             // you first have to remove the items, otherwise add() will try to add duplicates
@@ -106,16 +106,16 @@ class Controller_Admin_User extends Controller_App {
                // add() executes the query immediately, and saves the data (unlike the KO2 docs say)
                $model->add('roles', ORM::factory('role')->where('name', '=', $role)->find());
             }
-
             // message: save success
-            Message::add('success', 'Values saved.');
+            Message::add('success', __('Values saved.'));
             // redirect and exit
             Request::instance()->redirect('admin_user/index');
             return;
          } else {
-            // Get errors for display in view
-            Message::add('error', 'Validation errors: '.var_export($post->errors(), TRUE));
-            // set the data from POST
+            // Get errors for display in view --> to AppForm
+            // Note how the first param is the path to the message file (e.g. /messages/register.php)
+            $content->set('errors', $model->validate()->errors('register'));
+            // Pass on the old form values --> to AppForm
             $view->set('data', $post->as_array());
          }
       }
