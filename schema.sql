@@ -104,6 +104,12 @@ CREATE TABLE IF NOT EXISTS `users` (
   `password` char(50) NOT NULL,
   `logins` int(10) unsigned NOT NULL DEFAULT '0',
   `last_login` int(10) unsigned DEFAULT NULL,
+  `reset_token` char(64) NOT NULL,
+  `status` varchar(20) NOT NULL,
+  `last_failed_login` datetime NOT NULL,
+  `failed_login_count` int(11) NOT NULL,
+  `created` datetime NOT NULL,
+  `modified` datetime NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_username` (`username`),
   UNIQUE KEY `uniq_email` (`email`)
