@@ -157,13 +157,13 @@ class Controller_User extends Controller_App {
             $login_role = new Model_Role(array('name' =>'login'));
             $user->add('roles',$login_role);
             // sign the user in
-			Auth::instance()->login($_POST['username'], $_POST['password']);
+			      Auth::instance()->login($_POST['username'], $_POST['password']);
             // redirect to the user account
             Request::instance()->redirect('user/profile');
          } else {
             // Get errors for display in view
             // Note how the first param is the path to the message file (e.g. /messages/register.php)
-			$content->errors = $user->validate()->errors('register');
+			      $content->errors = $user->validate()->errors('register');
             // Pass on the old form values
             $_POST['password'] = $_POST['password_confirm'] = '';
             $content->set('defaults', $_POST);
@@ -322,7 +322,7 @@ class Controller_User extends Controller_App {
                $user->save();
                Message::add('success', __('Password reset.'));
                Message::add('success', '<p>'.__('Your password has been reset to: ":password".', array(':password' => $password)).'</p><p>'.__('Please log in below.').'</p>');
-   				Request::instance()->redirect('user/login?username='.$user->username);
+   				     Request::instance()->redirect('user/login?username='.$user->username);
             }
         }
      }
