@@ -82,7 +82,8 @@ class Controller_User extends Controller_App {
    public function action_profile_edit() {
       // set the template title (see Controller_App for implementation)
       $this->template->title = __('Edit user profile');
-      $id = Auth::instance()->get_user()->id;
+      $user = Auth::instance()->get_user();
+      $id = $user->id;
       // load the content from view
       $view = View::factory('user/profile_edit');
 
