@@ -25,6 +25,13 @@ class Appform {
     * @var array
     */
    public $values;
+   
+   /**
+    * CSS class strings for messages. You can override these.
+    * @var string
+    */
+   public $info_class = 'info';
+   public $error_class = 'error';
 
    /**
     * Add a class to the input attributes array.
@@ -97,7 +104,7 @@ class Appform {
          $result .= '<span class="error">'.ucfirst($this->errors[$name]).'</span>';
       } else if (isset($attributes['info'])) {
          // else add info span
-         $result .= '<span class="info">'.$attributes['info'].'</span>';
+         $result .= '<span class="'.$this->info_class.'">'.$attributes['info'].'</span>';
       }
       $result .= '</li>';
       return $result;
@@ -133,7 +140,7 @@ class Appform {
          $result .= '<span class="error">'.ucfirst($this->errors[$name]).'</span>';
       } else if (isset($attributes['info'])) {
          // else add info span
-         $result .= '<span class="info">'.$attributes['info'].'</span>';
+         $result .= '<span class="'.$this->info_class.'">'.$attributes['info'].'</span>';
       }
       $result .= '</li>';
       return $result;
@@ -152,10 +159,10 @@ class Appform {
       $result = '<li>'.Kohana_Form::file($name, $attributes);
       // add error span
       if (isset($this->errors[$name])) {
-         $result .= '<span class="error">'.ucfirst($this->errors[$name]).'</span>';
+         $result .= '<span class="'.$this->error_class.'">'.ucfirst($this->errors[$name]).'</span>';
       } else if (isset($attributes['info'])) {
          // else add info span
-         $result .= '<span class="info">'.$attributes['info'].'</span>';
+         $result .= '<span class="'.$this->info_class.'">'.$attributes['info'].'</span>';
       }
       $result .= '</li>';
       return $result;
@@ -175,10 +182,10 @@ class Appform {
       $result = '<li>'.Kohana_Form::checkbox($name, $value, $checked, $attributes);
       // add error span
       if (isset($this->errors[$name])) {
-         $result .= '<span class="error">'.ucfirst($this->errors[$name]).'</span>';
+         $result .= '<span class="'.$this->error_class.'">'.ucfirst($this->errors[$name]).'</span>';
       } else if (isset($attributes['info'])) {
          // else add info span
-         $result .= '<span class="info">'.$attributes['info'].'</span>';
+         $result .= '<span class="'.$this->info_class.'">'.$attributes['info'].'</span>';
       }
       $result .= '</li>';
       return $result;
@@ -198,10 +205,10 @@ class Appform {
       $result = '<li>'.Kohana_Form::radio($name, $value, $checked, $attributes);
       // add error span
       if (isset($this->errors[$name])) {
-         $result .= '<span class="error">'.ucfirst($this->errors[$name]).'</span>';
+         $result .= '<span class="'.$this->error_class.'">'.ucfirst($this->errors[$name]).'</span>';
       } else if (isset($attributes['info'])) {
          // else add info span
-         $result .= '<span class="info">'.$attributes['info'].'</span>';
+         $result .= '<span class="'.$this->info_class.'">'.$attributes['info'].'</span>';
       }
       $result .= '</li>';
       return $result;
@@ -221,10 +228,10 @@ class Appform {
       $result = '<li>'.Kohana_Form::textarea($name, $body, $attributes, $double_encode);
       // add error span
       if (isset($this->errors[$name])) {
-         $result .= '<span class="error">'.ucfirst($this->errors[$name]).'</span>';
+         $result .= '<span class="'.$this->error_class.'">'.ucfirst($this->errors[$name]).'</span>';
       } else if (isset($attributes['info'])) {
          // else add info span
-         $result .= '<span class="info">'.$attributes['info'].'</span>';
+         $result .= '<span class="'.$this->info_class.'">'.$attributes['info'].'</span>';
       }
       $result .= '</li>';
       return $result;
@@ -244,10 +251,10 @@ class Appform {
       $result = '<li>'.Kohana_Form::select($name, $options, $selected, $attributes);
       // add error span
       if (isset($this->errors[$name])) {
-         $result .= '<span class="error">'.ucfirst($this->errors[$name]).'</span>';
+         $result .= '<span class="'.$this->error_class.'">'.ucfirst($this->errors[$name]).'</span>';
       } else if (isset($attributes['info'])) {
          // else add info span
-         $result .= '<span class="info">'.$attributes['info'].'</span>';
+         $result .= '<span class="'.$this->info_class.'">'.$attributes['info'].'</span>';
       }
       $result .= '</li>';
       return $result;

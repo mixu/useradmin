@@ -200,7 +200,7 @@ span.info {
   color:#5C5C5C;
   border:solid 2px #CBDFE7; background:#DEF1F8;
   margin-top: 0px; margin-bottom: 0px;
-  margin-left: 4px;
+  margin-left: 4px; 
   display: inline-block;
   vertical-align: top;
   font-size: smaller;
@@ -210,12 +210,19 @@ span.info {
   *display: inline;
 }
 
+span.block {
+   display: block;
+   margin-left: 0px;
+   margin-bottom: 4px;
+}
+
 /* Messages */
 
 div.info {
   padding: 6px;
   color:#5C5C5C;
   border:solid 1px #CBDFE7; background:#DEF1F8;  margin-top: 4px; margin-bottom: 4px;
+  margin-right: 6px;
 }
 
 div.success {

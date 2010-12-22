@@ -158,7 +158,7 @@ class Controller_User extends Controller_App {
             $login_role = new Model_Role(array('name' =>'login'));
             $user->add('roles',$login_role);
             // sign the user in
-			      Auth::instance()->login($_POST['username'], $_POST['password']);
+			   Auth::instance()->login($_POST['username'], $_POST['password']);
             // redirect to the user account
             Request::instance()->redirect('user/profile');
          } else {
@@ -330,6 +330,9 @@ class Controller_User extends Controller_App {
      $this->template->content = View::factory('user/reset/reset');
   }
 
+  /**
+   * Allow the user to change their password.
+   */
   function action_change_password() {
       // set the template title (see Controller_App for implementation)
       $this->template->title = __('Change password');
@@ -366,13 +369,92 @@ class Controller_User extends Controller_App {
       }
       $this->template->content = $view;
   }
-  
-  function action_change_language($lang) {
-     if(!in_array($lang, array('fi', 'sv', 'en-us'))) {
-        $lang = 'fi';
-     }
-     Cookie::set('lang', $lang);
-     I18n::lang($lang);
-     $this->role_redirect();
-  }
+ 
+  /**
+   * Allow the user to login using Facebook
+   */
+   function action_fb_login() {
+      print_r($_COOKIE);
+      // check if user is logged in
+      $user = ORM::factory('user')->where('facebook_user_id', '=', $user_id)->find();     
+      if(!$user->empty_pk()) {
+         // found, log user in
+         Auth_ORM::instance()->force_login($user);
+         // redirect to the user account
+         Request::instance()->redirect('user/profile');
+         return;
+      }
+      // associated user not found; register the user
+      // retrieve user email from Facebook
+      // Create our Application instance.
+      $facebook = new Facebook(
+			array(
+				'appId'  => Kohana::config('facebook')->app_id,
+				'secret' => Kohana::config('facebook')->secret,
+				'cookie' => true, // enable optional cookie support
+			)
+		);
+      $session = $facebook->getSession();
+      $me = null;
+      // Session based API call.
+      if ($session) {
+         try {
+            $uid = $facebook->getUser();
+            $me = $facebook->api('/me');          
+         } catch (FacebookApiException $e) {
+            // do nothing
+         }        
+         if($me != NULL && Validate::email($me->email, TRUE)) {
+            // search for existing user using email
+            $user = ORM::factory('user')->where('email', '=', $me->email)->find();
+            if(!$user->empty_pk()) {
+               // Note: there is minor security issue here - we trust the email supplied by Facebook         
+               // They do perform a verification check for email addresses... and the data is signed.
+               // Hence this is not really a problem; I bet most of the implementations do trust Facebook.
+               // If you want, you can ask the user to enter their password to confirm, but it's 
+               // a bit clunky - and adds more special cases like what if they don't remember the password?
+               // Then you have to allow them to reset the password using their email ....
+               Message::add('success', __('We found an existing account using your email address.'));        
+               // found: "merge" with the existing user
+               $user->facebook_user_id = $facebook_user_id;
+               $user->save();
+               // force login
+               Auth_ORM::instance()->force_login($user);
+               // redirect to the user account
+               Request::instance()->redirect('user/profile');
+               return;
+            } 
+         }
+      } 
+
+      // not found: create a new user for real
+      // Instantiate a new user
+      $user = ORM::factory('user');
+      // fill in values
+      $values = array();
+      if($me != NULL && Validate::email($me->email, TRUE)) {
+         $values['email'] = $me->email;
+      }
+      $user->values($values);
+
+      // If the post data validates using the rules setup in the user model
+      if ($user->check()) {
+         // create the account
+         $user->save();
+         // Add the login role to the user (add a row to the db)
+         $login_role = new Model_Role(array('name' =>'login'));
+         $user->add('roles', $login_role);
+         // sign the user in
+         Auth::instance()->login($_POST['username'], $_POST['password']);
+         // redirect to the user account
+         Request::instance()->redirect('user/profile');
+      } else {
+         // Get errors for display in view
+         // Note how the first param is the path to the message file (e.g. /messages/register.php)
+         $content->errors = $user->validate()->errors('register');
+         // Pass on the old form values
+         $_POST['password'] = $_POST['password_confirm'] = '';
+         $content->set('defaults', $_POST);
+      }
+   }
 }
