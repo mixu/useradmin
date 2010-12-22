@@ -8,9 +8,13 @@ $form = new Appform();
 if(isset($errors)) {
    $form->errors = $errors;
 }
-unset($_POST['password']);
-unset($_POST['password_confirmation']);
-$form->defaults = $_POST;
+if(isset($defaults)) {
+   $form->defaults = $defaults;
+} else {
+   unset($_POST['password']);
+   unset($_POST['password_confirmation']);
+   $form->defaults = $_POST;
+}
 echo $form->open('user/register');
 ?>
 
@@ -28,16 +32,3 @@ echo $form->open('user/register');
 <?php
 echo $form->close();
 ?>
-
-
-<iframe src="http://www.facebook.com/plugins/registration.php?
-             client_id=113869198637480&
-             redirect_uri=http%3A%2F%2Fdevelopers.facebook.com%2Ftools%2Fecho%2F&
-             fields=name,birthday,gender,location,email"
-        scrolling="auto"
-        frameborder="no"
-        style="border:none"
-        allowTransparency="true"
-        width="100%"
-        height="330">
-</iframe>
