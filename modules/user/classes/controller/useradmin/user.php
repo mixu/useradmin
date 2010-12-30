@@ -107,22 +107,23 @@ class Controller_Useradmin_User extends Controller_App {
          } else {
             // Get errors for display in view
             // Note how the first param is the path to the message file (e.g. /messages/register.php)
-				$content->errors = $user->validate()->errors('register');
+            Message::add('error', __('Error: Values could not be saved.'));
+            $view->set('errors', $user->validate()->errors('register'));
             // Pass on the old form values
-            $_POST['password'] = $_POST['password_confirm'] = '';
-            $content->set('defaults', $_POST);
+            $model->password = $model->password_confirm = '';
+            $view->set('data', $model->as_array());
          }
       } else {
          // load the information for viewing
          $model = ORM::factory('user', $id);
          $view->set('data', $model->as_array());
-         // retrieve roles into array
-         $roles = array();
-         foreach($model->roles->find_all() as $role) {
-            $roles[$role->name] = $role->description;
-         }
-         $view->set('user_roles', $roles);
       }
+      // retrieve roles into array
+      $roles = array();
+      foreach($model->roles->find_all() as $role) {
+          $roles[$role->name] = $role->description;
+       }
+      $view->set('user_roles', $roles);
       $view->set('id', $id);
       $this->template->content = $view;
 
@@ -140,7 +141,7 @@ class Controller_Useradmin_User extends Controller_App {
          Request::instance()->redirect('user/profile');
       }
       // Load the view
-      $content = $this->template->content = View::factory('user/register');
+      $view = View::factory('user/register');
       // If there is a post and $_POST is not empty
       if ($_POST) {
          // Instantiate a new user
@@ -151,25 +152,26 @@ class Controller_Useradmin_User extends Controller_App {
          // REQUEST: If you do implement CAPTCHA for registration, send me the code so I can publish it. 
 
          // If the post data validates using the rules setup in the user model
-			if ($user->check()) {
+         if ($user->check()) {
             // create the account
             $user->save();
             // Add the login role to the user (add a row to the db)
             $login_role = new Model_Role(array('name' =>'login'));
             $user->add('roles',$login_role);
             // sign the user in
-			   Auth::instance()->login($_POST['username'], $_POST['password']);
+            Auth::instance()->login($_POST['username'], $_POST['password']);
             // redirect to the user account
             Request::instance()->redirect('user/profile');
          } else {
             // Get errors for display in view
             // Note how the first param is the path to the message file (e.g. /messages/register.php)
-			      $content->errors = $user->validate()->errors('register');
+            $view->set('errors', $user->validate()->errors('register'));
             // Pass on the old form values
             $_POST['password'] = $_POST['password_confirm'] = '';
-            $content->set('defaults', $_POST);
+            $view->set('defaults', $_POST);
          }
       }
+      $this->template->content = $view;
    }
 
    /**
@@ -323,7 +325,7 @@ class Controller_Useradmin_User extends Controller_App {
                $user->save();
                Message::add('success', __('Password reset.'));
                Message::add('success', '<p>'.__('Your password has been reset to: ":password".', array(':password' => $password)).'</p><p>'.__('Please log in below.').'</p>');
-   				     Request::instance()->redirect('user/login?username='.$user->username);
+               Request::instance()->redirect('user/login?username='.$user->username);
             }
         }
      }
@@ -377,12 +379,12 @@ class Controller_Useradmin_User extends Controller_App {
       include Kohana::find_file('vendor', 'facebook/src/facebook');
       // Create our Facebook SDK instance.
       $facebook = new Facebook(
-			array(
-				'appId'  => Kohana::config('facebook')->app_id,
-				'secret' => Kohana::config('facebook')->secret,
-				'cookie' => true, // enable optional cookie support
-			)
-		);
+         array(
+            'appId'  => Kohana::config('facebook')->app_id,
+            'secret' => Kohana::config('facebook')->secret,
+            'cookie' => true, // enable optional cookie support
+         )
+      );
       $me = null;
       // Session based API call.
       if ($facebook->getSession()) {

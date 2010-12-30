@@ -80,7 +80,7 @@ class Controller_Useradmin_Admin_User extends Controller_App {
          } else {
             // CREATE: do not specify id
             $model = ORM::factory('user');
-            }
+         }
          unset($_POST['id']);
          $model->values($_POST);
          // since we combine both editing and creating here we need a separate variable
@@ -113,10 +113,11 @@ class Controller_Useradmin_Admin_User extends Controller_App {
             return;
          } else {
             // Get errors for display in view --> to AppForm
+            Message::add('error', __('Error: Values could not be saved.'));
             // Note how the first param is the path to the message file (e.g. /messages/register.php)
-            $content->set('errors', $model->validate()->errors('register'));
+            $view->set('errors', $model->validate()->errors('register'));
             // Pass on the old form values --> to AppForm
-            $view->set('data', $post->as_array());
+            $view->set('data', $model->as_array());
          }
       }
 

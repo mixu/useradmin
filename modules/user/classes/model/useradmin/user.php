@@ -26,13 +26,13 @@ class Model_Useradmin_User extends Model_Auth_User {
 //   protected $_created_column = array('column' => 'created', 'format' => 'Y-m-d H:i:s');
 //   protected $_updated_column = array('column' => 'modified', 'format' => 'Y-m-d H:i:s');
 
-	/**
-   * Validates a user when the record is modified.
+   /**
+    * Validates a user when the record is modified.
     *
-   * Different rules are needed (e.g. the email and username do not need to be new, just unique to this user).
+    * Different rules are needed (e.g. the email and username do not need to be new, just unique to this user).
     *
-   * Unobtrusive: we setup the _validate value (see ORM) with custom values, then just run check().
-   * Should not require further changes to surrounding code.
+    * Unobtrusive: we setup the _validate value (see ORM) with custom values, then just run check().
+    * Should not require further changes to surrounding code.
     * 
     * @param $array An array of fields for the user record.
     * @return Validate Validation object, call check() on the return value to validate.
@@ -86,9 +86,13 @@ class Model_Useradmin_User extends Model_Auth_User {
     * @return boolean
     */
    public function login(array & $array, $redirect = FALSE) {
+      // This is what core Auth does to allow both email and username logins
+      $fieldname = (Validate::email($array['username']) ? 'email' : 'username');
       $array = Validate::factory($array)
+         ->label('username', $this->_labels[$fieldname])
+         ->label('password', $this->_labels['password'])
          ->filter(TRUE, 'trim')
-         ->rules('username', $this->_rules['username'])
+         ->rules('username', $this->_rules[$fieldname])
          ->rules('password', $this->_rules['password']);
 
       // Login starts out invalid
@@ -96,7 +100,7 @@ class Model_Useradmin_User extends Model_Auth_User {
 
       if ($array->check()) {
          // Attempt to load the user
-         $this->where('username', '=', $array['username'])->find();
+         $this->where($fieldname, '=', $array['username'])->find();
 
 /* Note: failed_login_count and last_failed_login do not exist in the default schema, so it is disabled here. failed_login_count is a int field, and last_failed_login is a datetime field.
  *
