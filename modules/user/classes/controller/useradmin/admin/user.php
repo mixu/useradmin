@@ -82,6 +82,10 @@ class Controller_Useradmin_Admin_User extends Controller_App {
             $model = ORM::factory('user');
          }
          unset($_POST['id']);
+         if(empty($_POST['password']) || empty($_POST['password_confirm'])) {
+            // force unsetting the password! Otherwise Kohana3 will automatically hash the empty string - preventing logins
+            unset($_POST['password'], $_POST['password_confirm']);            
+         }         
          $model->values($_POST);
          // since we combine both editing and creating here we need a separate variable
          // you can get rid of it if your actions don't need to do that
@@ -122,7 +126,7 @@ class Controller_Useradmin_Admin_User extends Controller_App {
       }
 
       // if an ID is set, load the information
-      if(empty($_POST) && is_numeric($id)) {
+      if(is_numeric($id)) {
          // instantiatiate a new model
          $model = ORM::factory('user', $id);
          $view->set('data', $model->as_array());

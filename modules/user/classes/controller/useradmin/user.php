@@ -89,16 +89,17 @@ class Controller_Useradmin_User extends Controller_App {
 
       // save the data
       if ( !empty($_POST) && is_numeric($id) ) {
-         $model = null;
-         // Load the validation rules, filters etc...
-         $model = ORM::factory('user', $id);
+         if(empty($_POST['password']) || empty($_POST['password_confirm'])) {
+            // force unsetting the password! Otherwise Kohana3 will automatically hash the empty string - preventing logins
+            unset($_POST['password'], $_POST['password_confirm']);            
+         }
          // editing requires that the username and email do not exist (EXCEPT for this ID)
-         $model->values($_POST);
+         $user->values($_POST);
 
          // If the post data validates using the rules setup in the user model
-         if ($model->check_edit()) {
+         if ($user->check_edit()) {
             // save first, so that the model has an id when the relationships are added
-            $model->save();
+            $user->save();
             // message: save success
             Message::add('success', __('Values saved.'));
             // redirect and exit
@@ -110,17 +111,16 @@ class Controller_Useradmin_User extends Controller_App {
             Message::add('error', __('Error: Values could not be saved.'));
             $view->set('errors', $user->validate()->errors('register'));
             // Pass on the old form values
-            $model->password = $model->password_confirm = '';
-            $view->set('data', $model->as_array());
+            $user->password = $user->password_confirm = '';
+            $view->set('data', $user->as_array());
          }
       } else {
          // load the information for viewing
-         $model = ORM::factory('user', $id);
-         $view->set('data', $model->as_array());
+         $view->set('data', $user->as_array());
       }
       // retrieve roles into array
       $roles = array();
-      foreach($model->roles->find_all() as $role) {
+      foreach($user->roles->find_all() as $role) {
           $roles[$role->name] = $role->description;
        }
       $view->set('user_roles', $roles);
@@ -338,18 +338,17 @@ class Controller_Useradmin_User extends Controller_App {
   function action_change_password() {
       // set the template title (see Controller_App for implementation)
       $this->template->title = __('Change password');
-      $id = Auth::instance()->get_user()->id;
+      $user = Auth::instance()->get_user();
+      $id = $user->id;
       // load the content from view
       $view = View::factory('user/change_password');
 
       // save the data
       if ( !empty($_POST) && is_numeric($id) ) {
-         // Load the validation rules, filters etc...
-         $model = ORM::factory('user', $id);
          // editing requires that the username and email do not exist (EXCEPT for this ID)
          // If the post data validates using the rules setup in the user model
          $param_by_ref = array('password' => $_POST['password'], 'password_confirm' => $_POST['password_confirm']);
-         $validate = $model->change_password($param_by_ref, FALSE);
+         $validate = $user->change_password($param_by_ref, FALSE);
          if ($validate) {
             // message: save success
             Message::add('success', __('Values saved.'));
@@ -366,8 +365,7 @@ class Controller_Useradmin_User extends Controller_App {
          }
       } else {
          // load the information for viewing
-         $model = ORM::factory('user', $id);
-         $view->set('data', $model->as_array());
+         $view->set('data', $user->as_array());
       }
       $this->template->content = $view;
   }
