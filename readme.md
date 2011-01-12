@@ -1,8 +1,20 @@
+TUTORIAL
+========
+
+Most recent, detailed tutorial:
+http://blog.mixu.net/2011/01/13/getting-started-with-useradmin-my-kohana-3-auth-admin-module/
+
+Earlier writing about Kohana auth:
+http://blog.mixu.net/2010/09/14/kohana-3-auth-sample-implementation-and-documentation/
+http://blog.mixu.net/2010/09/07/kohana-3-auth-the-auth-module-functionality/
+http://blog.mixu.net/2010/09/06/step-by-step-guide-to-kohana-3-auth/
+
 LICENCE (Simplified BSD licence)
 =======
 
-NOTE: This licence applies to the useradmin module only, as written by Mikito Takada (found under /modules/user/). Different licences may apply to
-the other modules in this repository and the Kohana 3 core.
+NOTE: This licence applies to the useradmin module only, as written by Mikito
+Takada (found under /modules/user/). Different licences may apply to the other
+modules in this repository and the Kohana 3 core.
 
 Please consult a lawyer if you need legal advice.
 
