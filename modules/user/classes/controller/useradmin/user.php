@@ -11,10 +11,15 @@
 class Controller_Useradmin_User extends Controller_App {
 
    /**
+    * @var string Filename of the template file.
+    */
+   public $template = 'template/useradmin';
+
+   /**
     * Controls access for the whole controller, if not set to FALSE we will only allow user roles specified.
     *
     * See Controller_App for how this implemented.
-    * 
+    *
     * Can be set to a string or an array, for example array('login', 'admin') or 'login'
     */
    public $auth_required = FALSE;
@@ -91,7 +96,7 @@ class Controller_Useradmin_User extends Controller_App {
       if ( !empty($_POST) && is_numeric($id) ) {
          if(empty($_POST['password']) || empty($_POST['password_confirm'])) {
             // force unsetting the password! Otherwise Kohana3 will automatically hash the empty string - preventing logins
-            unset($_POST['password'], $_POST['password_confirm']);            
+            unset($_POST['password'], $_POST['password_confirm']);
          }
          // editing requires that the username and email do not exist (EXCEPT for this ID)
          $user->values($_POST);
@@ -149,7 +154,7 @@ class Controller_Useradmin_User extends Controller_App {
          // load values from $_POST
          $user->values($_POST);
 
-         // REQUEST: If you do implement CAPTCHA for registration, send me the code so I can publish it. 
+         // REQUEST: If you do implement CAPTCHA for registration, send me the code so I can publish it.
 
          // If the post data validates using the rules setup in the user model
          if ($user->check()) {
@@ -186,7 +191,7 @@ class Controller_Useradmin_User extends Controller_App {
       }
       // get the user id
       $id = Auth::instance()->get_user()->id;
-      $user = ORM::factory('user', $id);      
+      $user = ORM::factory('user', $id);
       // KO3 ORM is lazy loading, which means we have to access a single field to actually have something happen.
       if($user->id != $id) {
          // If the user is not the current user, redirect
@@ -219,10 +224,10 @@ class Controller_Useradmin_User extends Controller_App {
          // redirect to the user account
          Request::instance()->redirect('user/profile');
       }
-      $content = $this->template->content = View::factory('user/login');
+      $view = View::factory('user/login');
       // allow setting the username as a get param
       if(isset($_GET['username'])) {
-         $content->set('username', Security::xss_clean($_GET['username']));
+         $view->set('username', Security::xss_clean($_GET['username']));
       }
 
       // If there is a post and $_POST is not empty
@@ -240,9 +245,11 @@ class Controller_Useradmin_User extends Controller_App {
             Request::instance()->redirect('user/profile');
          } else {
             // Get errors for display in view
-            $content->set('errors', $_POST->errors('login'));
+            $view->set('errors', $_POST->errors('login'));
          }
       }
+      $view->set('facebook_enabled', Kohana::config('useradmin')->facebook);
+      $this->template->content = $view;
    }
 
    /**
@@ -260,6 +267,11 @@ class Controller_Useradmin_User extends Controller_App {
     * A basic implementation of the "Forgot password" functionality
     */
    public function action_forgot() {
+      // Password reset must be enabled in config/useradmin.php
+      if(!Kohana::config('useradmin')->email) {
+         Message::add('error', 'Password reset via email is not enabled. Please contact the site administrator to reset your password.');
+         Request::instance()->redirect('user/register');
+      }
       // set the template title (see Controller_App for implementation)
       $this->template->title = __('Forgot password');
       if(isset($_POST['reset_email'])) {
@@ -281,7 +293,7 @@ class Controller_Useradmin_User extends Controller_App {
             // MUST PASS ALL PARAMS AS REFS
             $subject = __('Account password reset');
             $to = $_POST['reset_email'];
-            $from = 'admin@test.example';
+            $from = Kohana::config('useradmin')->email_address;
             $body =  __($message, array(
                 ':reset_token_link' => URL::site('user/reset?reset_token='.$user->reset_token.'&reset_email='.$_POST['reset_email'], TRUE),
                 ':reset_link' => URL::site('user/reset', TRUE),
@@ -310,14 +322,21 @@ class Controller_Useradmin_User extends Controller_App {
     * A basic version of "reset password" functionality.
     */
   function action_reset() {
+      // Password reset must be enabled in config/useradmin.php
+      if(!Kohana::config('useradmin')->email) {
+         Message::add('error', 'Password reset via email is not enabled. Please contact the site administrator to reset your password.');
+         Request::instance()->redirect('user/register');
+      }
       // set the template title (see Controller_App for implementation)
       $this->template->title = __('Reset password');
       if(isset($_REQUEST['reset_token']) && isset($_REQUEST['reset_email'])) {
          // make sure that the reset_token has exactly 32 characters (not doing that would allow resets with token length 0)
          if( (strlen($_REQUEST['reset_token']) == 32) && (strlen(trim($_REQUEST['reset_email'])) > 1) ) {
             $user = ORM::factory('user')->where('email', '=', $_REQUEST['reset_email'])->and_where('reset_token', '=', $_REQUEST['reset_token'])->find();
-            // admin passwords cannot be reset by email
-            if (is_numeric($user->id) && ($user->reset_token == $_REQUEST['reset_token']) && ($user->username != 'admin')) {
+            // The admin password cannot be reset by email
+            if ($user->username == 'admin') {
+               Message::add('failure', __('The admin password cannot be reset by email.'));
+            } else if (is_numeric($user->id) && ($user->reset_token == $_REQUEST['reset_token'])) {
                $password = $user->generate_password();
                $user->password = $password;
 // This field does not exist in the default config:
@@ -369,11 +388,16 @@ class Controller_Useradmin_User extends Controller_App {
       }
       $this->template->content = $view;
   }
- 
+
   /**
    * Allow the user to login using Facebook
    */
-   function action_fb_login() {      
+   function action_fb_login() {
+      // Facebook login must be enabled in config/useradmin.php
+      if(!Kohana::config('useradmin')->facebook) {
+         Message::add('error', 'Facebook login is not enabled. Please register below.');
+         Request::instance()->redirect('user/register');
+      }
       include Kohana::find_file('vendor', 'facebook/src/facebook');
       // Create our Facebook SDK instance.
       $facebook = new Facebook(
@@ -389,13 +413,13 @@ class Controller_Useradmin_User extends Controller_App {
          try {
             $uid = $facebook->getUser();
             // read user info as array from Graph API
-            $me = $facebook->api('/me');          
+            $me = $facebook->api('/me');
          } catch (FacebookApiException $e) {
             // do nothing
-         }        
+         }
       }
       // check if user is logged in
-      $user = ORM::factory('user')->where('facebook_user_id', '=', $facebook->getUser())->find();           
+      $user = ORM::factory('user')->where('facebook_user_id', '=', $facebook->getUser())->find();
       if(is_numeric($user->id) && ($user->id != '0')) {
          // found, log user in
          Auth_ORM::instance()->force_login($user);
@@ -409,13 +433,13 @@ class Controller_Useradmin_User extends Controller_App {
          // search for existing user using email
          $user = ORM::factory('user')->where('email', '=', $me['email'])->find();
          if(is_numeric($user->id) && ($user->id != '0')) {
-            // Note: there is minor security issue here - we trust the email supplied by Facebook         
+            // Note: there is minor security issue here - we trust the email supplied by Facebook
             // They do perform a verification check for email addresses... and the data is signed.
             // Hence this is not really a problem; I bet most of the implementations do trust Facebook.
-            // If you want, you can ask the user to enter their password to confirm, but it's 
+            // If you want, you can ask the user to enter their password to confirm, but it's
             // a bit clunky - and adds more special cases like what if they don't remember the password?
             // Then you have to allow them to reset the password using their email ....
-            Message::add('success', __('We found an existing account using your email address.'));        
+            Message::add('success', __('We found an existing account using your email address.'));
             // found: "merge" with the existing user
             $user->facebook_user_id = $facebook->getUser();
             $user->save();
@@ -424,9 +448,9 @@ class Controller_Useradmin_User extends Controller_App {
             // redirect to the user account
             Request::instance()->redirect('user/profile');
             return;
-         } 
+         }
       }
-     
+
       // not found: create a new user for real
       if($me != NULL) {
          // Instantiate a new user
@@ -440,10 +464,10 @@ class Controller_Useradmin_User extends Controller_App {
              'facebook_user_id' => $facebook->getUser(),
              'password' => $password,
              'password_confirm' => $password,
-         );         
+         );
          if(Validate::email($me['email'], TRUE)) {
             $values['email'] = $me['email'];
-         }         
+         }
          $user->values($values);
          // If the post data validates using the rules setup in the user model
          if ($user->check()) {
@@ -457,15 +481,16 @@ class Controller_Useradmin_User extends Controller_App {
             // redirect to the user account
             Request::instance()->redirect('user/profile');
          } else {
-            // in case the data for some reason fails, the user will still see something sensible: 
+            // in case the data for some reason fails, the user will still see something sensible:
             // the normal registration form.
             // Load the view
-            $content = $this->template->content = View::factory('user/register');
+            $view = View::factory('user/register');
             // Note how the first param is the path to the message file (e.g. /messages/register.php)
-            $content->errors = $user->validate()->errors('register');
+            $view->errors = $user->validate()->errors('register');
             // Pass on the old form values
             $values['password'] = $values['password_confirm'] = '';
-            $content->set('defaults', $values);
+            $view->set('defaults', $values);
+            $this->template->content = $view;
          }
       } else {
          Message::add('error', 'Retrieving information from Facebook failed. Please register below.');

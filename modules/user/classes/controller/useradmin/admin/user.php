@@ -11,6 +11,11 @@
 class Controller_Useradmin_Admin_User extends Controller_App {
 
    /**
+    * @var string Filename of the template file.
+    */
+   public $template = 'template/useradmin';
+
+   /**
     * Controls access for the whole controller, if not set to FALSE we will only allow user roles specified.
     *
     * See Controller_App for how this implemented.
@@ -84,8 +89,8 @@ class Controller_Useradmin_Admin_User extends Controller_App {
          unset($_POST['id']);
          if(empty($_POST['password']) || empty($_POST['password_confirm'])) {
             // force unsetting the password! Otherwise Kohana3 will automatically hash the empty string - preventing logins
-            unset($_POST['password'], $_POST['password_confirm']);            
-         }         
+            unset($_POST['password'], $_POST['password_confirm']);
+         }
          $model->values($_POST);
          // since we combine both editing and creating here we need a separate variable
          // you can get rid of it if your actions don't need to do that
