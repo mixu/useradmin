@@ -61,12 +61,8 @@ CREATE TABLE IF NOT EXISTS `roles_users` (
 --
 
 INSERT INTO `roles_users` (`user_id`, `role_id`) VALUES
-(2, 1),
-(3, 1),
-(5, 1),
-(6, 1),
-(3, 2),
-(5, 2);
+(1, 1),
+(1, 2);
 
 -- --------------------------------------------------------
 
@@ -102,6 +98,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `email` varchar(127) NOT NULL,
   `username` varchar(32) NOT NULL DEFAULT '',
   `password` char(50) NOT NULL,
+  `facebook_user_id` BIGINT( 20 ) NULL,
   `logins` int(10) unsigned NOT NULL DEFAULT '0',
   `last_login` int(10) unsigned DEFAULT NULL,
   `reset_token` char(64) NOT NULL,
@@ -113,17 +110,14 @@ CREATE TABLE IF NOT EXISTS `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_username` (`username`),
   UNIQUE KEY `uniq_email` (`email`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=7 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
 --
 -- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `email`, `username`, `password`, `logins`, `last_login`) VALUES
-(2, 'test@example.test', 'test1', 'cb3c87c984e2ec8120239c2f7d3dcbaef0cfa17abe89087c9a', 1, 1267016719),
-(3, 'test2@test.com', 'admin', '368ae03c1b3b29b8d242bc43dcbe3f0bd4755ea181adbd22ef', 12, 1277647337),
-(5, 'test5@test.com', 'test4', '6a882ec308cf074da97a407e0da220c1e2064ffe8500b8e7a0', 0, NULL),
-(6, 'test4@test.com', 'test5', '1c9b0fd3402a7b7ecdc47d34625dcf128de52c52b9b2524cbd', 0, NULL);
+(1, 'test2@test.com', 'admin', '368ae03c1b3b29b8d242bc43dcbe3f0bd4755ea181adbd22ef', 0, NULL);
 
 --
 -- Constraints for dumped tables

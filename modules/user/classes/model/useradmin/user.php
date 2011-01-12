@@ -7,7 +7,7 @@ class Model_Useradmin_User extends Model_Auth_User {
    protected $_table_name = 'users';
    protected $_has_many = array(
       // auth
-      'roles' => array('through' => 'roles_users'), 
+      'roles' => array('through' => 'roles_users'),
       'user_tokens' => array(),
       );
    protected $_has_one= array(
@@ -33,7 +33,7 @@ class Model_Useradmin_User extends Model_Auth_User {
     *
     * Unobtrusive: we setup the _validate value (see ORM) with custom values, then just run check().
     * Should not require further changes to surrounding code.
-    * 
+    *
     * @param $array An array of fields for the user record.
     * @return Validate Validation object, call check() on the return value to validate.
     */
@@ -50,7 +50,7 @@ class Model_Useradmin_User extends Model_Auth_User {
                   ->filter('email', 'trim')
                   ->filter('password', 'trim')
                   ->filter('password_confirm', 'trim');
-      // if the password is set, then validate it 
+      // if the password is set, then validate it
       // Note: the password field is always set if the model was loaded from DB (since there is a DB value for it)
       // So we will check for the password_confirm field instead.
       if(isset($values['password_confirm']) && (trim($values['password_confirm']) != '')) {
@@ -58,11 +58,11 @@ class Model_Useradmin_User extends Model_Auth_User {
                   ->label('password', $this->_labels['password'])
                   ->label('password_confirm', $this->_labels['password_confirm'])
                   ->rules('password', $this->_rules['password'])
-                    ->rules('password_confirm', $this->_rules['password_confirm']);
-      } 
+                  ->rules('password_confirm', $this->_rules['password_confirm']);
+      }
 
       // Since new versions of Kohana automatically exclude the current user from the uniqueness checks,
-      // we no longer need to define our own callbacks. 
+      // we no longer need to define our own callbacks.
       foreach ($this->_callbacks as $field => $callbacks) {
          foreach ($callbacks as $callback) {
             if (is_string($callback) AND method_exists($this, $callback)) {
@@ -140,7 +140,7 @@ class Model_Useradmin_User extends Model_Auth_User {
       }
       return $status;
    }
-   
+
    /**
     * Generates a password of given length using mt_rand.
     * @param int $length
@@ -163,7 +163,7 @@ class Model_Useradmin_User extends Model_Auth_User {
       }
       return $password;
    }
-   
+
    /**
     * Transcribe name to ASCII
     * @param string $string
@@ -177,11 +177,11 @@ class Model_Useradmin_User extends Model_Auth_User {
     $string = preg_replace("/([^a-z0-9\.]+)/", "", strtolower($string));
     return($string);
    }
-   
+
    /**
     * Given a string, this function will try to find an unused username by appending a number.
     * Ex. username2, username3, username4 ...
-    * 
+    *
     * @param string $base
     */
    function generate_username($base = '') {

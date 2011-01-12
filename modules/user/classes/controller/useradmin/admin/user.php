@@ -86,11 +86,12 @@ class Controller_Useradmin_Admin_User extends Controller_App {
             // CREATE: do not specify id
             $model = ORM::factory('user');
          }
-         unset($_POST['id']);
          if(empty($_POST['password']) || empty($_POST['password_confirm'])) {
             // force unsetting the password! Otherwise Kohana3 will automatically hash the empty string - preventing logins
             unset($_POST['password'], $_POST['password_confirm']);
          }
+         // you can't change your user id or facebook id
+         unset($_POST['id'], $_POST['facebook_user_id']);
          $model->values($_POST);
          // since we combine both editing and creating here we need a separate variable
          // you can get rid of it if your actions don't need to do that
