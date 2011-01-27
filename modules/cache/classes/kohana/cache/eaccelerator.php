@@ -30,8 +30,8 @@
  * *  PHP 5.2.4 or greater
  * *  Eaccelerator PHP extension
  * 
- * @package    Kohana
- * @category   Cache
+ * @package    Kohana/Cache
+ * @category   Base
  * @author     Kohana Team
  * @copyright  (c) 2009-2010 Kohana Team
  * @license    http://kohanaphp.com/license

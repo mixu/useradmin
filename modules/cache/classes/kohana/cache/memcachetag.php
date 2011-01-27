@@ -2,8 +2,8 @@
 /**
  * See [Kohana_Cache_Memcache]
  * 
-* @package    Kohana
-* @category   Cache
+* @package    Kohana/Cache
+* @category   Base
 * @version    2.0
 * @author     Kohana Team
 * @copyright  (c) 2009-2010 Kohana Team
@@ -19,12 +19,12 @@ class Kohana_Cache_MemcacheTag extends Cache_Memcache implements Kohana_Cache_Ta
 	 */
 	protected function __construct(array $config)
 	{
+		parent::__construct($config);
+
 		if ( ! method_exists($this->_memcache, 'tag_add'))
 		{
 			throw new Kohana_Cache_Exception('Memcached-tags PHP plugin not present. Please see http://code.google.com/p/memcached-tags/ for more information');
 		}
-
-		parent::__construct($config);
 	}
 
 	/**

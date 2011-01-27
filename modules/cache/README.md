@@ -15,6 +15,7 @@ Currently this module supports the following cache methods.
 5. SQLite (Supports tags)
 6. File
 7. Xcache
+8. Wincache
 
 Planned support
 ---------------

@@ -46,6 +46,11 @@ return array
 		'driver'             => 'apc',
 		'default_expire'     => 3600,
 	),
+	'wincache' => array
+	(
+		'driver'             => 'wincache',
+		'default_expire'     => 3600,
+	),
 	'sqlite'   => array
 	(
 		'driver'             => 'sqlite',

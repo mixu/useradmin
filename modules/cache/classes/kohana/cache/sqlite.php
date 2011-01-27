@@ -4,8 +4,8 @@
  * 
  * Requires SQLite3 and PDO
  * 
- * @package    Kohana
- * @category   Cache
+ * @package    Kohana/Cache
+ * @category   Base
  * @author     Kohana Team
  * @copyright  (c) 2009-2010 Kohana Team
  * @license    http://kohanaphp.com/license
@@ -195,16 +195,16 @@ class Kohana_Cache_Sqlite extends Cache implements Kohana_Cache_Tagging, Kohana_
 		$data = serialize($data);
 
 		// Normalise tags
-		$tags = (NULL === $tags) ? NULL : '<'.implode('>,<', $tags).'>';
+		$tags = (NULL === $tags) ? NULL : ('<'.implode('>,<', $tags).'>');
 
 		// Setup lifetime
 		if ($lifetime === NULL)
 		{
-			$lifetime = (0 === Arr::get('default_expire', NULL)) ? 0 : Arr::get($this->_config, 'default_expire', Cache::DEFAULT_EXPIRE) + time();
+			$lifetime = (0 === Arr::get('default_expire', NULL)) ? 0 : (Arr::get($this->_config, 'default_expire', Cache::DEFAULT_EXPIRE) + time());
 		}
 		else
 		{
-			$lifetime = (0 === $lifetime) ? 0 : $lifetime + time();
+			$lifetime = (0 === $lifetime) ? 0 : ($lifetime + time());
 		}
 
 		// Prepare statement

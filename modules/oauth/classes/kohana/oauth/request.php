@@ -60,6 +60,11 @@ class Kohana_OAuth_Request {
 	protected $params = array();
 
 	/**
+	 * @var  array  upload parameters
+	 */
+	protected $upload = array();
+
+	/**
 	 * @var  array  required parameters
 	 */
 	protected $required = array();
@@ -181,7 +186,7 @@ class Kohana_OAuth_Request {
 		$url = $this->url;
 
 		// Get the request parameters
-		$params = $this->params;
+		$params = array_diff_key($this->params, $this->upload);
 
 		// "oauth_signature" is never included in the base string!
 		unset($params['oauth_signature']);
@@ -203,9 +208,6 @@ class Kohana_OAuth_Request {
 	 *     // Get the "oauth_consumer_key" value
 	 *     $key = $request->param('oauth_consumer_key');
 	 *
-	 *     // Remove "oauth_consumer_key"
-	 *     $request->param('oauth_consumer_key', NULL);
-	 *
 	 * @param   string   parameter name
 	 * @param   mixed    parameter value
 	 * @param   boolean  allow duplicates?
@@ -215,35 +217,27 @@ class Kohana_OAuth_Request {
 	 */
 	public function param($name, $value = NULL, $duplicate = FALSE)
 	{
-		if (func_num_args() < 2)
+		if ($value === NULL)
 		{
 			// Get the parameter
 			return Arr::get($this->params, $name);
 		}
 
-		if ($value === NULL)
+		if (isset($this->params[$name]) AND $duplicate)
 		{
-			// Remove the parameter
-			unset($this->params[$name]);
+			if ( ! is_array($this->params[$name]))
+			{
+				// Convert the parameter into an array
+				$this->params[$name] = array($this->params[$name]);
+			}
+
+			// Add the duplicate value
+			$this->params[$name][] = $value;
 		}
 		else
 		{
-			if (isset($this->params[$name]) AND $duplicate)
-			{
-				if ( ! is_array($this->params[$name]))
-				{
-					// Convert the parameter into an array
-					$this->params[$name] = array($this->params[$name]);
-				}
-
-				// Add the duplicate value
-				$this->params[$name][] = $value;
-			}
-			else
-			{
-				// Set the parameter value
-				$this->params[$name] = $value;
-			}
+			// Set the parameter value
+			$this->params[$name] = $value;
 		}
 
 		return $this;
@@ -270,6 +264,38 @@ class Kohana_OAuth_Request {
 	}
 
 	/**
+	 * Upload getter and setter. Setting the value to `NULL` will remove it.
+	 *
+	 *     // Set the "image" file path for uploading
+	 *     $request->upload('image', $file_path);
+	 *
+	 *     // Get the "image" file path
+	 *     $key = $request->param('oauth_consumer_key');
+	 *
+	 * @param   string   upload name
+	 * @param   mixed    upload file path
+	 * @return  mixed    when getting
+	 * @return  $this    when setting
+	 * @uses    OAuth_Request::param
+	 */
+	public function upload($name, $value = NULL)
+	{
+		if ($value !== NULL)
+		{
+			// This is an upload parameter
+			$this->upload[$name] = TRUE;
+
+			// Get the mime type of the image
+			$mime = File::mime($value);
+
+			// Format the image path for CURL
+			$value = "@{$value};type={$mime}";
+		}
+
+		return $this->param($name, $value, FALSE);
+	}
+
+	/**
 	 * Get and set required parameters.
 	 *
 	 *     $request->required($field, $value);
@@ -283,6 +309,7 @@ class Kohana_OAuth_Request {
 	{
 		if ($value === NULL)
 		{
+			// Get the current status
 			return ! empty($this->required[$param]);
 		}
 
@@ -326,16 +353,25 @@ class Kohana_OAuth_Request {
 	 *
 	 * [!!] This method implements [OAuth 1.0 Spec 5.2 (2,3)](http://oauth.net/core/1.0/#rfc.section.5.2).
 	 *
-	 * @param   boolean   include oauth parameters
+	 * @param   boolean   include oauth parameters?
+	 * @param   boolean   return a normalized string?
 	 * @return  string
 	 */
-	public function as_query($include_oauth = NULL)
+	public function as_query($include_oauth = NULL, $as_string = TRUE)
 	{
-		if ($include_oauth !== TRUE AND $this->send_header)
+		if ($include_oauth === NULL)
 		{
 			// If we are sending a header, OAuth parameters should not be
 			// included in the query string.
+			$include_oauth = ! $this->send_header;
+		}
 
+		if ($include_oauth)
+		{
+			$params = $this->params;
+		}
+		else
+		{
 			$params = array();
 			foreach ($this->params as $name => $value)
 			{
@@ -346,12 +382,8 @@ class Kohana_OAuth_Request {
 				}
 			}
 		}
-		else
-		{
-			$params = $this->params;
-		}
 
-		return OAuth::normalize_params($params);
+		return $as_string ? OAuth::normalize_params($params) : $params;
 	}
 
 	/**
@@ -422,7 +454,6 @@ class Kohana_OAuth_Request {
 	/**
 	 * Execute the request and return a response.
 	 *
-	 * @param   string   request type: GET, POST, etc (NULL for header)
 	 * @param   array    additional cURL options
 	 * @return  string   request response body
 	 * @uses    OAuth_Request::check
@@ -460,7 +491,7 @@ class Kohana_OAuth_Request {
 			// Send the request as a POST
 			$options[CURLOPT_POST] = TRUE;
 
-			if ($post = $this->as_query())
+			if ($post = $this->as_query(NULL, empty($this->upload)))
 			{
 				// Attach the post fields to the request
 				$options[CURLOPT_POSTFIELDS] = $post;

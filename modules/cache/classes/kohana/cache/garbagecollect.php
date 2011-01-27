@@ -4,8 +4,8 @@
  * of their own, such as [Cache_File] and [Cache_Sqlite]. Memory based
  * cache systems clean their own caches periodically.
  *
- * @package    Kohana
- * @category   Cache
+ * @package    Kohana/Cache
+ * @category   Base
  * @version    2.0
  * @author     Kohana Team
  * @copyright  (c) 2009-2010 Kohana Team

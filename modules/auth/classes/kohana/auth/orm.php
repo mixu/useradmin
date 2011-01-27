@@ -4,8 +4,8 @@
  *
  * @package    Kohana/Auth
  * @author     Kohana Team
- * @copyright  (c) 2007-2008 Kohana Team
- * @license    http://kohanaphp.com/license.html
+ * @copyright  (c) 2007-2010 Kohana Team
+ * @license    http://kohanaframework.org/license
  */
 class Kohana_Auth_ORM extends Auth {
 
@@ -13,9 +13,10 @@ class Kohana_Auth_ORM extends Auth {
 	 * Checks if a session is active.
 	 *
 	 * @param   mixed    role name string, role ORM object, or array with role names
+	 * @param   boolean  check user for every role applied (TRUE, by default) or if any?
 	 * @return  boolean
 	 */
-	public function logged_in($role = NULL)
+	public function logged_in($role = NULL, $all_required = TRUE)
 	{
 		$status = FALSE;
 
@@ -32,6 +33,9 @@ class Kohana_Auth_ORM extends Auth {
 				// Multiple roles to check
 				if (is_array($role))
 				{
+					// set initial status
+					$status = (bool) $all_required;
+
 					// Check each role
 					foreach ($role as $_role)
 					{
@@ -45,6 +49,14 @@ class Kohana_Auth_ORM extends Auth {
 						{
 							// Set the status false and get outta here
 							$status = FALSE;
+							if ($all_required)
+							{
+								break;
+							}
+						}
+					   elseif ( ! $all_required )
+					   {
+						   $status = TRUE;
 							break;
 						}
 					}
@@ -91,16 +103,7 @@ class Kohana_Auth_ORM extends Auth {
 		{
 			if ($remember === TRUE)
 			{
-				// Create a new autologin token
-				$token = ORM::factory('user_token');
-
-				// Set token data
-				$token->user_id = $user->id;
-				$token->expires = time() + $this->_config['lifetime'];
-				$token->save();
-
-				// Set the autologin cookie
-				Cookie::set('authautologin', $token->token, $this->_config['lifetime']);
+				$this->remember($user);
 			}
 
 			// Finish the login
@@ -134,7 +137,7 @@ class Kohana_Auth_ORM extends Auth {
 		if ($mark_session_as_forced === TRUE)
 		{
 			// Mark the session as forced, to prevent users from changing account information
-			$this->_session->set('auth_forced', TRUE);
+			$this->_session->set($this->_config['forced_key'], TRUE);
 		}
 
 		// Run the standard completion
@@ -148,7 +151,7 @@ class Kohana_Auth_ORM extends Auth {
 	 */
 	public function auto_login()
 	{
-		if ($token = Cookie::get('authautologin'))
+		if ($token = Cookie::get($this->_config['autologin_key']))
 		{
 			// Load the token and user
 			$token = ORM::factory('user_token', array('token' => $token));
@@ -161,7 +164,7 @@ class Kohana_Auth_ORM extends Auth {
 					$token->save();
 
 					// Set the new token
-					Cookie::set('authautologin', $token->token, $token->expires - time());
+					Cookie::set($this->_config['autologin_key'], $token->token, $token->expires - time());
 
 					// Complete the login with the found data
 					$this->complete_login($token->user);
@@ -207,12 +210,12 @@ class Kohana_Auth_ORM extends Auth {
 	public function logout($destroy = FALSE, $logout_all = FALSE)
 	{
 		// Set by force_login()
-		$this->_session->delete('auth_forced');
+		$this->_session->delete($this->_config['forced_key']);
 
-		if ($token = Cookie::get('authautologin'))
+		if ($token = Cookie::get($this->_config['autologin_key']))
 		{
 			// Delete the autologin cookie to prevent re-login
-			Cookie::delete('authautologin');
+			Cookie::delete($this->_config['autologin_key']);
 
 			// Clear the autologin token from the database
 			$token = ORM::factory('user_token', array('token' => $token));
@@ -283,6 +286,37 @@ class Kohana_Auth_ORM extends Auth {
 		$hash = $this->hash_password($password, $this->find_salt($user->password));
 
 		return $hash == $user->password;
+	}
+
+	/**
+	 * Remember user (create token and save it in cookie)
+	 *
+	 * @param  Model_User  $user
+	 * @return boolean
+	 */
+	public function remember($user = NULL)
+	{
+		if (is_null($user))
+		{
+			$user = $this->get_user();
+		}
+		if ( ! $user)
+		{
+			return FALSE;
+		}
+
+		// Create a new autologin token
+		$token = ORM::factory('user_token');
+
+		// Set token data
+		$token->user_id = $user->id;
+		$token->expires = time() + $this->_config['lifetime'];
+		$token->save();
+
+		// Set the autologin cookie
+		Cookie::set($this->_config['autologin_key'], $token->token, $this->_config['lifetime']);
+
+		return TRUE;
 	}
 
 } // End Auth ORM

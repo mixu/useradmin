@@ -14,7 +14,7 @@ return array(
 			'name' => 'OAuth',
 
 			// A short description of this module, shown on the index page
-			'description' => 'Official OAuth module, used for open protocol authorization.',
+			'description' => 'Open protocol authorization.',
 			
 			// Copyright message, shown in the footer for this module
 			'copyright' => '&copy; 2008–2010 Kohana Team',
