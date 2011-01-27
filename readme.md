@@ -18,12 +18,12 @@ I would like to thank [jnbdz](https://bitbucket.org/jnbdz/useradmin/) for adding
 
 CHANGELOG
 =========
-Jan 28th 2010:
+Jan 28th 2011:
 
 * Added reCaptcha support (captcha on registration)
 * Upgraded to Kohana v3.0.9
 
-Jan 12th 2010: Pushed out new version with following improvements:
+Jan 12th 2011: Pushed out new version with following improvements:
 
 * Facebook login! Yes, you can now have users register and log in using their Facebook account.
 * New tutorial! I tried to go through everything necessary to get started with the module, see this new post.
