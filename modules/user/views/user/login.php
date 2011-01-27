@@ -20,7 +20,7 @@ echo '<li>'.$form->label('password', __('Password')).'</li>';
 echo $form->password('password');
 echo '</ul>';
 echo $form->submit(NULL, __('Login'));
-echo '<small>'.' '.Html::anchor('user/forgot', __('Forgot your password?')).'<br></small>';
+echo '<small> '.Html::anchor('user/forgot', __('Forgot your password?')).'<br></small>';
 echo $form->close();
 echo '</td><td width="22">&nbsp;</td><td style="vertical-align: top;"><div id="fb-root"></div>';
 echo '<ul>';
@@ -53,7 +53,7 @@ if($facebook_enabled) {
     // since login() redirects to profile if the user is logged in
    FB.getLoginStatus(function(response) {
      if (response.status == 'connected') {
-        document.getElementById('fb-login-li').innerHTML = '<a href="<?php echo URL::site('/user/fb_login') ?>"><img src="/img/fb-login.png"></a>';
+        document.getElementById('fb-login-li').innerHTML = '<a href="<?php echo URL::site('/user/fb_login') ?>"><img src="/img/fb-login.png" alt="Facebook Login" /></a>';
      } else {
         document.getElementById('fb-login-li').innerHTML = '<fb:login-button perms="email" size="large"><?php echo __('Login / Register with Facebook')?></fb:login-button>';
         FB.XFBML.parse(document.getElementById('fb-login-li'));

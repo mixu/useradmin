@@ -2,5 +2,4 @@ syntax: regexp
 ^application/cache
 ^application/logs
 ^nbproject
-^modules/user/config/facebook.php
 

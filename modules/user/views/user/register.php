@@ -3,7 +3,7 @@
 
 <p><?php echo __('Fill in the information below to register.'); ?></p>
 
-<?php 
+<?php
 $form = new Appform();
 if(isset($errors)) {
    $form->errors = $errors;
@@ -27,6 +27,12 @@ echo $form->open('user/register');
    <?php echo $form->password('password', null, array('info' => __('Password should be between 6-42 characters.'))) ?>
    <li><label><?php echo __('Re-type Password'); ?></label></li>
    <?php echo $form->password('password_confirm') ?>
+   <?php if(isset($captcha_enabled) && $captcha_enabled) { ?>
+   <li>
+       <?php echo $recaptcha_html; ?>
+       <br/>
+   </li>
+   <?php } ?>
    <li><?php echo $form->submit(NULL, __('Register new account')); ?></li>
 </ul>
 <?php

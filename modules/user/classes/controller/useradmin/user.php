@@ -138,6 +138,12 @@ class Controller_Useradmin_User extends Controller_App {
     * Register a new user.
     */
    public function action_register() {
+      // Load reCaptcha if needed
+      if(Kohana::config('useradmin')->captcha) {
+         include Kohana::find_file('vendor', 'recaptcha/recaptchalib');
+         $recaptcha_config = Kohana::config('recaptcha');
+         $recaptcha_error = null;
+      }
       // set the template title (see Controller_App for implementation)
       $this->template->title = __('User registration');
       // If user already signed-in
@@ -153,16 +159,27 @@ class Controller_Useradmin_User extends Controller_App {
          $user = ORM::factory('user');
          // load values from $_POST
          $user->values($_POST);
-
-         // REQUEST: If you do implement CAPTCHA for registration, send me the code so I can publish it.
-
+         // optional checks (e.g. reCaptcha or some other additional check)
+         $optional_checks = true;
+         // if configured to use captcha, check the reCaptcha result
+         if(Kohana::config('useradmin')->captcha) {
+            $recaptcha_resp = recaptcha_check_answer($recaptcha_config['privatekey'],
+                                           $_SERVER['REMOTE_ADDR'],
+                                           $_POST['recaptcha_challenge_field'],
+                                           $_POST['recaptcha_response_field']);
+            if(!$recaptcha_resp->is_valid) {
+               $optional_checks = false;
+               $recaptcha_error = $recaptcha_resp->error;
+               Message::add('error', __('The captcha text is incorrect, please try again.'));
+            }
+         }
          // If the post data validates using the rules setup in the user model
-         if ($user->check()) {
+         if ($user->check() && $optional_checks) {
             // create the account
             $user->save();
             // Add the login role to the user (add a row to the db)
             $login_role = new Model_Role(array('name' =>'login'));
-            $user->add('roles',$login_role);
+            $user->add('roles', $login_role);
             // sign the user in
             Auth::instance()->login($_POST['username'], $_POST['password']);
             // redirect to the user account
@@ -175,6 +192,10 @@ class Controller_Useradmin_User extends Controller_App {
             $_POST['password'] = $_POST['password_confirm'] = '';
             $view->set('defaults', $_POST);
          }
+      }
+      if(Kohana::config('useradmin')->captcha) {
+         $view->set('captcha_enabled', true);
+         $view->set('recaptcha_html', recaptcha_get_html($recaptcha_config['publickey'], $recaptcha_error));
       }
       $this->template->content = $view;
    }
