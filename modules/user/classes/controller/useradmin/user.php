@@ -38,9 +38,9 @@ class Controller_Useradmin_User extends Controller_App {
       'profile' => 'login',
       'profile_edit' => 'login',
       'unregister' => 'login',
-      'logout' => 'login',
       'change_password' => 'login',
       // the others are public (forgot, login, register, reset, noaccess)
+      // logout is also public to avoid confusion (e.g. easier to specify and test post-logout page)
       );
 
    // USER SELF-MANAGEMENT
@@ -238,39 +238,60 @@ class Controller_Useradmin_User extends Controller_App {
     * View: Login form.
     */
    public function action_login() {
-      // set the template title (see Controller_App for implementation)
-      $this->template->title = __('Login');
-      // If user already signed-in
-      if(Auth::instance()->logged_in() != 0){
-         // redirect to the user account
-         Request::instance()->redirect('user/profile');
-      }
-      $view = View::factory('user/login');
-      // allow setting the username as a get param
-      if(isset($_GET['username'])) {
-         $view->set('username', Security::xss_clean($_GET['username']));
-      }
-
-      // If there is a post and $_POST is not empty
-      if ($_POST) {
-         // Instantiate a new user
+      // ajax login
+      if(Request::$is_ajax && isset($_REQUEST['username'], $_REQUEST['password'])) {
+         $this->auto_render = false;
+         $this->request->headers['Content-Type'] = 'application/json';
+         if(Auth::instance()->logged_in() != 0) {
+            $this->request->status = 200;
+            $this->template->content = $this->request->response = '{ "success": "true" }';
+            return;
+         }
          $user = ORM::factory('user');
-
-         // Check Auth
-         // more specifically, username and password fields need to be set.
-         $status = $user->login($_POST);
-
-         // If the post data validates using the rules setup in the user model
-         if ($status) {
+         $status = $user->login($_REQUEST);
+         if($status) {
+            $this->request->status = 200;
+            $this->template->content = $this->request->response = '{ "success": "true" }';
+            return;
+         }
+         $this->request->status = 500;
+         $this->template->content = $this->request->response = '{ "success": "false" }';
+         return;
+      } else {
+         // set the template title (see Controller_App for implementation)
+         $this->template->title = __('Login');
+         // If user already signed-in
+         if(Auth::instance()->logged_in() != 0){
             // redirect to the user account
             Request::instance()->redirect('user/profile');
-         } else {
-            // Get errors for display in view
-            $view->set('errors', $_POST->errors('login'));
          }
+         $view = View::factory('user/login');
+         // allow setting the username as a get param
+         if(isset($_GET['username'])) {
+            $view->set('username', Security::xss_clean($_GET['username']));
+         }
+
+         // If there is a post and $_POST is not empty
+         if ($_REQUEST && isset($_REQUEST['username'], $_REQUEST['password'])) {
+            // Instantiate a new user
+            $user = ORM::factory('user');
+
+            // Check Auth
+            // more specifically, username and password fields need to be set.
+            $status = $user->login($_REQUEST);
+
+            // If the post data validates using the rules setup in the user model
+            if ($status) {
+               // redirect to the user account
+               Request::instance()->redirect('user/profile');
+            } else {
+               // Get errors for display in view
+               $view->set('errors', $status->errors('login'));
+            }
+         }
+         $view->set('facebook_enabled', Kohana::config('useradmin')->facebook);
+         $this->template->content = $view;
       }
-      $view->set('facebook_enabled', Kohana::config('useradmin')->facebook);
-      $this->template->content = $view;
    }
 
    /**

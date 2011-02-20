@@ -39,6 +39,28 @@ class Controller_Useradmin_App extends Controller {
     */
    public $secure_actions = FALSE;
 
+   /**
+    * Called from before() when the user does not have the correct rights to access a controller/action.
+    *
+    * Override this in your own Controller / Controller_App if you need to handle
+    * responses differently.
+    *
+    * For example:
+    * - handle JSON requests by returning a HTTP error code and a JSON object
+    * - redirect to a different failure page from one part of the application
+    */
+   public function access_required() {
+      Request::instance()->redirect('user/noaccess');
+   }
+
+   /**
+    * Called from before() when the user is not logged in but they should.
+    *
+    * Override this in your own Controller / Controller_App.
+    */
+   public function login_required() {
+      Request::instance()->redirect('user/login');
+   }
 
    /**
     * The before() method is called before your controller action.
@@ -73,9 +95,9 @@ class Controller_Useradmin_App extends Controller {
          ) {
          if (Auth::instance()->logged_in()){
             // user is logged in but not on the secure_actions list
-            Request::instance()->redirect('user/noaccess');
+            $this->access_required();
          } else {
-            Request::instance()->redirect('user/login');
+            $this->login_required();
          }
       }
 

@@ -18,6 +18,10 @@ I would like to thank [jnbdz](https://bitbucket.org/jnbdz/useradmin/) for adding
 
 CHANGELOG
 =========
+Feb 21st 2011:
+* To support login via AJAX requests moved the processing of results from the Auth check to Controller_App->access_required and Controller_App->login_required. Override those in your app, using Request::$is_ajax to detect AJAX requests.
+* Workaround for email field for http://dev.kohanaframework.org/issues/3750 in messages/register.php
+
 Jan 28th 2011:
 
 * Added reCaptcha support (captcha on registration)

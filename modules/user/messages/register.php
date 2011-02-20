@@ -7,6 +7,12 @@ return array(
          'username_not_unique' => 'This username is already in use.',
        ),
       'email' => array(
+         'email' => 'This is not a valid email.', // Workaround for Bug Report #3750
+         'email_available' => 'This email address is already in use.',
+         'email_not_unique' => 'This email address is already in use.',
+       ),
+      'email_confirm' => array(
+         'email' => 'This is not a valid email.', // Workaround for Bug Report #3750
          'email_available' => 'This email address is already in use.',
          'email_not_unique' => 'This email address is already in use.',
        ),
