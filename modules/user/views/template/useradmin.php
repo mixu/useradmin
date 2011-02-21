@@ -9,7 +9,7 @@
 </head>
 <body>
    <div id="page">
-      <div id="header"></div>
+      <div id="header"><h1>Useradmin for Kohana</h1></div>
       <div id="navigation">
          <ul class="menu">
 
@@ -29,8 +29,13 @@
       </div>
    <div id="content">
     <?php
-    // output messages
-     echo Message::output();
+     // output messages
+     if(Message::count() > 0) {
+       echo '<div class="block">';
+       echo '<div class="content" style="padding: 10px 15px;">';
+       echo Message::output();
+       echo '</div></div>';
+     }
      echo $content ?>
    </div>
 </div>

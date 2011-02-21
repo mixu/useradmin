@@ -1,5 +1,6 @@
-<h1><?php echo __('Password reset'); ?></h1>
-
+<div class="block">
+   <h1><?php echo __('Password reset'); ?></h1>
+   <div class="content">
 <?php
 echo Form::open('user/reset');
 ?>
@@ -13,8 +14,10 @@ echo Form::open('user/reset');
       <?php echo Form::input('reset_token', '', array('class' => 'text')) ?>
    </li>
 </ul>
-
+<br style="clear:both;">
 <?php echo Form::submit(NULL, __('Reset password')); ?>
 
 <?php echo Form::close() ?>
 
+   </div>
+</div>

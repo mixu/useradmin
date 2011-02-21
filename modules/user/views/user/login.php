@@ -1,4 +1,3 @@
-<h1><?php echo __('Login'); ?></h1>
 <?php
 $form = new Appform();
 if(isset($errors)) {
@@ -12,70 +11,13 @@ $form->error_class = 'error block';
 $form->info_class = 'info block';
 
 ?>
-<style type="text/css">
-#box {
-  -moz-border-radius-topleft: 9px;
-  -webkit-border-top-left-radius: 9px;
-  -moz-border-radius-topright: 9px;
-  -webkit-border-top-right-radius: 9px;
-  
-   width: 610px;
-   margin: 50px auto;
-}
-/* box */
-
-#box .block {
-  -moz-border-radius-topleft: 9px;
-  -webkit-border-top-left-radius: 9px;
-  -moz-border-radius-topright: 9px;
-  -webkit-border-top-right-radius: 9px;
-  
-  background: #fff;
-
-  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-  -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-  -moz-border-radius-bottomleft: 9px;
-  -webkit-border-bottom-left-radius: 9px;
-  -moz-border-radius-bottomright: 9px;
-  -webkit-border-bottom-right-radius: 9px;
-}
-
-#box .block h2 {
-  -moz-border-radius-topleft: 9px;
-  -webkit-border-top-left-radius: 9px;
-  -moz-border-radius-topright: 9px;
-  -webkit-border-top-right-radius: 9px;
-  
-  background: #002134;
-  color: #fff;
-
-  padding: 10px 15px;
-  margin: 0;
-
-}
-
-#box .block .content {
-  padding: 10px 20px;
-}
-
-input.twothirds {
-   width: 280px;
-}
-
-input.half {
-   width: 210px;
-}
-
-</style>
-
 <div id="box">
    <div class="block">
-      <h2>Login</h2>
+      <h1><?php echo __('Login'); ?></h1>
       <div class="content">
 <?php
 echo $form->open('user/login');
-echo '<table><tr><td>';
+echo '<table><tr><td style="vertical-align: top;">';
 echo '<ul>';
 echo '<li>'.$form->label('username', __('Email or Username')).'</li>';
 echo $form->input('username', null, array('class' => 'text twothirds'));
@@ -90,6 +32,13 @@ echo '</td><td width="22" style="border-right: 1px solid #DDD;">&nbsp;</td><td><
 echo '<ul>';
 echo '<li style="height: 61px">'.__('Don\'t have an account?').' '.Html::anchor('user/register', __('Register a new account')).'.</li>';
 // Facebook
+   echo '<li style="padding-bottom: 8px;"><label>'.__('Other login options').':</label></li>';
+   echo '<li>
+<a style="width: 100px; height: 60px; border: 1px solid #DDD; margin: 3px; float: left; background: #FFF url(/img/facebook.png) no-repeat center center"></a>
+<a style="width: 100px; height: 60px; border: 1px solid #DDD; margin: 3px; float: left; background: #FFF url(/img/twitter.png) no-repeat center center"></a>
+<a style="width: 100px; height: 60px; border: 1px solid #DDD; margin: 3px; float: left; background: #FFF url(/img/google.gif) no-repeat center center"></a>
+<a style="width: 100px; height: 60px; border: 1px solid #DDD; margin: 3px; float: left; background: #FFF url(/img/yahoo.gif) no-repeat center center"></a>
+</li>';
 if($facebook_enabled) {
    echo '<li style="padding-bottom: 8px;"><label>'.__('Other login options').':</label></li>';
    echo '<li id="fb-login-li"><img src="/img/fb-login.png"></li>';

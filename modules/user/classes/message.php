@@ -18,6 +18,10 @@ class Message {
 
    }
 
+   public static function count() {
+      return count(Session::instance()->get('messages'));
+   }
+
    public static function output() {
       $str = '';
       $messages = Session::instance()->get('messages');

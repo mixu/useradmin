@@ -1,46 +1,20 @@
 <?php
-
 /**
  *
  * @author Mikito Takada
  * @package default
- * @version 1.0
  */
-
 ?>
+<div class="block">
+<div class="submenu">
+   <ul>
+      <li><?php echo Html::anchor('admin_user/edit', __('Add new user'))?></li>
+   </ul>
+   <br style="clear:both;">
+</div>
 <h1><?php echo __('Administer users'); ?></h1>
-<ul class="submenu">
-   <li><?php echo Html::anchor('admin_user/edit', __('Add new user'))?></li>
-   <li><?php echo Html::anchor('admin_user/frontpage', __('Edit front page'))?></li>
-   <li><?php echo Html::anchor('admin_user/stage', __('Change review stage'))?></li>
-</ul>
+<div class="content">
 <?php
-/*
-if($filter_description != '') {
-   echo '<div class="notice">'.$filter_description.' ('.Html::anchor('user/index', __('Remove filter')).')</div>';
-}
-*/
-echo '<p>'.__('Show users:').' </p>';
-
-echo '<ul class="sf-menu">';
-if(!isset($_REQUEST['filter_role'])) {
-   echo '<li>'.Html::anchor('admin_user/index', __('All'), array('class' => 'selected')).'</a></li>';
-} else {
-   echo '<li>'.Html::anchor('admin_user/index', __('All')).'</a></li>';
-}
-// Select all roles
-$role = ORM::factory('role');
-foreach($role->find_all() as $obj) {
-   if($obj->name != 'login') {
-      if(isset($_REQUEST['filter_role']) && ($_REQUEST['filter_role'] == $obj->name)) {
-         echo '<li>'.Html::anchor('admin_user/index?filter_role='.$obj->name, ucfirst($obj->name).'s', array('class' => 'selected')).'</li>';
-      } else {
-         echo '<li>'.Html::anchor('admin_user/index?filter_role='.$obj->name, ucfirst($obj->name).'s').'</li>';
-      }
-   }
-}
-echo '</ul><br style="clear:both;">';
-
 echo $paging->render();
 // format data for DataTable
 $data = array();
@@ -53,7 +27,7 @@ foreach ($users as $obj) {
    $row['last_login'] = Helper_Format::relative_time($row['last_login']);
    $row['last_failed_login'] = Helper_Format::relative_time(strtotime($row['last_failed_login']));
    // add actions
-   $row['actions'] = Html::anchor('admin_user/edit/'.$row['id'], __('Edit')).' <br> '.Html::anchor('admin_user/delete/'.$row['id'], __('Delete'));
+   $row['actions'] = Html::anchor('admin_user/edit/'.$row['id'], __('Edit')).' | '.Html::anchor('admin_user/delete/'.$row['id'], __('Delete'));
    // set roles
    $row['role'] = '';
    foreach($obj->roles->where('name', '!=', 'login')->find_all() as $role) {
@@ -71,8 +45,10 @@ $column_list = array ( 'username' => array ( 'label' => __('Username') ),
                        'actions' => array ( 'label' => __('Actions'), 'sortable' => false ), );
 
 
-$datatable = new Helper_Datatable($column_list, array('paginator' => true, 'class' => 'content', 'sortable' => 'true', 'default_sort' => 'username'));
+$datatable = new Helper_Datatable($column_list, array('paginator' => true, 'class' => 'table', 'sortable' => 'true', 'default_sort' => 'username'));
 $datatable->values($data);
 echo $datatable->render();
 echo $paging->render();
-
+?>
+</div>
+</div>

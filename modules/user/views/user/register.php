@@ -1,7 +1,10 @@
-<h1><?php echo __('Register'); ?></h1>
-<div class="info"><small><?php echo __('Already have a user account?').' '.Html::anchor('user/login', __('Log in here.')); ?></small></div>
 
-<p><?php echo __('Fill in the information below to register.'); ?></p>
+<div class="block">
+   <h1><?php echo __('Register'); ?></h1>
+   <div class="content">
+      <div class="info" style="width: 415px;"><small><?php echo __('Already have a user account?').' '.Html::anchor('user/login', __('Log in here.')); ?></small></div>
+      <br>
+      <p><?php echo __('Fill in the information below to register.'); ?></p>
 
 <?php
 $form = new Appform();
@@ -35,6 +38,9 @@ echo $form->open('user/register');
    <?php } ?>
    <li><?php echo $form->submit(NULL, __('Register new account')); ?></li>
 </ul>
+<br style="clear:both;">
 <?php
 echo $form->close();
 ?>
+   </div>
+</div>

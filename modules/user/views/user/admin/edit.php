@@ -1,4 +1,3 @@
-<h1><?php echo __('Edit/add user') ?></h1>
 <?php
 
 $form = new Appform();
@@ -7,6 +6,7 @@ if(isset($errors)) {
 }
 if(isset($data)) {
    unset($data['password']);
+   unset($data['password_confirm']);
    $form->values = $data;
 }
 echo $form->open('admin_user/edit/'.$id);
@@ -14,6 +14,9 @@ echo $form->open('admin_user/edit/'.$id);
 <?php
   echo $form->hidden('id', $id);
 ?>
+<div class="block">
+<h1><?php echo __('Edit/add user') ?></h1>
+   <div class="content">
 <ul>
    <li><label><?php echo __('Username'); ?></label></li>
    <?php echo $form->input('username', null, array('info' => __('Length between 4-32 characters. Letters, numbers, dot and underscore are allowed characters.'))); ?>
@@ -47,3 +50,6 @@ echo $form->open('admin_user/edit/'.$id);
 <?php
 echo $form->submit(NULL, __('Save'));
 echo $form->close();
+?>
+   </div>
+</div>
