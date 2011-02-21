@@ -2,4 +2,4 @@ syntax: regexp
 ^application/cache
 ^application/logs
 ^nbproject
-
+^application/config

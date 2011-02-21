@@ -10,33 +10,106 @@ if(isset($username)) {
 // set custom classes to get labels moved to bottom:
 $form->error_class = 'error block';
 $form->info_class = 'info block';
-echo '<table width="850">';
-echo '<tr><td width="428">';
+
+?>
+<style type="text/css">
+#box {
+  -moz-border-radius-topleft: 9px;
+  -webkit-border-top-left-radius: 9px;
+  -moz-border-radius-topright: 9px;
+  -webkit-border-top-right-radius: 9px;
+  
+   width: 610px;
+   margin: 50px auto;
+}
+/* box */
+
+#box .block {
+  -moz-border-radius-topleft: 9px;
+  -webkit-border-top-left-radius: 9px;
+  -moz-border-radius-topright: 9px;
+  -webkit-border-top-right-radius: 9px;
+  
+  background: #fff;
+
+  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  -moz-border-radius-bottomleft: 9px;
+  -webkit-border-bottom-left-radius: 9px;
+  -moz-border-radius-bottomright: 9px;
+  -webkit-border-bottom-right-radius: 9px;
+}
+
+#box .block h2 {
+  -moz-border-radius-topleft: 9px;
+  -webkit-border-top-left-radius: 9px;
+  -moz-border-radius-topright: 9px;
+  -webkit-border-top-right-radius: 9px;
+  
+  background: #002134;
+  color: #fff;
+
+  padding: 10px 15px;
+  margin: 0;
+
+}
+
+#box .block .content {
+  padding: 10px 20px;
+}
+
+input.twothirds {
+   width: 280px;
+}
+
+input.half {
+   width: 210px;
+}
+
+</style>
+
+<div id="box">
+   <div class="block">
+      <h2>Login</h2>
+      <div class="content">
+<?php
 echo $form->open('user/login');
+echo '<table><tr><td>';
 echo '<ul>';
 echo '<li>'.$form->label('username', __('Email or Username')).'</li>';
-echo $form->input('username');
+echo $form->input('username', null, array('class' => 'text twothirds'));
 echo '<li>'.$form->label('password', __('Password')).'</li>';
-echo $form->password('password');
+echo $form->password('password', null, array('class' => 'text twothirds'));
 echo '</ul>';
 echo $form->submit(NULL, __('Login'));
 echo '<small> '.Html::anchor('user/forgot', __('Forgot your password?')).'<br></small>';
 echo $form->close();
-echo '</td><td width="22">&nbsp;</td><td style="vertical-align: top;"><div id="fb-root"></div>';
+echo '</td><td width="22" style="border-right: 1px solid #DDD;">&nbsp;</td><td><td style="padding-left: 2px; vertical-align: top;">';
+
 echo '<ul>';
-echo '<li>'.__('Don\'t have an account?').' '.Html::anchor('user/register', __('Register new account here.')).'<br></li>';
+echo '<li style="height: 61px">'.__('Don\'t have an account?').' '.Html::anchor('user/register', __('Register a new account')).'.</li>';
 // Facebook
 if($facebook_enabled) {
-   echo '<li><label>'.__('Other login options').':</label><br></li>';
+   echo '<li style="padding-bottom: 8px;"><label>'.__('Other login options').':</label></li>';
    echo '<li id="fb-login-li"><img src="/img/fb-login.png"></li>';
 }
 echo '</ul>';
 echo '</td></tr></table>';
+?>
+      </div>
+   </div>
+</div>
 
+<?php
 // more Facebook
 if($facebook_enabled) {
+   // NOTE that the fb-root div is needed even though it is empty.
+   // It must be located before the script that initializes FB login. Otherwise, there may be (intermittent) load errors on FF/Chrome.
+   // Also make sure you have <html xmlns="http://www.w3.org/1999/xhtml" xmlns:fb="http://www.facebook.com/2008/fbml" dir="ltr" lang="en-US"> in your template.
 ?>
-<script>
+<div id="fb-root"></div>
+<script type="text/javascript">
     window.fbAsyncInit = function() {
         FB.init({
             appId   : '<?php echo Kohana::config('facebook')->app_id; ?>',

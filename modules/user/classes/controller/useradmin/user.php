@@ -450,6 +450,7 @@ class Controller_Useradmin_User extends Controller_App {
          )
       );
       $me = null;
+      $uid = null;
       // Session based API call.
       if ($facebook->getSession()) {
          try {
@@ -459,15 +460,17 @@ class Controller_Useradmin_User extends Controller_App {
          } catch (FacebookApiException $e) {
             // do nothing
          }
-      }
-      // check if user is logged in
-      $user = ORM::factory('user')->where('facebook_user_id', '=', $facebook->getUser())->find();
-      if(is_numeric($user->id) && ($user->id != '0')) {
-         // found, log user in
-         Auth_ORM::instance()->force_login($user);
-         // redirect to the user account
-         Request::instance()->redirect('user/profile');
-         return;
+         // check if user is logged in
+         if(is_numeric($uid)) {
+            $user = ORM::factory('user')->where('facebook_user_id', '=', $uid)->find();
+            if(is_numeric($user->id) && ($user->id != '0')) {
+               // found, log user in
+               Auth_ORM::instance()->force_login($user);
+               // redirect to the user account
+               Request::instance()->redirect('user/profile');
+               return;
+            }
+         }
       }
       // associated user not found; register the user
       // retrieve user email from Facebook
