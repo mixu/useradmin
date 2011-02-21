@@ -34,7 +34,7 @@
 	<?php if ($next_page !== FALSE): ?>
 		<a class="next" href="<?php echo HTML::chars($page->url($next_page)) ?>" rel="next"><?php echo __('Next') ?></a>
 	<?php else: ?>
-		<span class="next"><?php echo __('Next') ?></span>
+		<span class="next disabled"><?php echo __('Next') ?></span>
 	<?php endif ?>
 
 	<?php if ($last_page !== FALSE): ?>
