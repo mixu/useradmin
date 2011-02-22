@@ -36,7 +36,8 @@ CHANGELOG
 Feb xxth 2011:
 
 * New UI! The UI is loosely based on https://github.com/pilu/web-app-theme (a theme generator for Ruby) and is a lot better looking than the old one. See screenshots below.
-* Twitter login!
+* Twitter login! Requires that you enable the kohana-oauth module from the core.
+* Google and Yahoo login! Uses LightOpenID which is bundled in the repo. I had a look at Janrain's popular library, but to me if you let your library generate errors on PHP 5.0.0 - 5.3.0 and have dozens of pending issues and pull requests - then you just don't care about supporting your library. So not using Janrain's lib.
 * Refactored 3rd party account provider code for better extensibility.
 * Changed from Facebook Javascript API (which had some reports of problems) to PHP/redirect based API.
 * Database changes to allow user to be associated with more service providers. See MIGRATION below if you used had the Facebook login enabled previously and want to migrate the accounts.

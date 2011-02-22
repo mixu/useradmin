@@ -442,6 +442,12 @@ class Controller_Useradmin_User extends Controller_App {
             case 'twitter':
                $provider = new Provider_Twitter();
                break;
+            case 'google':
+               $provider = new Provider_OpenID('google');
+               break;
+            case 'yahoo':
+               $provider = new Provider_OpenID('yahoo');
+               break;
             default:
                $provider = new Provider_Facebook();
                break;
@@ -460,6 +466,12 @@ class Controller_Useradmin_User extends Controller_App {
       switch ($provider_name) {
          case 'twitter':
             $provider = new Provider_Twitter();
+            break;
+         case 'google':
+            $provider = new Provider_OpenID('google');
+            break;
+         case 'yahoo':
+            $provider = new Provider_OpenID('yahoo');
             break;
          default:
             $provider = new Provider_Facebook();

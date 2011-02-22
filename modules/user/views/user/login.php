@@ -36,8 +36,8 @@ echo '<li style="height: 61px">'.__('Don\'t have an account?').' '.Html::anchor(
    echo '<li>
 <a class="login_provider" style="background: #FFF url(/img/facebook.png) no-repeat center center" href="'.URL::site('/user/provider/facebook').'"></a>
 <a class="login_provider" style="background: #FFF url(/img/twitter.png) no-repeat center center" href="'.URL::site('/user/provider/twitter').'"></a>
-<a class="login_provider" style="background: #FFF url(/img/google.gif) no-repeat center center"></a>
-<a class="login_provider" style="background: #FFF url(/img/yahoo.gif) no-repeat center center"></a>
+<a class="login_provider" style="background: #FFF url(/img/google.gif) no-repeat center center" href="'.URL::site('/user/provider/google').'"></a>
+<a class="login_provider" style="background: #FFF url(/img/yahoo.gif) no-repeat center center" href="'.URL::site('/user/provider/yahoo').'"></a>
 <br style="clear: both;">
 </li>';
 echo '</ul>';
