@@ -1,3 +1,17 @@
+SUPPORTED PROVIDERS
+===================
+
+- OAuth v2.0:
++ Facebook
+- OAuth v1.0:
++ Twitter
+
+Later:
++ LinkedIn (OAuth v1.0)
++ Google (OpenID)
++ Yahoo (OpenID)
++ Windows Live (proprietary bs)
+
 TUTORIAL
 ========
 
@@ -18,6 +32,16 @@ I would like to thank [jnbdz](https://bitbucket.org/jnbdz/useradmin/) for adding
 
 CHANGELOG
 =========
+
+Feb xxth 2011:
+
+* New UI! The UI is loosely based on https://github.com/pilu/web-app-theme (a theme generator for Ruby) and is a lot better looking than the old one. See screenshots below.
+* Twitter login!
+* Refactored 3rd party account provider code for better extensibility.
+* Changed from Facebook Javascript API (which had some reports of problems) to PHP/redirect based API.
+* Database changes to allow user to be associated with more service providers. See MIGRATION below if you used had the Facebook login enabled previously and want to migrate the accounts.
+* Included Datatable helper which helps when working with pagination links in tables.
+
 Feb 21st 2011:
 
 * CRITICAL SECURITY BUG in Facebook login; it is strongly recommended that all users of Facebook login functionality upgrade (does not affect sites with Facebook login disabled). Thank you Euan McKay!
@@ -46,6 +70,20 @@ Nov 25th 2010: Pushed out new version with following improvements:
 Sep 14th 2010:
 
 * Initial version.
+
+SCREENSHOT
+==========
+
+Todo: add screenshot.
+
+MIGRATION from pre-Feb xxth 2011 to new schema
+==============================================
+
+The schema had to be updated to allow for better support for multiple 3rd party providers.
+After this, schema changes should not be necessary for a long while.
+
+Basically, the facebook_user_id field has been removed from the users table, and moved
+to a one-user-to-many-provider-id table.
 
 LICENCE (Simplified BSD licence)
 =======

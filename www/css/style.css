@@ -536,3 +536,15 @@ input.half {
 .pagination a.disabled, .pagination span.disabled {
    color: #818171;
 }
+
+a.login_provider {
+   width: 100px; 
+   height: 60px;
+   border: 1px solid #DDD;
+   margin: 3px;
+   float: left;
+}
+
+a.login_provider:hover {
+   border: 1px solid black;
+}

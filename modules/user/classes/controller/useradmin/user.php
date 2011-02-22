@@ -429,41 +429,53 @@ class Controller_Useradmin_User extends Controller_App {
          $view->set('data', $user->as_array());
       }
       $this->template->content = $view;
-  }
+   }
+
+   /**
+    * Redirect to the provider's auth URL
+    * @param string $provider
+    */
+   function action_provider($provider_name = null) {
+      if(!empty($provider_name)) {
+         $provider = null;
+         switch ($provider_name) {
+            case 'twitter':
+               $provider = new Provider_Twitter();
+               break;
+            default:
+               $provider = new Provider_Facebook();
+               break;
+         }
+         Request::instance()->redirect($provider->redirect_url());
+         return;
+      }
+   }
 
   /**
-   * Allow the user to login using Facebook
+   * Allow the user to login and register using a 3rd party provider.
    */
-   function action_fb_login() {
-      // Facebook login must be enabled in config/useradmin.php
-      if(!Kohana::config('useradmin')->facebook) {
-         Message::add('error', 'Facebook login is not enabled. Please register below.');
-         Request::instance()->redirect('user/register');
+     function action_provider_return($provider_name = null) {
+      Message::add('success', 'provider '.$provider_name.' return');
+      $provider = null;
+      switch ($provider_name) {
+         case 'twitter':
+            $provider = new Provider_Twitter();
+            break;
+         default:
+            $provider = new Provider_Facebook();
+            break;
       }
-      include Kohana::find_file('vendor', 'facebook/src/facebook');
-      // Create our Facebook SDK instance.
-      $facebook = new Facebook(
-         array(
-            'appId'  => Kohana::config('facebook')->app_id,
-            'secret' => Kohana::config('facebook')->secret,
-            'cookie' => true, // enable optional cookie support
-         )
-      );
-      $me = null;
-      $uid = null;
-      // Session based API call.
-      if ($facebook->getSession()) {
-         try {
-            $uid = $facebook->getUser();
-            // read user info as array from Graph API
-            $me = $facebook->api('/me');
-         } catch (FacebookApiException $e) {
-            // do nothing
-         }
-         // check if user is logged in
+      // verify the request
+      if($provider->verify()) {
+         // check for previously connected user
+         $uid = $provider->user_id();
+
+         print $provider_name.' returned uid: '.$uid;
+         die;
+
          if(is_numeric($uid)) {
             $user = ORM::factory('user')->where('facebook_user_id', '=', $uid)->find();
-            if(is_numeric($user->id) && ($user->id != '0')) {
+            if($user->loaded()) {
                // found, log user in
                Auth_ORM::instance()->force_login($user);
                // redirect to the user account
@@ -471,33 +483,29 @@ class Controller_Useradmin_User extends Controller_App {
                return;
             }
          }
-      }
-      // associated user not found; register the user
-      // retrieve user email from Facebook
-      if($me != NULL && Validate::email($me['email'], TRUE)) {
-         // search for existing user using email
-         $user = ORM::factory('user')->where('email', '=', $me['email'])->find();
-         if(is_numeric($user->id) && ($user->id != '0')) {
-            // Note: there is minor security issue here - we trust the email supplied by Facebook
-            // They do perform a verification check for email addresses... and the data is signed.
-            // Hence this is not really a problem; I bet most of the implementations do trust Facebook.
-            // If you want, you can ask the user to enter their password to confirm, but it's
-            // a bit clunky - and adds more special cases like what if they don't remember the password?
-            // Then you have to allow them to reset the password using their email ....
-            Message::add('success', __('We found an existing account using your email address.'));
-            // found: "merge" with the existing user
-            $user->facebook_user_id = $facebook->getUser();
-            $user->save();
-            // force login
-            Auth_ORM::instance()->force_login($user);
-            // redirect to the user account
-            Request::instance()->redirect('user/profile');
-            return;
+         // check for existing account
+         $email = $provider->email();
+         if(Validate::email($email, TRUE)) {
+            // search for existing user using email
+            $user = ORM::factory('user')->where('email', '=', $email)->find();
+            if(is_numeric($user->id) && ($user->id != '0')) {
+               // Note: there is minor security issue here - we trust the email supplied by Facebook
+               // They do perform a verification check for email addresses... and the data is signed.
+               // If you want, you can ask the user to enter their password to confirm, but it's
+               // a bit clunky - and adds more special cases like what if they don't remember the password?
+               // Then you have to allow them to reset the password using their email ....
+               Message::add('success', __('We found an existing account using your email address.'));
+               // found: "merge" with the existing user
+               $user->facebook_user_id = $provider->user_id();
+               $user->save();
+               // force login
+               Auth_ORM::instance()->force_login($user);
+               // redirect to the user account
+               Request::instance()->redirect('user/profile');
+               return;
+            }
          }
-      }
-
-      // not found: create a new user for real
-      if($me != NULL) {
+         // create new account
          // Instantiate a new user
          $user = ORM::factory('user');
          // fill in values
@@ -505,13 +513,13 @@ class Controller_Useradmin_User extends Controller_App {
          $password = $user->generate_password(42);
          $values = array(
              // get a unused username like firstname.surname or firstname.surname2 ...
-             'username' => $user->generate_username($me['first_name'].'.'.$me['last_name']),
-             'facebook_user_id' => $facebook->getUser(),
+             'username' => $user->generate_username(str_replace(' ', '.', $provider->name())),
+             'facebook_user_id' => $provider->user_id(),
              'password' => $password,
              'password_confirm' => $password,
          );
-         if(Validate::email($me['email'], TRUE)) {
-            $values['email'] = $me['email'];
+         if(Validate::email($email, TRUE)) {
+            $values['email'] = $provider->name();
          }
          $user->values($values);
          // If the post data validates using the rules setup in the user model
