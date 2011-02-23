@@ -191,7 +191,7 @@ class Model_Useradmin_User extends Model_Auth_User {
       $username = $base;
       $i = 2;
       // check returns false if not unique
-      while($this->check($username)) {
+      while(!$this->check_username($username)) {
          $username = $base.$i;
          $i++;
       }

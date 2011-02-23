@@ -32,6 +32,16 @@ CREATE TABLE `roles` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `roles`
+--
+
+INSERT INTO `roles` (`id`, `name`, `description`) VALUES
+(1, 'login', 'Login privileges, granted after account confirmation'),
+(2, 'admin', 'Administrative user, has access to everything.');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `roles_users`
 --
 
@@ -47,6 +57,16 @@ CREATE TABLE `roles_users` (
   CONSTRAINT `roles_users_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `roles_users`
+--
+
+INSERT INTO `roles_users` (`user_id`, `role_id`) VALUES
+(1, 1),
+(1, 2);
+
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `user_identity`
@@ -111,6 +131,13 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `email`, `username`, `password`, `logins`, `last_login`) VALUES
+(1, 'test@test.com', 'admin', '368ae03c1b3b29b8d242bc43dcbe3f0bd4755ea181adbd22ef', 0, NULL);
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

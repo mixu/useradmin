@@ -16,5 +16,57 @@
 
       <h2>Login Activity</h2>
       <p>Last login was <?php echo date('F jS, Y', $user->last_login) ?>, at <?php echo date('h:i:s a', $user->last_login) ?>.<br/>Total logins: <?php echo $user->logins ?></p>
+      
+      <h2>Accounts associated with your user profile</h2>
+      <p>
+         <?php
+         $providers = array('facebook' => true, 'twitter' => true, 'google' => true, 'yahoo' => true);
+         foreach($user->user_identity->find_all() as $identity) {            
+            switch ($identity->provider) {
+               case 'facebook':
+                  echo '<a style="width: 32px; height: 32px; margin: 3px; float: left; background: #FFF url(/img/small/facebook.png) no-repeat center center"></a>';
+                  break;
+               case 'twitter':
+                  echo '<a style="width: 32px; height: 32px; margin: 3px; float: left; background: #FFF url(/img/small/twitter.png) no-repeat center center"></a>';
+                  break;
+               case 'google':
+                  echo '<a style="width: 32px; height: 32px; margin: 3px; float: left; background: #FFF url(/img/small/google.png) no-repeat center center"></a>';
+                  break;
+               case 'yahoo':
+                  echo '<a style="width: 32px; height: 32px; margin: 3px; float: left; background: #FFF url(/img/small/yahoo.png) no-repeat center center"></a>';
+                  break;
+               default:
+                  break;
+            }
+            unset($providers[$identity->provider]);
+         }
+         ?>
+         <br style="clear: both;">
+      </p>
+      <h2>Additional account providers</h2>
+      <p>
+         <?php
+         foreach($providers as $provider => $enabled) {
+            switch ($provider) {
+               case 'facebook':
+                  echo '<a style="width: 32px; height: 32px; margin: 3px; float: left; background: #FFF url(/img/small/facebook_gray.png) no-repeat center center" href="'.URL::site('/user/provider/facebook').'"></a>';
+                  break;
+               case 'twitter':
+                  echo '<a style="width: 32px; height: 32px; margin: 3px; float: left; background: #FFF url(/img/small/twitter_gray.png) no-repeat center center" href="'.URL::site('/user/provider/twitter').'"></a>';
+                  break;
+               case 'google':
+                  echo '<a style="width: 32px; height: 32px; margin: 3px; float: left; background: #FFF url(/img/small/google_gray.png) no-repeat center center" href="'.URL::site('/user/provider/google').'"></a>';
+                  break;
+               case 'yahoo':
+                  echo '<a style="width: 32px; height: 32px; margin: 3px; float: left; background: #FFF url(/img/small/yahoo_gray.png) no-repeat center center" href="'.URL::site('/user/provider/yahoo').'"></a>';
+                  break;
+               default:
+                  break;
+            }
+
+         }
+         ?>
+         <br style="clear: both;">
+      </p>
    </div>
 </div>

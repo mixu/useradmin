@@ -91,9 +91,7 @@ LICENCE (Simplified BSD licence)
 
 NOTE: This licence applies to the useradmin module only, as written by Mikito
 Takada (found under /modules/user/). Different licences may apply to the other
-modules in this repository and the Kohana 3 core.
-
-Please consult a lawyer if you need legal advice.
+modules in this repository and the Kohana 3 core. 
 
 -------
 
@@ -126,3 +124,27 @@ or implied, of Mikito Takada.
 -------
 
 Not that I have any official policies.
+
+DEPENDENCIES'S LICENCES (bundled in repository; don't have to find these)
+=========================================================================
+I have attempted to ensure that none of the dependencies are GPL licenced,
+so that they can be used in commercial applications without worrying about copyleft.
+
+Vendors folder:
+
+- Facebook's PHP SDK is under the Apache Licence, v.2.0 - needed for Facebook.
+- LightOpenID is under MIT licence - needed for OpenID (Google, Yahoo).
+- ReCaptchalib is under MIT licence - needed for ReCaptcha.
+
+Kohana modules:
+
+- Kohana oAuth and Auth are part of the Kohana Core.
+- Kohana-email is a port of the same module which was in the Kohana v.2.x Core.
+  It depends on Swiftmailer which is LGPL.
+
+Icons:
+
+- http://www.nouveller.com/general/free-social-media-bookmark-icon-pack-the-ever-growing-icon-set/
+  Quote: "[Y]ou can use them anywhere, for anything for free with no attribution. No strings attached."
+
+Please consult a lawyer if you need legal advice.

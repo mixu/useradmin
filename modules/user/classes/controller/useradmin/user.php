@@ -432,52 +432,14 @@ class Controller_Useradmin_User extends Controller_App {
    }
 
    /**
-    * Associate a logged in user with an account.
-    *
-    * Note that you should not trust the OAuth/OpenID provider-supplied email
-    * addresses. Yes, for Facebook, Twitter, Google and Yahoo the user is actually
-    * required to ensure that the email is in fact one that they control.
-    *
-    * However, with generic OpenID (and non-trusted OAuth providers) one can setup a
-    * rogue provider that claims the user owns a particular email address without
-    * actually owning it. So if you trust the email information, then you open yourself to
-    * a vulnerability since someone might setup a provider that claims to own your
-    * admin account email address and if you don't require the user to log in to
-    * associate their account they gain access to any account.
-    *
-    * TL;DR - the only information you can trust is that the identity string is
-    * associated with that user on that openID provider, you need the user to also
-    * prove that they want to trust that identity provider on your application.
-    *
-    * @return void
-    */
-   function action_associate() {
-      // Note: there is minor security issue here - we trust the email supplied by Facebook
-      // They do perform a verification check for email addresses... and the data is signed.
-      // If you want, you can ask the user to enter their password to confirm, but it's
-      // a bit clunky - and adds more special cases like what if they don't remember the password?
-      // Then you have to allow them to reset the password using their email ....
-      Message::add('success', __('We found an existing account using your email address.'));
-      // found: "merge" with the existing user
-      $user_identity = ORM::factory('user_identity');
-      $user_identity->user_id = $user->id;
-      $user_identity->provider = $provider_name;
-      $user_identity->identity = $provider->user_id();
-      if($user_identity->check()) {
-         $user_identity->save();
-         // force login
-         Auth_ORM::instance()->force_login($user);
-         // redirect to the user account
-         Request::instance()->redirect('user/profile');
-         return;
-      }
-   }
-   /**
     * Redirect to the provider's auth URL
     * @param string $provider
     */
    function action_provider($provider_name = null) {
-      // TODO check that
+      if(Auth::instance()->logged_in()){
+         // redirect to the user account
+         Request::instance()->redirect('user/profile');
+      }
       // TODO check that the provider is enabled
       if(!empty($provider_name)) {
          $provider = null;
@@ -525,7 +487,6 @@ class Controller_Useradmin_User extends Controller_App {
       if($provider->verify()) {
          // check for previously connected user
          $uid = $provider->user_id();
-         // TODO: make sure that this cannot resolve to a user even if empty!!
          $user_identity = ORM::factory('user_identity')
                         ->where('provider', '=', $provider_name)
                         ->and_where('identity', '=', $uid)
@@ -545,58 +506,103 @@ class Controller_Useradmin_User extends Controller_App {
          if(Validate::email($email, TRUE)) {
             // search for existing user using email
             $user = ORM::factory('user')->where('email', '=', $email)->find();
-            if($user->loaded && is_numeric($user->id)) {
-               Message::add('error', 'Your email is associated with an existing account. For security reasons, you have to log in to associate a 3rd party provider with an existing account.');
-               Request::instance()->redirect('user/login');
+            if($user->loaded() && is_numeric($user->id)) {
+               if(Auth::instance()->logged_in() && Auth::instance()->get_user()->id == $user->id) {
+                  /*
+                   * Associate a logged in user with an account.
+                   *
+                   * Note that you should not trust the OAuth/OpenID provider-supplied email
+                   * addresses. Yes, for Facebook, Twitter, Google and Yahoo the user is actually
+                   * required to ensure that the email is in fact one that they control.
+                   *
+                   * However, with generic OpenID (and non-trusted OAuth providers) one can setup a
+                   * rogue provider that claims the user owns a particular email address without
+                   * actually owning it. So if you trust the email information, then you open yourself to
+                   * a vulnerability since someone might setup a provider that claims to own your
+                   * admin account email address and if you don't require the user to log in to
+                   * associate their account they gain access to any account.
+                   *
+                   * TL;DR - the only information you can trust is that the identity string is
+                   * associated with that user on that openID provider, you need the user to also
+                   * prove that they want to trust that identity provider on your application.
+                   *
+                   */
+                  Message::add('success', __('We found an existing account using your email address.'));
+                  // found: "merge" with the existing user
+                  $user_identity = ORM::factory('user_identity');
+                  $user_identity->user_id = $user->id;
+                  $user_identity->provider = $provider_name;
+                  $user_identity->identity = $provider->user_id();
+                  if($user_identity->check()) {
+                     $user_identity->save();
+                     // force login
+                     Auth_ORM::instance()->force_login($user);
+                     // redirect to the user account
+                     Request::instance()->redirect('user/profile');
+                     return;
+                  }
+               } else {
+                  Message::add('error', 'Your email is associated with an existing account. For security reasons, you have to log in to associate a 3rd party provider with an existing account. You can do this from your profile after logging in.');
+                  Request::instance()->redirect('user/login');
+               }
             }
          }
          // create new account
-         // Instantiate a new user
-         $user = ORM::factory('user');
-         // fill in values
-         // generate long random password (maximum that passes validation is 42 characters)
-         $password = $user->generate_password(42);
-         $values = array(
-             // get a unused username like firstname.surname or firstname.surname2 ...
-             'username' => $user->generate_username(str_replace(' ', '.', $provider->name())),
-             'password' => $password,
-             'password_confirm' => $password,
-         );
-         if(Validate::email($provider->email(), TRUE)) {
-            $values['email'] = $provider->email();
-         }
-         $user->values($values);
-         // If the post data validates using the rules setup in the user model
-         if ($user->check()) {
-            // create the account
-            $user->save();
-            // Add the login role to the user (add a row to the db)
-            $login_role = new Model_Role(array('name' =>'login'));
-            $user->add('roles', $login_role);
-            // create user identity after we have the user id
-            $user_identity = ORM::factory('user_identity');
-            $user_identity->user_id = $user->id;
-            $user_identity->provider = $provider_name;
-            $user_identity->identity = $provider->user_id();
-            if($user_identity->check()) {
-               $user_identity->save();
+         if(!Auth::instance()->logged_in()) {
+            // Instantiate a new user
+            $user = ORM::factory('user');
+            // fill in values
+            // generate long random password (maximum that passes validation is 42 characters)
+            $password = $user->generate_password(42);
+            $values = array(
+                // get a unused username like firstname.surname or firstname.surname2 ...
+                'username' => $user->generate_username(str_replace(' ', '.', $provider->name())),
+                'password' => $password,
+                'password_confirm' => $password,
+            );
+            if(Validate::email($provider->email(), TRUE)) {
+               $values['email'] = $provider->email();
             }
-            // sign the user in
-            Auth::instance()->login($values['username'], $password);
-            // redirect to the user account
-            Request::instance()->redirect('user/profile');
+            $user->values($values);
+            // If the post data validates using the rules setup in the user model
+            if ($user->check()) {
+               // create the account
+               $user->save();
+               // Add the login role to the user (add a row to the db)
+               $login_role = new Model_Role(array('name' =>'login'));
+               $user->add('roles', $login_role);
+               // create user identity after we have the user id
+               $user_identity = ORM::factory('user_identity');
+               $user_identity->user_id = $user->id;
+               $user_identity->provider = $provider_name;
+               $user_identity->identity = $provider->user_id();
+               if($user_identity->check()) {
+                  $user_identity->save();
+               }
+               // sign the user in
+               Auth::instance()->login($values['username'], $password);
+               // redirect to the user account
+               Request::instance()->redirect('user/profile');
+            } else {
+               if($provider_name == 'twitter') {
+                  Message::add('error', 'The Twitter API does not support retrieving your email address; you will have to enter it manually.');
+               } else {
+                  Message::add('error', 'We have successfully retrieved some of the data from your other account, but we were unable to get all the required fields. Please complete form below to register an account.');
+               }
+               // in case the data for some reason fails, the user will still see something sensible:
+               // the normal registration form.
+               // Load the view
+               $view = View::factory('user/register');
+               // Note how the first param is the path to the message file (e.g. /messages/register.php)
+               $view->errors = $user->validate()->errors('register');
+               // Pass on the old form values
+               $values['password'] = $values['password_confirm'] = '';
+               $view->set('defaults', $values);
+               $this->template->content = $view;
+            }
          } else {
-            Message::add('error', 'Please re-check the information below.');
-            // in case the data for some reason fails, the user will still see something sensible:
-            // the normal registration form.
-            // Load the view
-            $view = View::factory('user/register');
-            // Note how the first param is the path to the message file (e.g. /messages/register.php)
-            $view->errors = $user->validate()->errors('register');
-            // Pass on the old form values
-            $values['password'] = $values['password_confirm'] = '';
-            $view->set('defaults', $values);
-            $this->template->content = $view;
+            Message::add('error', 'You are logged in, but the email received from the provider does not match the email associated with your account.');
+            Request::instance()->redirect('user/profile');
          }
       } else {
          Message::add('error', 'Retrieving information from the provider failed. Please register below.');
