@@ -9,6 +9,8 @@ class Model_Useradmin_User extends Model_Auth_User {
       // auth
       'roles' => array('through' => 'roles_users'),
       'user_tokens' => array(),
+      // for facebook / twitter / google / yahoo identities
+      'user_identity' => array(),
       );
    protected $_has_one= array(
       );

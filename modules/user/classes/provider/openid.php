@@ -28,7 +28,7 @@ class Provider_OpenID {
    public function redirect_url() {
 		$this->provider->identity = Provider_OpenID::$config[$this->provider_name]['url'];
 		$this->provider->returnUrl = URL::site('/user/provider_return/'.$this->provider_name, true);
-		$this->provider->required = array('namePerson/friendly', 'contact/email');
+		$this->provider->required = array('namePerson', 'namePerson/first', 'namePerson/last', 'contact/email');
       return $this->provider->authUrl();
    }
 
@@ -65,23 +65,17 @@ class Provider_OpenID {
    }
 
    /**
-    * Get the display name from the provider.
-    * @return string
-    */
-   public function display_name() {
-      if(isset($this->data['name'])) {
-         return $this->data['name'];
-      }
-      return '';
-   }
-
-   /**
     * Get the full name (firstname surname) from the provider.
     * @return string
     */
    function name() {
-      if(isset($this->data['namePerson/friendly'])) {
-         return $this->data['namePerson/friendly'];
+      // YAHOO supports this ax
+      if(isset($this->data['namePerson'])) {
+         return $this->data['namePerson'];
+      }
+      // GOOGLE uses these...
+      if(isset($this->data['namePerson/first']) && isset($this->data['namePerson/last'])) {
+         return $this->data['namePerson/first'].' '.$this->data['namePerson/last'];
       }
       return '';
    }

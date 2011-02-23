@@ -72,17 +72,6 @@ class Provider_Facebook {
    }
 
    /**
-    * Get the display name from the provider.
-    * @return string
-    */
-   public function display_name() {
-      if(isset($this->me['email'])) {
-         return $this->me['email'];
-      }
-      return '';
-   }
-
-   /**
     * Get the full name (firstname surname) from the provider.
     * @return string
     */

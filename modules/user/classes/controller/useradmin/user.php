@@ -432,10 +432,53 @@ class Controller_Useradmin_User extends Controller_App {
    }
 
    /**
+    * Associate a logged in user with an account.
+    *
+    * Note that you should not trust the OAuth/OpenID provider-supplied email
+    * addresses. Yes, for Facebook, Twitter, Google and Yahoo the user is actually
+    * required to ensure that the email is in fact one that they control.
+    *
+    * However, with generic OpenID (and non-trusted OAuth providers) one can setup a
+    * rogue provider that claims the user owns a particular email address without
+    * actually owning it. So if you trust the email information, then you open yourself to
+    * a vulnerability since someone might setup a provider that claims to own your
+    * admin account email address and if you don't require the user to log in to
+    * associate their account they gain access to any account.
+    *
+    * TL;DR - the only information you can trust is that the identity string is
+    * associated with that user on that openID provider, you need the user to also
+    * prove that they want to trust that identity provider on your application.
+    *
+    * @return void
+    */
+   function action_associate() {
+      // Note: there is minor security issue here - we trust the email supplied by Facebook
+      // They do perform a verification check for email addresses... and the data is signed.
+      // If you want, you can ask the user to enter their password to confirm, but it's
+      // a bit clunky - and adds more special cases like what if they don't remember the password?
+      // Then you have to allow them to reset the password using their email ....
+      Message::add('success', __('We found an existing account using your email address.'));
+      // found: "merge" with the existing user
+      $user_identity = ORM::factory('user_identity');
+      $user_identity->user_id = $user->id;
+      $user_identity->provider = $provider_name;
+      $user_identity->identity = $provider->user_id();
+      if($user_identity->check()) {
+         $user_identity->save();
+         // force login
+         Auth_ORM::instance()->force_login($user);
+         // redirect to the user account
+         Request::instance()->redirect('user/profile');
+         return;
+      }
+   }
+   /**
     * Redirect to the provider's auth URL
     * @param string $provider
     */
    function action_provider($provider_name = null) {
+      // TODO check that
+      // TODO check that the provider is enabled
       if(!empty($provider_name)) {
          $provider = null;
          switch ($provider_name) {
@@ -460,7 +503,8 @@ class Controller_Useradmin_User extends Controller_App {
   /**
    * Allow the user to login and register using a 3rd party provider.
    */
-     function action_provider_return($provider_name = null) {
+   function action_provider_return($provider_name = null) {
+      // TODO: enable/disable providers via config.
       Message::add('success', 'provider '.$provider_name.' return');
       $provider = null;
       switch ($provider_name) {
@@ -481,13 +525,14 @@ class Controller_Useradmin_User extends Controller_App {
       if($provider->verify()) {
          // check for previously connected user
          $uid = $provider->user_id();
-
-         print $provider_name.' returned uid: '.$uid;
-         die;
-
-         if(is_numeric($uid)) {
-            $user = ORM::factory('user')->where('facebook_user_id', '=', $uid)->find();
-            if($user->loaded()) {
+         // TODO: make sure that this cannot resolve to a user even if empty!!
+         $user_identity = ORM::factory('user_identity')
+                        ->where('provider', '=', $provider_name)
+                        ->and_where('identity', '=', $uid)
+                        ->find();
+         if($user_identity->loaded()) {
+            $user = $user_identity->user;
+            if($user->loaded() && $user->id == $user_identity->user_id && is_numeric($user->id)) {
                // found, log user in
                Auth_ORM::instance()->force_login($user);
                // redirect to the user account
@@ -500,21 +545,9 @@ class Controller_Useradmin_User extends Controller_App {
          if(Validate::email($email, TRUE)) {
             // search for existing user using email
             $user = ORM::factory('user')->where('email', '=', $email)->find();
-            if(is_numeric($user->id) && ($user->id != '0')) {
-               // Note: there is minor security issue here - we trust the email supplied by Facebook
-               // They do perform a verification check for email addresses... and the data is signed.
-               // If you want, you can ask the user to enter their password to confirm, but it's
-               // a bit clunky - and adds more special cases like what if they don't remember the password?
-               // Then you have to allow them to reset the password using their email ....
-               Message::add('success', __('We found an existing account using your email address.'));
-               // found: "merge" with the existing user
-               $user->facebook_user_id = $provider->user_id();
-               $user->save();
-               // force login
-               Auth_ORM::instance()->force_login($user);
-               // redirect to the user account
-               Request::instance()->redirect('user/profile');
-               return;
+            if($user->loaded && is_numeric($user->id)) {
+               Message::add('error', 'Your email is associated with an existing account. For security reasons, you have to log in to associate a 3rd party provider with an existing account.');
+               Request::instance()->redirect('user/login');
             }
          }
          // create new account
@@ -526,12 +559,11 @@ class Controller_Useradmin_User extends Controller_App {
          $values = array(
              // get a unused username like firstname.surname or firstname.surname2 ...
              'username' => $user->generate_username(str_replace(' ', '.', $provider->name())),
-             'facebook_user_id' => $provider->user_id(),
              'password' => $password,
              'password_confirm' => $password,
          );
-         if(Validate::email($email, TRUE)) {
-            $values['email'] = $provider->name();
+         if(Validate::email($provider->email(), TRUE)) {
+            $values['email'] = $provider->email();
          }
          $user->values($values);
          // If the post data validates using the rules setup in the user model
@@ -541,11 +573,20 @@ class Controller_Useradmin_User extends Controller_App {
             // Add the login role to the user (add a row to the db)
             $login_role = new Model_Role(array('name' =>'login'));
             $user->add('roles', $login_role);
+            // create user identity after we have the user id
+            $user_identity = ORM::factory('user_identity');
+            $user_identity->user_id = $user->id;
+            $user_identity->provider = $provider_name;
+            $user_identity->identity = $provider->user_id();
+            if($user_identity->check()) {
+               $user_identity->save();
+            }
             // sign the user in
             Auth::instance()->login($values['username'], $password);
             // redirect to the user account
             Request::instance()->redirect('user/profile');
          } else {
+            Message::add('error', 'Please re-check the information below.');
             // in case the data for some reason fails, the user will still see something sensible:
             // the normal registration form.
             // Load the view
@@ -558,7 +599,7 @@ class Controller_Useradmin_User extends Controller_App {
             $this->template->content = $view;
          }
       } else {
-         Message::add('error', 'Retrieving information from Facebook failed. Please register below.');
+         Message::add('error', 'Retrieving information from the provider failed. Please register below.');
          Request::instance()->redirect('user/register');
       }
    }
