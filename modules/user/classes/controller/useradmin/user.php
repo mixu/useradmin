@@ -226,6 +226,8 @@ class Controller_Useradmin_User extends Controller_App {
          }
          // Delete the user
          $user->delete($id);
+         // Delete any associated identities
+         DB::delete('user_identities')->where('user_id', '=', $id)->execute();
          // message: save success
          Message::add('success', __('User deleted.'));
          Request::instance()->redirect('user/profile');
@@ -289,7 +291,8 @@ class Controller_Useradmin_User extends Controller_App {
                $view->set('errors', $status->errors('login'));
             }
          }
-         $view->set('facebook_enabled', Kohana::config('useradmin')->facebook);
+         $providers = Kohana::config('useradmin.providers');
+         $view->set('facebook_enabled', isset($providers['facebook']) ? $providers['facebook'] : false);
          $this->template->content = $view;
       }
    }
@@ -437,26 +440,13 @@ class Controller_Useradmin_User extends Controller_App {
     */
    function action_provider($provider_name = null) {
       if(Auth::instance()->logged_in()){
+         Message::add('success', 'Already logged in.');
          // redirect to the user account
          Request::instance()->redirect('user/profile');
       }
-      $provider = null;
-      if(!empty($provider_name) && Kohana::config('useradmin.'.$provider_name)) {
-         switch ($provider_name) {
-            case 'twitter':
-               $provider = new Provider_Twitter();
-               break;
-            case 'google':
-               $provider = new Provider_OpenID('google');
-               break;
-            case 'yahoo':
-               $provider = new Provider_OpenID('yahoo');
-               break;
-            default:
-               $provider = new Provider_Facebook();
-               break;
-         }
-         Request::instance()->redirect($provider->redirect_url());
+      $provider = Provider::factory($provider_name);
+      if(is_object($provider)) {
+         Request::instance()->redirect($provider->redirect_url('/user/provider_return/'.$provider_name));
          return;
       }
       Message::add('error', 'Provider is not enabled; please select another provider or log in normally.');
@@ -464,28 +454,82 @@ class Controller_Useradmin_User extends Controller_App {
       return;
    }
 
+   function action_associate($provider_name = null) {
+      if(Auth::instance()->logged_in()){
+         $provider = Provider::factory($provider_name);
+         if(is_object($provider)) {
+            Request::instance()->redirect($provider->redirect_url('/user/provider_return/'.$provider_name));
+            return;
+         }
+      }
+      Message::add('error', 'Provider is not enabled; please select another provider or log in normally.');
+      Request::instance()->redirect('user/login');
+      return;
+
+   }
+
+   function action_associate_return($provider_name = null) {
+      if(Auth::instance()->logged_in()){
+         $provider = Provider::factory($provider_name);
+         // verify the request
+         if(is_object($provider) && $provider->verify()) {
+            // check for existing account
+            $email = $provider->email();
+            if(Validate::email($email, TRUE)) {
+               // search for existing user using email
+               $user = ORM::factory('user')->where('email', '=', $email)->find();
+               if($user->loaded() && is_numeric($user->id)) {
+                  if(Auth::instance()->logged_in() && Auth::instance()->get_user()->id == $user->id) {
+                     /*
+                      * Associate a logged in user with an account.
+                      *
+                      * Note that you should not trust the OAuth/OpenID provider-supplied email
+                      * addresses. Yes, for Facebook, Twitter, Google and Yahoo the user is actually
+                      * required to ensure that the email is in fact one that they control.
+                      *
+                      * However, with generic OpenID (and non-trusted OAuth providers) one can setup a
+                      * rogue provider that claims the user owns a particular email address without
+                      * actually owning it. So if you trust the email information, then you open yourself to
+                      * a vulnerability since someone might setup a provider that claims to own your
+                      * admin account email address and if you don't require the user to log in to
+                      * associate their account they gain access to any account.
+                      *
+                      * TL;DR - the only information you can trust is that the identity string is
+                      * associated with that user on that openID provider, you need the user to also
+                      * prove that they want to trust that identity provider on your application.
+                      *
+                      */
+                     Message::add('success', __('We found an existing account using your email address.'));
+                     // found: "merge" with the existing user
+                     $user_identity = ORM::factory('user_identity');
+                     $user_identity->user_id = $user->id;
+                     $user_identity->provider = $provider_name;
+                     $user_identity->identity = $provider->user_id();
+                     if($user_identity->check()) {
+                        $user_identity->save();
+                        // force login
+                        Auth_ORM::instance()->force_login($user);
+                        // redirect to the user account
+                        Request::instance()->redirect('user/profile');
+                        return;
+                     }
+                  } else {
+                     Message::add('error', 'Your email is associated with an existing account. For security reasons, you have to log in to associate a 3rd party provider with an existing account. You can do this from your profile after logging in.');
+                     Request::instance()->redirect('user/login');
+                     return;
+                  }
+               }
+            }
+         }
+      }
+   }
+
   /**
    * Allow the user to login and register using a 3rd party provider.
    */
    function action_provider_return($provider_name = null) {
-      // TODO: enable/disable providers via config.
-      $provider = null;
-      if(!empty($provider_name) && Kohana::config('useradmin.'.$provider_name)) {
-         switch ($provider_name) {
-            case 'twitter':
-               $provider = new Provider_Twitter();
-               break;
-            case 'google':
-               $provider = new Provider_OpenID('google');
-               break;
-            case 'yahoo':
-               $provider = new Provider_OpenID('yahoo');
-               break;
-            default:
-               $provider = new Provider_Facebook();
-               break;
-         }
-      } else {
+      $provider = Provider::factory($provider_name);
+      if(!is_object($provider)) {
          Message::add('error', 'Provider is not enabled; please select another provider or log in normally.');
          Request::instance()->redirect('user/login');
          return;
@@ -506,53 +550,6 @@ class Controller_Useradmin_User extends Controller_App {
                // redirect to the user account
                Request::instance()->redirect('user/profile');
                return;
-            }
-         }
-         // check for existing account
-         $email = $provider->email();
-         if(Validate::email($email, TRUE)) {
-            // search for existing user using email
-            $user = ORM::factory('user')->where('email', '=', $email)->find();
-            if($user->loaded() && is_numeric($user->id)) {
-               if(Auth::instance()->logged_in() && Auth::instance()->get_user()->id == $user->id) {
-                  /*
-                   * Associate a logged in user with an account.
-                   *
-                   * Note that you should not trust the OAuth/OpenID provider-supplied email
-                   * addresses. Yes, for Facebook, Twitter, Google and Yahoo the user is actually
-                   * required to ensure that the email is in fact one that they control.
-                   *
-                   * However, with generic OpenID (and non-trusted OAuth providers) one can setup a
-                   * rogue provider that claims the user owns a particular email address without
-                   * actually owning it. So if you trust the email information, then you open yourself to
-                   * a vulnerability since someone might setup a provider that claims to own your
-                   * admin account email address and if you don't require the user to log in to
-                   * associate their account they gain access to any account.
-                   *
-                   * TL;DR - the only information you can trust is that the identity string is
-                   * associated with that user on that openID provider, you need the user to also
-                   * prove that they want to trust that identity provider on your application.
-                   *
-                   */
-                  Message::add('success', __('We found an existing account using your email address.'));
-                  // found: "merge" with the existing user
-                  $user_identity = ORM::factory('user_identity');
-                  $user_identity->user_id = $user->id;
-                  $user_identity->provider = $provider_name;
-                  $user_identity->identity = $provider->user_id();
-                  if($user_identity->check()) {
-                     $user_identity->save();
-                     // force login
-                     Auth_ORM::instance()->force_login($user);
-                     // redirect to the user account
-                     Request::instance()->redirect('user/profile');
-                     return;
-                  }
-               } else {
-                  Message::add('error', 'Your email is associated with an existing account. For security reasons, you have to log in to associate a 3rd party provider with an existing account. You can do this from your profile after logging in.');
-                  Request::instance()->redirect('user/login');
-                  return;
-               }
             }
          }
          // create new account

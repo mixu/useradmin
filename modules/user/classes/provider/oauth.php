@@ -6,7 +6,7 @@
  * Kohana's bundled OAuth module supports Twitter (and Google) as providers.
  * 
  */
-class Provider_OAuth {
+class Provider_OAuth extends Provider {
 
    /**
     * Privately used for OAuth requests
@@ -37,9 +37,9 @@ class Provider_OAuth {
     * Get the URL to redirect to.
     * @return string
     */
-   public function redirect_url() {
+   public function redirect_url($return_url) {
 		// Add the callback URL to the consumer
-		$this->consumer->callback(URL::site('/user/provider_return/'.$this->provider_name, true));
+		$this->consumer->callback(URL::site($return_url, true));
 
 		// Get a request token for the consumer
 		$request_token = $this->provider->request_token($this->consumer);

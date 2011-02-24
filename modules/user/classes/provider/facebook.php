@@ -4,7 +4,7 @@
  * Oauth 2.0 using Facebook's own API class.
  * If Oauth 2.0 becomes more common, a base class could be created to abstract away from Facebook.
  */
-class Provider_Facebook {
+class Provider_Facebook extends Provider {
 
    private $facebook = null;
    private $me = null;
@@ -26,10 +26,10 @@ class Provider_Facebook {
     * Get the URL to redirect to.
     * @return string
     */
-   public function redirect_url() {
+   public function redirect_url($return_url) {
       return $this->facebook->getLoginUrl(array(
-          'next' => URL::site('/user/provider_return/facebook', true),
-          'cancel_url' => URL::site('/user/provider_return/facebook', true),
+          'next' => URL::site($return_url, true),
+          'cancel_url' => URL::site($return_url, true),
           'req_perms' => 'email',
       ));
    }
@@ -75,7 +75,7 @@ class Provider_Facebook {
     * Get the full name (firstname surname) from the provider.
     * @return string
     */
-   function name() {
+   public function name() {
       if(isset($this->me['first_name'])) {
          return $this->me['first_name'].' '.$this->me['last_name'];
       }

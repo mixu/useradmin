@@ -171,6 +171,8 @@ class Controller_Useradmin_Admin_User extends Controller_App {
       if(is_numeric($id) && isset($_POST['confirmation']) && $_POST['confirmation'] == 'Y') {
          // Delete the user
          $user->delete($id);
+         // Delete any associated identities
+         DB::delete('user_identities')->where('user_id', '=', $id)->execute();
          // message: save success
          Message::add('success', 'User deleted.');
          // redirect and exit

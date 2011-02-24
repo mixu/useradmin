@@ -70,7 +70,7 @@ class Provider_Twitter extends Provider_OAuth {
     * Get the full name (firstname surname) from the provider.
     * @return string
     */
-   function name() {
+   public function name() {
       if(isset($this->data['name'])) {
          return $this->data['name'];
       } else if(isset($this->data['screen_name'])) {

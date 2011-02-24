@@ -2,6 +2,8 @@
 TUTORIAL
 ========
 
+Note: I haven't had the time to look into upgrading from 3.0 to 3.1.x. Help me out and contribute if you need it quickly!
+
 Most recent, detailed tutorial:
 
 * [Getting started with Useradmin, my Kohana 3 auth admin module](http://blog.mixu.net/2011/01/13/getting-started-with-useradmin-my-kohana-3-auth-admin-module/)
@@ -15,12 +17,9 @@ Earlier writing about Kohana auth:
 TODO
 ====
 
-- Enable/disable providers via config
 - Support for associating an existing account from the profile page.
 - Allow associating accounts even if the email matches as long as the identity is unique.
 - Support for Twitter registration (cache the Twitter ID during registration)
-- Add small icons to useradmin user index to show what providers the user account is associated with.
-- Make deleting an account also delete any identity associations.
 - Configuration instructions
 - Screenshots
 

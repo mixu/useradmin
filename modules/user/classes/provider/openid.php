@@ -3,7 +3,7 @@
 /**
  * OpenID provider using LightOpenID
  */
-class Provider_OpenID {
+class Provider_OpenID extends Provider {
 
   protected static $config = array(
       'google' => array( 'url' => 'https://www.google.com/accounts/o8/id' ),
@@ -25,9 +25,9 @@ class Provider_OpenID {
     * Get the URL to redirect to.
     * @return string
     */
-   public function redirect_url() {
+   public function redirect_url($return_url) {
 		$this->provider->identity = Provider_OpenID::$config[$this->provider_name]['url'];
-		$this->provider->returnUrl = URL::site('/user/provider_return/'.$this->provider_name, true);
+		$this->provider->returnUrl = URL::site($return_url, true);
 		$this->provider->required = array('namePerson', 'namePerson/first', 'namePerson/last', 'contact/email');
       return $this->provider->authUrl();
    }
@@ -68,7 +68,7 @@ class Provider_OpenID {
     * Get the full name (firstname surname) from the provider.
     * @return string
     */
-   function name() {
+   public function name() {
       // YAHOO supports this ax
       if(isset($this->data['namePerson'])) {
          return $this->data['namePerson'];
