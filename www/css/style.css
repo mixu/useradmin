@@ -3,9 +3,11 @@ html{color:#000;background:#FFF;}body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pr
 
 /* Global styles: body, paragraphs, lists etc */
 
+html {
+   background-color: #E5E5E5;
+}
 body {
    font-family: Arial,Helvetica,Sans-serif;
-   background-color: rgb(255,255,255);
    margin: 0px;
 }
 
@@ -247,12 +249,6 @@ div.error {
    table.content tr.odd, table.content td.odd { background: #eeeeee; }
 
 
-/* Footer */
-
-
-#page {
-   background: #E5E5E5;
-}
 #content {
    padding: 20px 20px;
 }
@@ -537,6 +533,7 @@ input.half {
    color: #818171;
 }
 
+/* front page login links */
 a.login_provider {
    width: 100px; 
    height: 60px;
@@ -548,3 +545,38 @@ a.login_provider {
 a.login_provider:hover {
    border: 1px solid black;
 }
+
+/* profile page: associated accounts */
+
+a.associated_account {
+   width: 32px; height: 32px; margin: 3px; float: left;
+}
+
+a.facebook {
+   background: #FFF url(/img/small/facebook_gray.png) no-repeat center center;
+}
+
+a.facebook:hover {
+   background: #FFF url(/img/small/facebook.png) no-repeat center center;
+}
+
+a.twitter {
+   background: #FFF url(/img/small/twitter_gray.png) no-repeat center center;   
+}
+a.twitter:hover {
+   background: #FFF url(/img/small/twitter.png) no-repeat center center;
+}
+a.google {
+background: #FFF url(/img/small/google_gray.png) no-repeat center center
+}
+a.google:hover {
+background: #FFF url(/img/small/google.png) no-repeat center center
+}
+a.yahoo {
+background: #FFF url(/img/small/yahoo_gray.png) no-repeat center center;
+}
+a.yahoo:hover {
+background: #FFF url(/img/small/yahoo.png) no-repeat center center;
+}
+
+

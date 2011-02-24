@@ -31,14 +31,22 @@ echo '</td><td width="5" style="border-right: 1px solid #DDD;">&nbsp;</td><td><t
 
 echo '<ul>';
 echo '<li style="height: 61px">'.__('Don\'t have an account?').' '.Html::anchor('user/register', __('Register a new account')).'.</li>';
-// Facebook
-   echo '<li style="padding-bottom: 8px;"><label>'.__('To register / log in using another account, please click your provider').':</label></li>';
-   echo '<li>
-<a class="login_provider" style="background: #FFF url(/img/facebook.png) no-repeat center center" href="'.URL::site('/user/provider/facebook').'"></a>
-<a class="login_provider" style="background: #FFF url(/img/twitter.png) no-repeat center center" href="'.URL::site('/user/provider/twitter').'"></a>
-<a class="login_provider" style="background: #FFF url(/img/google.gif) no-repeat center center" href="'.URL::site('/user/provider/google').'"></a>
-<a class="login_provider" style="background: #FFF url(/img/yahoo.gif) no-repeat center center" href="'.URL::site('/user/provider/yahoo').'"></a>
-<br style="clear: both;">
+$options = Kohana::config('useradmin');
+echo '<li style="padding-bottom: 8px;"><label>'.__('To register / log in using another account, please click your provider').':</label></li>';
+echo '<li>';
+if(isset($options['facebook']) && $options['facebook']) {
+   echo '<a class="login_provider" style="background: #FFF url(/img/facebook.png) no-repeat center center" href="'.URL::site('/user/provider/facebook').'"></a>';
+}
+if(isset($options['twitter']) && $options['twitter']) {
+   echo '<a class="login_provider" style="background: #FFF url(/img/twitter.png) no-repeat center center" href="'.URL::site('/user/provider/twitter').'"></a>';
+}
+if(isset($options['google']) && $options['google']) {
+   echo '<a class="login_provider" style="background: #FFF url(/img/google.gif) no-repeat center center" href="'.URL::site('/user/provider/google').'"></a>';
+}
+if(isset($options['yahoo']) && $options['yahoo']) {
+   echo '<a class="login_provider" style="background: #FFF url(/img/yahoo.gif) no-repeat center center" href="'.URL::site('/user/provider/yahoo').'"></a>';
+}
+echo '<br style="clear: both;">
 </li>';
 echo '</ul>';
 echo '</td></tr></table>';

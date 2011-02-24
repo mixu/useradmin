@@ -24,16 +24,16 @@
          foreach($user->user_identity->find_all() as $identity) {            
             switch ($identity->provider) {
                case 'facebook':
-                  echo '<a style="width: 32px; height: 32px; margin: 3px; float: left; background: #FFF url(/img/small/facebook.png) no-repeat center center"></a>';
+                  echo '<a class="associated_account" style="background: #FFF url(/img/small/facebook.png) no-repeat center center"></a>';
                   break;
                case 'twitter':
-                  echo '<a style="width: 32px; height: 32px; margin: 3px; float: left; background: #FFF url(/img/small/twitter.png) no-repeat center center"></a>';
+                  echo '<a class="associated_account" style="background: #FFF url(/img/small/twitter.png) no-repeat center center"></a>';
                   break;
                case 'google':
-                  echo '<a style="width: 32px; height: 32px; margin: 3px; float: left; background: #FFF url(/img/small/google.png) no-repeat center center"></a>';
+                  echo '<a class="associated_account" style="background: #FFF url(/img/small/google.png) no-repeat center center"></a>';
                   break;
                case 'yahoo':
-                  echo '<a style="width: 32px; height: 32px; margin: 3px; float: left; background: #FFF url(/img/small/yahoo.png) no-repeat center center"></a>';
+                  echo '<a class="associated_account" style="background: #FFF url(/img/small/yahoo.png) no-repeat center center"></a>';
                   break;
                default:
                   break;
@@ -49,16 +49,16 @@
          foreach($providers as $provider => $enabled) {
             switch ($provider) {
                case 'facebook':
-                  echo '<a style="width: 32px; height: 32px; margin: 3px; float: left; background: #FFF url(/img/small/facebook_gray.png) no-repeat center center" href="'.URL::site('/user/provider/facebook').'"></a>';
+                  echo '<a class="associated_account facebook" href="'.URL::site('/user/provider/facebook').'"></a>';
                   break;
                case 'twitter':
-                  echo '<a style="width: 32px; height: 32px; margin: 3px; float: left; background: #FFF url(/img/small/twitter_gray.png) no-repeat center center" href="'.URL::site('/user/provider/twitter').'"></a>';
+                  echo '<a class="associated_account twitter" href="'.URL::site('/user/provider/twitter').'"></a>';
                   break;
                case 'google':
-                  echo '<a style="width: 32px; height: 32px; margin: 3px; float: left; background: #FFF url(/img/small/google_gray.png) no-repeat center center" href="'.URL::site('/user/provider/google').'"></a>';
+                  echo '<a class="associated_account google" href="'.URL::site('/user/provider/google').'"></a>';
                   break;
                case 'yahoo':
-                  echo '<a style="width: 32px; height: 32px; margin: 3px; float: left; background: #FFF url(/img/small/yahoo_gray.png) no-repeat center center" href="'.URL::site('/user/provider/yahoo').'"></a>';
+                  echo '<a class="associated_account yahoo" href="'.URL::site('/user/provider/yahoo').'"></a>';
                   break;
                default:
                   break;

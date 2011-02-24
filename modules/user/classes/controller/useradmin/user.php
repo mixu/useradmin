@@ -440,9 +440,8 @@ class Controller_Useradmin_User extends Controller_App {
          // redirect to the user account
          Request::instance()->redirect('user/profile');
       }
-      // TODO check that the provider is enabled
-      if(!empty($provider_name)) {
-         $provider = null;
+      $provider = null;
+      if(!empty($provider_name) && Kohana::config('useradmin.'.$provider_name)) {
          switch ($provider_name) {
             case 'twitter':
                $provider = new Provider_Twitter();
@@ -460,6 +459,9 @@ class Controller_Useradmin_User extends Controller_App {
          Request::instance()->redirect($provider->redirect_url());
          return;
       }
+      Message::add('error', 'Provider is not enabled; please select another provider or log in normally.');
+      Request::instance()->redirect('user/login');
+      return;
    }
 
   /**
@@ -467,21 +469,26 @@ class Controller_Useradmin_User extends Controller_App {
    */
    function action_provider_return($provider_name = null) {
       // TODO: enable/disable providers via config.
-      Message::add('success', 'provider '.$provider_name.' return');
       $provider = null;
-      switch ($provider_name) {
-         case 'twitter':
-            $provider = new Provider_Twitter();
-            break;
-         case 'google':
-            $provider = new Provider_OpenID('google');
-            break;
-         case 'yahoo':
-            $provider = new Provider_OpenID('yahoo');
-            break;
-         default:
-            $provider = new Provider_Facebook();
-            break;
+      if(!empty($provider_name) && Kohana::config('useradmin.'.$provider_name)) {
+         switch ($provider_name) {
+            case 'twitter':
+               $provider = new Provider_Twitter();
+               break;
+            case 'google':
+               $provider = new Provider_OpenID('google');
+               break;
+            case 'yahoo':
+               $provider = new Provider_OpenID('yahoo');
+               break;
+            default:
+               $provider = new Provider_Facebook();
+               break;
+         }
+      } else {
+         Message::add('error', 'Provider is not enabled; please select another provider or log in normally.');
+         Request::instance()->redirect('user/login');
+         return;
       }
       // verify the request
       if($provider->verify()) {
@@ -544,6 +551,7 @@ class Controller_Useradmin_User extends Controller_App {
                } else {
                   Message::add('error', 'Your email is associated with an existing account. For security reasons, you have to log in to associate a 3rd party provider with an existing account. You can do this from your profile after logging in.');
                   Request::instance()->redirect('user/login');
+                  return;
                }
             }
          }

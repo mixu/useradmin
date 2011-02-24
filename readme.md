@@ -1,16 +1,3 @@
-SUPPORTED PROVIDERS
-===================
-
-- OAuth v2.0:
-+ Facebook
-- OAuth v1.0:
-+ Twitter
-
-Later:
-+ LinkedIn (OAuth v1.0)
-+ Google (OpenID)
-+ Yahoo (OpenID)
-+ Windows Live (proprietary bs)
 
 TUTORIAL
 ========
@@ -24,6 +11,29 @@ Earlier writing about Kohana auth:
 * [Kohana 3 auth sample implementation and documentation](http://blog.mixu.net/2010/09/14/kohana-3-auth-sample-implementation-and-documentation/)
 * [Kohana 3 auth: the auth module functionality](http://blog.mixu.net/2010/09/07/kohana-3-auth-the-auth-module-functionality/)
 * [Step-by-step guide to getting started with Kohana 3 auth](http://blog.mixu.net/2010/09/06/step-by-step-guide-to-kohana-3-auth/)
+
+TODO
+====
+
+- Enable/disable providers via config
+- Support for associating an existing account from the profile page.
+- Allow associating accounts even if the email matches as long as the identity is unique.
+- Support for Twitter registration (cache the Twitter ID during registration)
+- Add small icons to useradmin user index to show what providers the user account is associated with.
+- Make deleting an account also delete any identity associations.
+- Configuration instructions
+- Screenshots
+
+
+SUPPORTED PROVIDERS
+===================
+
++ Regular Kohana user account registration
++ Facebook (OAuth v2.0)
++ Twitter (OAuth v1.0)
++ Google (OpenID)
++ Yahoo (OpenID)
+
 
 CONTRIBUTORS
 ============
@@ -39,7 +49,7 @@ Feb xxth 2011:
 * Twitter login! Requires that you enable the kohana-oauth module from the core.
 * Google and Yahoo login! Uses LightOpenID which is bundled in the repo. I had a look at Janrain's popular library, but to me if you let your library generate errors on PHP 5.0.0 - 5.3.0 and have dozens of pending issues and pull requests - then you just don't care about supporting your library. So not using Janrain's lib.
 * Refactored 3rd party account provider code for better extensibility.
-* Changed from Facebook Javascript API (which had some reports of problems) to PHP/redirect based API.
+* Changed from Facebook Javascript API (which had some reports of problems) to PHP/redirect based API. No popups during login, just a redirect!
 * Database changes to allow user to be associated with more service providers. See MIGRATION below if you used had the Facebook login enabled previously and want to migrate the accounts.
 * Included Datatable helper which helps when working with pagination links in tables.
 
@@ -81,10 +91,15 @@ MIGRATION from pre-Feb xxth 2011 to new schema
 ==============================================
 
 The schema had to be updated to allow for better support for multiple 3rd party providers.
-After this, schema changes should not be necessary for a long while.
 
 Basically, the facebook_user_id field has been removed from the users table, and moved
-to a one-user-to-many-provider-id table.
+to the user_identies table. To migrate, you need to create a row for each user with a facebook_user_id
+in that table, something like:
+
+INSERT INTO `useradmin`.`user_identities` (`user_id`, `provider`, `identity`) SELECT `users`.`id`,
+"facebook", `users`.`facebook_user_id` FROM `useradmin`.`users`;
+
+after creating the new table. You can drop `facebook_user_id` after this.
 
 LICENCE (Simplified BSD licence)
 =======
