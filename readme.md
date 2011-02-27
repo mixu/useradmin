@@ -74,7 +74,7 @@ Sep 14th 2010:
 SCREENSHOT
 ==========
 
-![screenshot](useradmin-screen.png)
+![screenshot](http://github.com/mixu/useradmin/raw/master/useradmin-screen.png)
 
 MIGRATION from pre-Feb xxth 2011 to new schema
 ==============================================
