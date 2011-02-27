@@ -288,7 +288,7 @@ class Controller_Useradmin_User extends Controller_App {
                Request::instance()->redirect('user/profile');
             } else {
                // Get errors for display in view
-               $view->set('errors', $status->errors('login'));
+               $view->set('errors', $_REQUEST->errors('login'));
             }
          }
          $providers = Kohana::config('useradmin.providers');
