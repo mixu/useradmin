@@ -14,16 +14,6 @@ Earlier writing about Kohana auth:
 * [Kohana 3 auth: the auth module functionality](http://blog.mixu.net/2010/09/07/kohana-3-auth-the-auth-module-functionality/)
 * [Step-by-step guide to getting started with Kohana 3 auth](http://blog.mixu.net/2010/09/06/step-by-step-guide-to-kohana-3-auth/)
 
-TODO
-====
-
-- Support for associating an existing account from the profile page.
-- Allow associating accounts even if the email matches as long as the identity is unique.
-- Support for Twitter registration (cache the Twitter ID during registration)
-- Configuration instructions
-- Screenshots
-
-
 SUPPORTED PROVIDERS
 ===================
 
@@ -42,10 +32,10 @@ I would like to thank [jnbdz](https://bitbucket.org/jnbdz/useradmin/) for adding
 CHANGELOG
 =========
 
-Feb xxth 2011:
+Feb 27th 2011:
 
 * New UI! The UI is loosely based on https://github.com/pilu/web-app-theme (a theme generator for Ruby) and is a lot better looking than the old one. See screenshots below.
-* Twitter login! Requires that you enable the kohana-oauth module from the core.
+* Twitter login! Requires that you enable the kohana-oauth module from the core. 
 * Google and Yahoo login! Uses LightOpenID which is bundled in the repo. I had a look at Janrain's popular library, but to me if you let your library generate errors on PHP 5.0.0 - 5.3.0 and have dozens of pending issues and pull requests - then you just don't care about supporting your library. So not using Janrain's lib.
 * Refactored 3rd party account provider code for better extensibility.
 * Changed from Facebook Javascript API (which had some reports of problems) to PHP/redirect based API. No popups during login, just a redirect!
@@ -84,7 +74,7 @@ Sep 14th 2010:
 SCREENSHOT
 ==========
 
-Todo: add screenshot.
+![screenshot](useradmin-screen.png)
 
 MIGRATION from pre-Feb xxth 2011 to new schema
 ==============================================

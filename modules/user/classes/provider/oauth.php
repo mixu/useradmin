@@ -6,7 +6,7 @@
  * Kohana's bundled OAuth module supports Twitter (and Google) as providers.
  * 
  */
-class Provider_OAuth extends Provider {
+abstract class Provider_OAuth extends Provider {
 
    /**
     * Privately used for OAuth requests

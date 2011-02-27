@@ -29,9 +29,9 @@
          echo '<br style="clear: both;"></p>';
       }
       if(!empty($providers)) {
-         echo '<h2>Additional account providers</h2><p>';
+         echo '<h2>Additional account providers</h2><p>Click the provider icon to associate it with your existing account.</p><p>';
          foreach($providers as $provider => $enabled) {
-            echo '<a class="associated_account '.$provider.'" href="'.URL::site('/user/provider/'.$provider).'"></a>';
+            echo '<a class="associated_account '.$provider.'" href="'.URL::site('/user/associate/'.$provider).'"></a>';
          }
          echo '<br style="clear: both;"></p>';
       }

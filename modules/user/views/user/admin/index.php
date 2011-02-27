@@ -42,7 +42,7 @@ foreach ($users as $user) {
       $identities = $user->user_identity->find_all();
       if($identities->count() > 0) {
          foreach($identities as $identity) {
-            $row['identities'] .= '<img src="/img/tiny/'.$identity->provider.'.png">';
+            $row['identities'] .= '<img src="/img/tiny/'.$identity->provider.'.png"> ';
          }
       }
    }
