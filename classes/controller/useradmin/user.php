@@ -241,7 +241,7 @@ class Controller_Useradmin_User extends Controller_App {
     */
    public function action_login() {
       // ajax login
-      if(Request::$is_ajax && isset($_REQUEST['username'], $_REQUEST['password'])) {
+      if($this->request->is_ajax() && isset($_REQUEST['username'], $_REQUEST['password'])) {
          $this->auto_render = false;
          $this->request->headers['Content-Type'] = 'application/json';
          if(Auth::instance()->logged_in() != 0) {

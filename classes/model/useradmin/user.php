@@ -89,7 +89,7 @@ class Model_Useradmin_User extends Model_Auth_User {
     */
    public function login(array & $array, $redirect = FALSE) {
       // This is what core Auth does to allow both email and username logins
-      $fieldname = (Valid::email($array['username']) ? 'email' : 'username');
+      $fieldname = (Validate::email($array['username']) ? 'email' : 'username');
       $array = Validate::factory($array)
          ->label('username', $this->_labels[$fieldname])
          ->label('password', $this->_labels['password'])

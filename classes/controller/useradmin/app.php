@@ -13,7 +13,7 @@ class Controller_Useradmin_App extends Controller {
    /**
     * @var string Filename of the template file.
     */
-   public $template = 'default/template';
+   public $template = 'template/default';
 
    /**
     * @var boolean Whether the template file should be rendered automatically.
@@ -50,7 +50,7 @@ class Controller_Useradmin_App extends Controller {
     * - redirect to a different failure page from one part of the application
     */
    public function access_required() {
-      Request::instance()->redirect('user/noaccess');
+      $this->request->redirect('user/noaccess');
    }
 
    /**
@@ -59,7 +59,7 @@ class Controller_Useradmin_App extends Controller {
     * Override this in your own Controller / Controller_App.
     */
    public function login_required() {
-      Request::instance()->redirect('user/login');
+      Request::current()->redirect('user/login');
    }
 
    /**
@@ -86,7 +86,7 @@ class Controller_Useradmin_App extends Controller {
       $this->session = Session::instance();
 
       // Check user auth and role
-      $action_name = Request::instance()->action;
+      $action_name = Request::current()->action();
 
       if (($this->auth_required !== FALSE && Auth::instance()->logged_in($this->auth_required) === FALSE)
             // auth is required AND user role given in auth_required is NOT logged in
@@ -116,9 +116,9 @@ class Controller_Useradmin_App extends Controller {
          // Scripts in header
          $this->template->scripts = array();
          // ControllerName will contain the name of the Controller in the Template
-         $this->template->controllerName = $this->request->controller;
+         $this->template->controllerName = $this->request->controller();
          // ActionName will contain the name of the Action in the Template
-         $this->template->actionName = $this->request->action;
+         $this->template->actionName = $this->request->action();
          // next, it is expected that $this->template->content is set e.g. by rendering a view into it.
      }
    }
@@ -132,7 +132,7 @@ class Controller_Useradmin_App extends Controller {
    public function after() {
       if ($this->auto_render === TRUE) {
          // Assign the template as the request response and render it
-         $this->request->response = $this->template;
+         $this->response->body( $this->template );
          
          $styles = array( 'css/style.css' => 'screen');
          $scripts = array();
