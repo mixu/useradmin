@@ -51,9 +51,9 @@ class Controller_Useradmin_User extends Controller_App {
    public function action_index() {
       // if the user has the admin role, redirect to admin_user controller
       if(Auth::instance()->logged_in('admin')) {
-         Request::instance()->redirect('admin_user/index');
+         $this->request->redirect('admin_user/index');
       } else {
-         Request::instance()->redirect('user/profile');
+         $this->request->redirect('user/profile');
       }
    }
 
@@ -74,7 +74,7 @@ class Controller_Useradmin_User extends Controller_App {
       $this->template->title = __('User profile');
       if ( Auth::instance()->logged_in() == false ){
          // No user is currently logged in
-         Request::instance()->redirect('user/login');
+         $this->request->redirect('user/login');
       }
       $view = $this->template->content = View::factory('user/profile');
       // retrieve the current user and set the view variable accordingly
@@ -108,7 +108,7 @@ class Controller_Useradmin_User extends Controller_App {
             // message: save success
             Message::add('success', __('Values saved.'));
             // redirect and exit
-            Request::instance()->redirect('user/profile');
+            $this->request->redirect('user/profile');
             return;
          } else {
             // Get errors for display in view
@@ -149,7 +149,7 @@ class Controller_Useradmin_User extends Controller_App {
       // If user already signed-in
       if(Auth::instance()->logged_in() != false){
          // redirect to the user account
-         Request::instance()->redirect('user/profile');
+         $this->request->redirect('user/profile');
       }
       // Load the view
       $view = View::factory('user/register');
@@ -183,7 +183,7 @@ class Controller_Useradmin_User extends Controller_App {
             // sign the user in
             Auth::instance()->login($_POST['username'], $_POST['password']);
             // redirect to the user account
-            Request::instance()->redirect('user/profile');
+            $this->request->redirect('user/profile');
          } else {
             // Get errors for display in view
             // Note how the first param is the path to the message file (e.g. /messages/register.php)
@@ -208,7 +208,7 @@ class Controller_Useradmin_User extends Controller_App {
       $this->template->title = __('Close user account');
       if ( Auth::instance()->logged_in() == false ){
          // No user is currently logged in
-         Request::instance()->redirect('user/login');
+         $this->request->redirect('user/login');
       }
       // get the user id
       $id = Auth::instance()->get_user()->id;
@@ -216,7 +216,7 @@ class Controller_Useradmin_User extends Controller_App {
       // KO3 ORM is lazy loading, which means we have to access a single field to actually have something happen.
       if($user->id != $id) {
          // If the user is not the current user, redirect
-         Request::instance()->redirect('user/profile');
+         $this->request->redirect('user/profile');
       }
       // check for confirmation
       if(is_numeric($id) && isset($_POST['confirmation']) && $_POST['confirmation'] == 'Y') {
@@ -230,7 +230,7 @@ class Controller_Useradmin_User extends Controller_App {
          DB::delete('user_identities')->where('user_id', '=', $id)->execute();
          // message: save success
          Message::add('success', __('User deleted.'));
-         Request::instance()->redirect('user/profile');
+         $this->request->redirect('user/profile');
       }
       // display confirmation
       $this->template->content = View::factory('user/unregister')->set('id', $id)->set('data', array('username' => Auth::instance()->get_user()->username));
@@ -265,7 +265,7 @@ class Controller_Useradmin_User extends Controller_App {
          // If user already signed-in
          if(Auth::instance()->logged_in() != 0){
             // redirect to the user account
-            Request::instance()->redirect('user/profile');
+            $this->request->redirect('user/profile');
          }
          $view = View::factory('user/login');
          // allow setting the username as a get param
@@ -285,7 +285,7 @@ class Controller_Useradmin_User extends Controller_App {
             // If the post data validates using the rules setup in the user model
             if ($status) {
                // redirect to the user account
-               Request::instance()->redirect('user/profile');
+               $this->request->redirect('user/profile');
             } else {
                // Get errors for display in view
                $view->set('errors', $_REQUEST->errors('login'));
@@ -305,7 +305,7 @@ class Controller_Useradmin_User extends Controller_App {
       Auth::instance()->logout();
 
       // redirect to the user account and then the signin page if logout worked as expected
-      Request::instance()->redirect('user/profile');
+      $this->request->redirect('user/profile');
    }
 
    /**
@@ -315,7 +315,7 @@ class Controller_Useradmin_User extends Controller_App {
       // Password reset must be enabled in config/useradmin.php
       if(!Kohana::config('useradmin')->email) {
          Message::add('error', 'Password reset via email is not enabled. Please contact the site administrator to reset your password.');
-         Request::instance()->redirect('user/register');
+         $this->request->redirect('user/register');
       }
       // set the template title (see Controller_App for implementation)
       $this->template->title = __('Forgot password');
@@ -350,7 +350,7 @@ class Controller_Useradmin_User extends Controller_App {
                     ->setTo($to);
             if($mailer->send($message_swift)) {
                Message::add('success', __('Password reset email sent.'));
-               Request::instance()->redirect('user/login');
+               $this->request->redirect('user/login');
             } else {
                Message::add('failure', __('Could not send email.'));
             }
@@ -370,7 +370,7 @@ class Controller_Useradmin_User extends Controller_App {
       // Password reset must be enabled in config/useradmin.php
       if(!Kohana::config('useradmin')->email) {
          Message::add('error', 'Password reset via email is not enabled. Please contact the site administrator to reset your password.');
-         Request::instance()->redirect('user/register');
+         $this->request->redirect('user/register');
       }
       // set the template title (see Controller_App for implementation)
       $this->template->title = __('Reset password');
@@ -389,7 +389,7 @@ class Controller_Useradmin_User extends Controller_App {
                $user->save();
                Message::add('success', __('Password reset.'));
                Message::add('success', '<p>'.__('Your password has been reset to: ":password".', array(':password' => $password)).'</p><p>'.__('Please log in below.').'</p>');
-               Request::instance()->redirect('user/login?username='.$user->username);
+               $this->request->redirect('user/login?username='.$user->username);
             }
         }
      }
@@ -442,15 +442,15 @@ class Controller_Useradmin_User extends Controller_App {
       if(Auth::instance()->logged_in()){
          Message::add('success', 'Already logged in.');
          // redirect to the user account
-         Request::instance()->redirect('user/profile');
+         $this->request->redirect('user/profile');
       }
       $provider = Provider::factory($provider_name);
       if(is_object($provider)) {
-         Request::instance()->redirect($provider->redirect_url('/user/provider_return/'.$provider_name));
+         $this->request->redirect($provider->redirect_url('/user/provider_return/'.$provider_name));
          return;
       }
       Message::add('error', 'Provider is not enabled; please select another provider or log in normally.');
-      Request::instance()->redirect('user/login');
+      $this->request->redirect('user/login');
       return;
    }
 
@@ -459,21 +459,21 @@ class Controller_Useradmin_User extends Controller_App {
          if(isset($_POST['confirmation']) && $_POST['confirmation'] == 'Y') {
             $provider = Provider::factory($provider_name);
             if(is_object($provider)) {
-               Request::instance()->redirect($provider->redirect_url('/user/associate_return/'.$provider_name));
+               $this->request->redirect($provider->redirect_url('/user/associate_return/'.$provider_name));
                return;
             } else {
                Message::add('error', 'Provider is not enabled; please select another provider or log in normally.');
-               Request::instance()->redirect('user/login');
+               $this->request->redirect('user/login');
                return;
             }
          } else if(isset($_POST['confirmation'])) {
             Message::add('error', 'Please click Yes to confirm associating the account.');
-            Request::instance()->redirect('user/profile');
+            $this->request->redirect('user/profile');
             return;
          }
       } else {
          Message::add('error', 'You are not logged in.');
-         Request::instance()->redirect('user/login');
+         $this->request->redirect('user/login');
          return;
       }
      $this->template->content = View::factory('user/associate')->set('provider_name', $provider_name);
@@ -515,11 +515,11 @@ class Controller_Useradmin_User extends Controller_App {
                      Message::add('success', __('Your user account has been associated with this provider.'));
                      $user_identity->save();
                      // redirect to the user account
-                     Request::instance()->redirect('user/profile');
+                     $this->request->redirect('user/profile');
                      return;
                   } else {
                      Message::add('error', 'We were unable to associate this account with the provider. Please make sure that there are no other accounts using this provider identity, as each 3rd party provider identity can only be associated with one user account.');
-                     Request::instance()->redirect('user/login');
+                     $this->request->redirect('user/login');
                      return;
                   }
                }
@@ -527,7 +527,7 @@ class Controller_Useradmin_User extends Controller_App {
          }
       }
       Message::add('error', 'There was an error associating your account with this provider.');
-      Request::instance()->redirect('user/login');
+      $this->request->redirect('user/login');
       return;
    }
 
@@ -538,7 +538,7 @@ class Controller_Useradmin_User extends Controller_App {
       $provider = Provider::factory($provider_name);
       if(!is_object($provider)) {
          Message::add('error', 'Provider is not enabled; please select another provider or log in normally.');
-         Request::instance()->redirect('user/login');
+         $this->request->redirect('user/login');
          return;
       }
       // verify the request
@@ -555,7 +555,7 @@ class Controller_Useradmin_User extends Controller_App {
                // found, log user in
                Auth_ORM::instance()->force_login($user);
                // redirect to the user account
-               Request::instance()->redirect('user/profile');
+               $this->request->redirect('user/profile');
                return;
             }
          }
@@ -594,7 +594,7 @@ class Controller_Useradmin_User extends Controller_App {
                // sign the user in
                Auth::instance()->login($values['username'], $password);
                // redirect to the user account
-               Request::instance()->redirect('user/profile');
+               $this->request->redirect('user/profile');
             } else {
                if($provider_name == 'twitter') {
                   Message::add('error', 'The Twitter API does not support retrieving your email address; you will have to enter it manually.');
@@ -614,11 +614,11 @@ class Controller_Useradmin_User extends Controller_App {
             }
          } else {
             Message::add('error', 'You are logged in, but the email received from the provider does not match the email associated with your account.');
-            Request::instance()->redirect('user/profile');
+            $this->request->redirect('user/profile');
          }
       } else {
          Message::add('error', 'Retrieving information from the provider failed. Please register below.');
-         Request::instance()->redirect('user/register');
+         $this->request->redirect('user/register');
       }
    }
 }
