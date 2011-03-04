@@ -23,7 +23,7 @@ class Auth_ORM extends Kohana_Auth_ORM {
 		}
 		
 		// if there are too many recent failed logins, fail now
-		if (($this->_config["useradmin"]["max_failed_logins"] > 0) && ($user->failed_login_count > $this->_config["useradmin"]["max_failed_logins"] ) && (strtotime($user->last_failed_login) > strtotime($this->_config["useradmin"]["login_jail_time"] ) )) 
+		if (($this->_config["useradmin"]["max_failed_logins"] > 0) && ($user->failed_login_count > $this->_config["useradmin"]["max_failed_logins"] ) && (strtotime($user->last_failed_login) > strtotime("-".$this->_config["useradmin"]["login_jail_time"] ) )) 
 		{
 			// do nothing, and fail (too many failed logins within {login_jail_time} minutes).
 			return FALSE;

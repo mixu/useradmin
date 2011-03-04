@@ -11,7 +11,7 @@ return array(
 		 * Define the time that user who archive the max_failed_logins will need to 
 		 * wait before his next attempt
 		 */
-		'login_jail_time' => "-5 minutes",
+		'login_jail_time' => "5 minutes",
 	),
     'providers' => array(
        /**
