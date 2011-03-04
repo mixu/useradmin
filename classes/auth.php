@@ -8,6 +8,36 @@
  */
 class Auth extends Kohana_Auth {
 	
+	/**
+	 * Singleton pattern
+	 *
+	 * @return Auth
+	 */
+	public static function instance()
+	{
+		
+		if ( ! isset(Auth::$_instance))
+		{
+			// Load the configuration for this type
+			$config = Kohana::config('auth');
+
+			if ( ! $type = $config->get('driver'))
+			{
+				$type = 'file';
+			}
+
+			// Set the session class name
+			$class = 'Auth_'.ucfirst($type);
+			
+			$config->set("useradmin", Kohana::config('useradmin.auth') );
+
+			// Create a new session instance
+			Auth::$_instance = new $class($config);
+		}
+
+		return Auth::$_instance;
+	}
+	
 	/* Just implements, will be ignored, and use the ORM Driver
 	 * @see Kohana_Auth::_login()
 	 */

@@ -7,21 +7,6 @@
  */
 class Auth_ORM extends Kohana_Auth_ORM {
 	
-	protected $_useradmin_config;
-	
-	/**
-	 * Loads Session and configuration options.
-	 *
-	 * @return  void
-	 */
-	public function __construct($config = array()) {
-		parent::__construct($config);
-		
-		//Load the config from useradmin if ins't loaded before
-		if( ! isset($this->_useradmin_config) )
-			$this->_useradmin_config = Kohana::config("useradmin.auth");
-	}
-	
 	/**
 	 * Extends the Kohana Auth ORM driver to give useradmin module extras
 	 * @see Kohana_Auth_ORM::_login()
@@ -37,10 +22,8 @@ class Auth_ORM extends Kohana_Auth_ORM {
 			$user->where($user->unique_key($username), '=', $username)->find();
 		}
 		
-		$cfg = $this->_useradmin_config;
-		
 		// if there are too many recent failed logins, fail now
-		if (($cfg["max_failed_logins"] > 0) && ($user->failed_login_count > $cfg["max_failed_logins"]) && (strtotime($user->last_failed_login) > strtotime($cfg["login_jail_time"]) )) 
+		if (($this->_config["useradmin"]["max_failed_logins"] > 0) && ($user->failed_login_count > $this->_config["useradmin"]["max_failed_logins"] ) && (strtotime($user->last_failed_login) > strtotime($this->_config["useradmin"]["login_jail_time"] ) )) 
 		{
 			// do nothing, and fail (too many failed logins within {login_jail_time} minutes).
 			return FALSE;
