@@ -275,20 +275,18 @@ class Controller_Useradmin_User extends Controller_App {
 
          // If there is a post and $_POST is not empty
          if ($_REQUEST && isset($_REQUEST['username'], $_REQUEST['password'])) {
-            // Instantiate a new user
-            $user = ORM::factory('user');
 
             // Check Auth
             // more specifically, username and password fields need to be set.
-            $status = $user->login($_REQUEST);
+            $auth = Auth::instance();
 
             // If the post data validates using the rules setup in the user model
-            if ($status) {
+            if ( $auth->login($_REQUEST['username'], $_REQUEST['password']) ) {
                // redirect to the user account
                $this->request->redirect('user/profile');
             } else {
                // Get errors for display in view
-               $view->set('errors', $_REQUEST->errors('login'));
+               $view->set('errors', array('username', 'invalid'));
             }
          }
          $providers = Kohana::config('useradmin.providers');

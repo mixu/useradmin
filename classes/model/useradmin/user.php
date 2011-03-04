@@ -2,8 +2,7 @@
 
 class Model_Useradmin_User extends Model_Auth_User {
 
-   // be sure to include these if you add more relationships! - if not, you will get errors with auth.
-   // they are defined in Model_Auth_User (in /modules/auth/classes/model/auth/user.php)
+   // Model_Auth_User is a driver for Auth in ORM module
    protected $_table_name = 'users';
    protected $_has_many = array(
       // auth
@@ -77,70 +76,6 @@ class Model_Useradmin_User extends Model_Auth_User {
          }
       }
       return $this->_validate->check();
-   }
-
-   /**
-    * Validates login information from an array, and optionally redirects
-    * after a successful login.
-    *
-    * @param  array    values to check
-    * @param  string   URI or URL to redirect to
-    * @return boolean
-    */
-   public function login(array & $array, $redirect = FALSE) {
-      // This is what core Auth does to allow both email and username logins
-      $fieldname = (Validate::email($array['username']) ? 'email' : 'username');
-      $array = Validate::factory($array)
-         ->label('username', $this->_labels[$fieldname])
-         ->label('password', $this->_labels['password'])
-         ->filter(TRUE, 'trim')
-         ->rules('username', $this->_rules[$fieldname])
-         ->rules('password', $this->_rules['password']);
-
-      // Login starts out invalid
-      $status = FALSE;
-
-      if ($array->check()) {
-         // Attempt to load the user
-         $this->where($fieldname, '=', $array['username'])->find();
-
-/* Note: failed_login_count and last_failed_login do not exist in the default schema, so it is disabled here. failed_login_count is a int field, and last_failed_login is a datetime field.
- *
-         // if there are too many recent failed logins, fail now
-         if (($this->failed_login_count > 5) && (strtotime($this->last_failed_login) > strtotime("-5 minutes") )) {
-            // do nothing, and fail (too many failed logins within 5 minutes).
-            return FALSE;
-         }
-*/
-         // if you want to allow 5 logins again after 5 minutes, then set the failed login count to zero here, if it is too high.
-         if ($this->loaded() AND Auth::instance()->login($this, $array['password'])) {
-            // Login is successful
-            $status = TRUE;
-            // set the number of failed logins to 0
-//            $this->failed_login_count = 0;
-            if(is_numeric($this->id) && ($this->id != 0)) {
-               // only save if the user already exists
-               $this->save();
-            }
-            if (is_string($redirect)) {
-               // Redirect after a successful login
-               Request::instance()->redirect($redirect);
-            }
-         } else {
-/*
-            // login failed: update failed login count
-            $this->failed_login_count = $this->failed_login_count+1;
-            $this->last_failed_login = date('Y-m-d H:i:s');
-            if(is_numeric($this->id) && ($this->id != 0) ) {
-               // only save if the user already exists
-               $this->save();
-            }
-*/
-            // set error status
-            $array->error('username', 'invalid');
-         }
-      }
-      return $status;
    }
 
    /**

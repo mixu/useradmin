@@ -116,7 +116,7 @@ CREATE TABLE `users` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `email` varchar(127) NOT NULL,
   `username` varchar(32) NOT NULL DEFAULT '',
-  `password` char(50) NOT NULL,
+  `password` char(64) NOT NULL,
   `logins` int(10) unsigned NOT NULL DEFAULT '0',
   `last_login` int(10) unsigned DEFAULT NULL,
   `reset_token` char(64) NOT NULL,

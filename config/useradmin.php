@@ -1,7 +1,18 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
 return array(
-
+	'auth' => array(
+		/**
+		 * Define the maximum failed attempts to login
+		 * set 0 to disable the login jail
+		 */
+		'max_failed_logins' => 5,
+		/**
+		 * Define the time that user who archive the max_failed_logins will need to 
+		 * wait before his next attempt
+		 */
+		'login_jail_time' => "-5 minutes",
+	),
     'providers' => array(
        /**
         * Toggle Facebook support: if set, then users can log in using Facebook.
@@ -48,7 +59,7 @@ return array(
      */
     'email' => true,
     /* change this to the email address you want the password reset emails to come from. */
-    'email_address' => 'test@example.com',
+    'email_address' => 'no-response@example.com',
     /**
      * Toggle reCaptcha support: if set, then during registration the user is shown
      * a reCaptcha which they must answer correctly (unless they are using one of the 3rd party accounts).
