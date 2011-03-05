@@ -38,19 +38,4 @@ abstract class Useradmin_Auth extends Kohana_Auth {
 		return Auth::$_instance;
 	}
 
-	/**
-	 * Attempt to log in a user by using an ORM object and plain-text password.
-	 *
-	 * @param   string   username to log in
-	 * @param   string   password to check against
-	 * @param   boolean  enable autologin
-	 * @return  boolean
-	 */
-	public function login($username, $password, $remember = FALSE) {
-
-		$status = parent::login($username, $password, $remember);
-		
-		return $status;
-	}
-
 }
