@@ -4,6 +4,8 @@
  *
  * @group modules
  * @group modules.useradmin
+ * @group modules.useradmin.auth
+ * @group modules.useradmin.auth_class_only
  * 
  * @package    Useradmin
  * @category   Tests
@@ -11,7 +13,7 @@
  * @author     gabrielgiannattasio <gabriel@l6.com.br>
  * @copyright  (c) 2011-2011 Fleep.me
  */
-class UserTest extends Unittest_TestCase 
+class UserTests extends Unittest_TestCase 
 {
 	static public $dbConnection = "test";
 	
@@ -38,13 +40,13 @@ class UserTest extends Unittest_TestCase
 	 * Configure database for test
 	 */
 	static public function useTestDB() {
-		return Kohana::config('database')->set( "default", Kohana::config('database.'.UserTest::$dbConnection) );
+		return Kohana::config('database')->set( "default", Kohana::config('database.'.UserTests::$dbConnection) );
 	}
 	
 	/**
 	 * Valid users Provider
 	 */
-	function providerValidUsers() {
+	public function providerValidUsers() {
 		return array(
 			// Basic username
 			array(array(
@@ -80,7 +82,7 @@ class UserTest extends Unittest_TestCase
 	/**
 	 * Invalid users Provider
 	 */
-	function providerInvalidUsers() {
+	public function providerInvalidUsers() {
 		return array(
 			// Userame with spaces
 			array(array(
@@ -141,16 +143,16 @@ class UserTest extends Unittest_TestCase
 		);
 	}
 	
-	function setUp() 
+	public function setUp() 
 	{	
 		parent::setUp();
-		UserTest::useTestDB();
+		UserTests::useTestDB();
 	}
 	
-	static function setUpBeforeClass()
+	static public function setUpBeforeClass()
 	{
-		UserTest::useTestDB();
-		UserTest::runSchema("clean-setup" );
+		UserTests::useTestDB();
+		UserTests::runSchema("clean-setup" );
 	}
 	
 	/**
@@ -158,11 +160,11 @@ class UserTest extends Unittest_TestCase
 	 * @author Gabriel Giannattasio
 	 * @test
 	 */
-	function test_if_auth_exists()
+	public function test_if_auth_exists()
 	{
 		$this->assertTrue( class_exists("Auth"), 'Auth class not found' );
 	} // test if auth is a class
-	
+		
 	/**
 	 * test auth register user
 	 * @author Gabriel Giannattasio
@@ -170,23 +172,11 @@ class UserTest extends Unittest_TestCase
 	 * @dataProvider providerValidUsers
 	 * @depends test_if_auth_exists
 	 */
-	function test_auth_register_valid_users( $fields )
+	public function test_auth_register_valid_users( $fields )
 	{
 		// Start the tests
 		$this->assertTrue( Auth::instance()->register($fields), 'Must be a valid user.');
 	} // test auth register user
-	
-	/**
-	 * test for unique fields
-	 * @author Gabriel Giannattasio
-	 * @test
-	 * @dataProvider providerValidUsers
-	 * @depends test_auth_register_valid_users
-	 */
-	function test_for_unitque_fileds( $fields ) {
-		$user = ORM::factory("user");
-		$this->assertTrue( $user->username_exist( $fields['username'] ) );
-	}
 	
 	/**
 	 * test auth register invalid users
@@ -195,7 +185,7 @@ class UserTest extends Unittest_TestCase
 	 * @dataProvider providerInvalidUsers
 	 * @depends test_if_auth_exists
 	 */
-	function test_auth_register_invalid_users( $fields )
+	public function test_auth_register_invalid_users( $fields )
 	{
 		// Start the tests
 		$this->assertFalse( Auth::instance()->register($fields), 'Must be a invalid user.');
@@ -206,10 +196,10 @@ class UserTest extends Unittest_TestCase
 	 * @author Gabriel Giannattasio
 	 * @test
 	 * @depends test_if_auth_exists
+	 * @expectedException ErrorException
 	 */
-	function test_auth_register_invalid_fields()
+	public function test_auth_register_invalid_fields()
 	{
-		// Start the tests
 		$this->assertFalse( Auth::instance()->register(NULL), 'Must be a invalid field user.');
-	} // test auth register user
+	} 
 }

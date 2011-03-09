@@ -55,6 +55,7 @@ class Useradmin_Auth_ORM extends Kohana_Auth_ORM implements Useradmin_Driver_iAu
 	 * Register a new user
 	 * 
 	 * @param array $fields contain $_POST array
+	 * @param boolean $throwExeptions
 	 */
 	public function register($fields, $throwExeptions = FALSE) 
 	{

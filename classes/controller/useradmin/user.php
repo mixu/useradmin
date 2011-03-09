@@ -158,7 +158,6 @@ class Controller_Useradmin_User extends Controller_App {
          // Instantiate a new user
          $user = ORM::factory('user');
          // load values from $_POST
-         $user->values($_POST);
          // optional checks (e.g. reCaptcha or some other additional check)
          $optional_checks = true;
          // if configured to use captcha, check the reCaptcha result
@@ -173,17 +172,23 @@ class Controller_Useradmin_User extends Controller_App {
                Message::add('error', __('The captcha text is incorrect, please try again.'));
             }
          }
-         // If the post data validates using the rules setup in the user model
-         if ($user->check() && $optional_checks) {
-         	Auth::instance()->register( $_POST );
-            // sign the user in
+         
+         try {
+         	if( ! $optional_checks )
+         		throw new Kohana_Exception("Invalid option checks");
+         	Auth::instance()->register( $_POST, TRUE );
+         	
+         	// sign the user in
             Auth::instance()->login($_POST['username'], $_POST['password']);
             // redirect to the user account
             $this->request->redirect('user/profile');
-         } else {
+         } catch (ORM_Validation_Exception $e) {
             // Get errors for display in view
             // Note how the first param is the path to the message file (e.g. /messages/register.php)
-            $view->set('errors', $user->validate()->errors('register'));
+            echo("<pre>");
+            var_dump($e->errors('register'));
+            echo("</pre>");
+            $view->set('errors', $e->errors('register'));
             // Pass on the old form values
             $_POST['password'] = $_POST['password_confirm'] = '';
             $view->set('defaults', $_POST);
