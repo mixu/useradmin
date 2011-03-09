@@ -200,4 +200,16 @@ class UserTest extends Unittest_TestCase
 		// Start the tests
 		$this->assertFalse( Auth::instance()->register($fields), 'Must be a invalid user.');
 	} // test auth register user
+	
+	/**
+	 * test auth register invalid fields
+	 * @author Gabriel Giannattasio
+	 * @test
+	 * @depends test_if_auth_exists
+	 */
+	function test_auth_register_invalid_fields()
+	{
+		// Start the tests
+		$this->assertFalse( Auth::instance()->register(NULL), 'Must be a invalid field user.');
+	} // test auth register user
 }
