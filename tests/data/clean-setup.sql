@@ -58,14 +58,6 @@ CREATE TABLE `roles_users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `roles_users`
---
-
-INSERT INTO `roles_users` (`user_id`, `role_id`) VALUES
-(1, 1),
-(1, 2);
-
 -- --------------------------------------------------------
 
 --
