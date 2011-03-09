@@ -185,10 +185,9 @@ class Controller_Useradmin_User extends Controller_App {
          } catch (ORM_Validation_Exception $e) {
             // Get errors for display in view
             // Note how the first param is the path to the message file (e.g. /messages/register.php)
-            echo("<pre>");
-            var_dump($e->errors('register'));
-            echo("</pre>");
-            $view->set('errors', $e->errors('register'));
+            $errors = $e->errors('register');
+            $errors = array_merge($errors, $errors["_external"]);
+            $view->set('errors', $errors);
             // Pass on the old form values
             $_POST['password'] = $_POST['password_confirm'] = '';
             $view->set('defaults', $_POST);
