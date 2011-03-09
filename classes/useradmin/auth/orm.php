@@ -56,14 +56,12 @@ class Useradmin_Auth_ORM extends Kohana_Auth_ORM implements Useradmin_Driver_iAu
 	 * 
 	 * @param array $fields contain $_POST array
 	 */
-	public function register($fields) 
+	public function register($fields, $throwExeptions = FALSE) 
 	{
 		if( ! is_object($fields) ) 
 		{
 			// Load the user
 			$user = ORM::factory('user');
-			// Load fields
-			//$user->values($fields);
 		} else {
 			// Check for instanced model
 			if( $fields instanceof Model_User ) 
@@ -82,8 +80,11 @@ class Useradmin_Auth_ORM extends Kohana_Auth_ORM implements Useradmin_Driver_iAu
 			// Add the login role to the user (add a row to the db)
 			$login_role = new Model_Role(array('name' =>'login'));
             $user->add('roles', $login_role);
-		} catch (Exception $e) {
-			return FALSE;
+		} catch (ORM_Validation_Exception $e) {
+			if($throwExeptions)
+				throw $e;
+			else
+				return FALSE;
 		}
 		return TRUE;
 	}
