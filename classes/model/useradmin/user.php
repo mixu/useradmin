@@ -2,17 +2,17 @@
 
 class Model_Useradmin_User extends Model_Auth_User {
 
-   // Model_Auth_User is a driver for Auth in ORM module
-   protected $_table_name = 'users';
-   protected $_has_many = array(
-      // auth
-      'roles' => array('through' => 'roles_users'),
-      'user_tokens' => array(),
-      // for facebook / twitter / google / yahoo identities
-      'user_identity' => array(),
-      );
-   protected $_has_one= array(
-      );
+	// Model_Auth_User is a driver for Auth in ORM module
+	protected $_table_name = 'users';
+	protected $_has_many = array(
+		// auth
+		'roles' => array('through' => 'roles_users'),
+		'user_tokens' => array(),
+		// for facebook / twitter / google / yahoo identities
+		'user_identity' => array(),
+	);
+	protected $_has_one= array(
+	);
 
 
    /* ORM supports:
@@ -126,7 +126,7 @@ class Model_Useradmin_User extends Model_Auth_User {
       $username = $base;
       $i = 2;
       // check returns false if not unique
-      while(!$this->check_username($username)) {
+      while(!$this->username_exist($username)) {
          $username = $base.$i;
          $i++;
       }
@@ -138,17 +138,8 @@ class Model_Useradmin_User extends Model_Auth_User {
     * @param string $username
     * @return boolean
     */
-   public function check_username($username) {
-       $exists = (bool) DB::select(array('COUNT("*")', 'total_count'))
-                     ->from($this->_table_name)
-                     ->where('username',   '=',   $username)
-                     ->execute($this->_db)
-                     ->get('total_count');
-
-      if ($exists) {
-         return false;
-      }
-      return true;
+   public function username_exist($username) {
+       return ( (bool) $this->unique_key_exists( $username, "username") ) ;
    }
 
 }

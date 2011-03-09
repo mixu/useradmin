@@ -175,11 +175,7 @@ class Controller_Useradmin_User extends Controller_App {
          }
          // If the post data validates using the rules setup in the user model
          if ($user->check() && $optional_checks) {
-            // create the account
-            $user->save();
-            // Add the login role to the user (add a row to the db)
-            $login_role = new Model_Role(array('name' =>'login'));
-            $user->add('roles', $login_role);
+         	Auth::instance()->register( $_POST );
             // sign the user in
             Auth::instance()->login($_POST['username'], $_POST['password']);
             // redirect to the user account
