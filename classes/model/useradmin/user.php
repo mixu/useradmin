@@ -23,9 +23,9 @@ class Model_Useradmin_User extends Model_Auth_User {
     *
     * Haven't seen this documented.
     */
-// I have left these uncommented, since the default table SQL does not contain these columns. If you want these fields, add two DATETIME fields to the DB.
-//   protected $_created_column = array('column' => 'created', 'format' => 'Y-m-d H:i:s');
-//   protected $_updated_column = array('column' => 'modified', 'format' => 'Y-m-d H:i:s');
+	// I have left these uncommented, since the default table SQL does not contain these columns. If you want these fields, add two DATETIME fields to the DB.
+	protected $_created_column = array('column' => 'created', 'format' => 'Y-m-d H:i:s');
+	protected $_updated_column = array('column' => 'modified', 'format' => 'Y-m-d H:i:s');
 
    /**
     * Validates a user when the record is modified.
