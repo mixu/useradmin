@@ -140,6 +140,13 @@ class UserTests extends Unittest_TestCase
 				"password_confirm" => "987654321",
 				"email" => "validu@sername5@User.com",
 			)),
+			// Already registred user with diferente case
+			array(array(
+				"username" => "A",
+				"password" => "123456789",
+				"password_confirm" => "123456789",
+				"email" => "a_new@User.com",
+			)),
 		);
 	}
 	

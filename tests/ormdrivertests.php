@@ -47,6 +47,7 @@ class ORMDriverTests extends UserTests {
 	public function test_for_unitque_fileds( $fields ) {
 		$user = ORM::factory("user");
 		$this->assertTrue( $user->username_exist( $fields['username'] ) );
+		// Test for diferent username case
+		$this->assertTrue( $user->username_exist( strtoupper( $fields['username'] ) ) );
 	}
 }
-
