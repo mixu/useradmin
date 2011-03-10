@@ -51,8 +51,8 @@ class UserTests extends Unittest_TestCase
 			// Basic username
 			array(array(
 				"username" => "validuser",
-				"password" => "12345678",
-				"password_confirm" => "12345678",
+				"password" => "123456",
+				"password_confirm" => "123456",
 				"email" => "valid@user.com",
 			)),
 			// Caps username
@@ -132,6 +132,13 @@ class UserTests extends Unittest_TestCase
 				"password" => "123456789",
 				"password_confirm" => "987654321",
 				"email" => "validusername4@User.com",
+			)),
+			// Too short Password
+			array(array(
+				"username" => "validusername6",
+				"password" => "12345",
+				"password_confirm" => "12345",
+				"email" => "validusername6@User.com",
 			)),
 			// Invalid e-mail
 			array(array(
