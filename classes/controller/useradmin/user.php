@@ -186,6 +186,7 @@ class Controller_Useradmin_User extends Controller_App {
             // Get errors for display in view
             // Note how the first param is the path to the message file (e.g. /messages/register.php)
             $errors = $e->errors('register');
+            // Move external errors to main array, for post helper compatibility
             $errors = array_merge($errors, $errors["_external"]);
             $view->set('errors', $errors);
             // Pass on the old form values

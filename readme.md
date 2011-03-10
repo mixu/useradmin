@@ -2,7 +2,7 @@
 TUTORIAL
 ========
 
-Note: I haven't had the time to look into upgrading from 3.0 to 3.1.x. Help me out and contribute if you need it quickly!
+Note: This is for Kohana 3.1.x, so the tutorial will be useless, but the old links are there.
 
 Most recent, detailed tutorial:
 
@@ -28,48 +28,6 @@ CONTRIBUTORS
 ============
 
 I would like to thank [jnbdz](https://bitbucket.org/jnbdz/useradmin/) for adding the reCaptcha support.
-
-CHANGELOG
-=========
-
-Feb 27th 2011:
-
-* New UI! The UI is loosely based on https://github.com/pilu/web-app-theme (a theme generator for Ruby) and is a lot better looking than the old one. See screenshots below.
-* Twitter login! Requires that you enable the kohana-oauth module from the core. 
-* Google and Yahoo login! Uses LightOpenID which is bundled in the repo. I had a look at Janrain's popular library, but to me if you let your library generate errors on PHP 5.0.0 - 5.3.0 and have dozens of pending issues and pull requests - then you just don't care about supporting your library. So not using Janrain's lib.
-* Refactored 3rd party account provider code for better extensibility.
-* Changed from Facebook Javascript API (which had some reports of problems) to PHP/redirect based API. No popups during login, just a redirect!
-* Database changes to allow user to be associated with more service providers. See MIGRATION below if you used had the Facebook login enabled previously and want to migrate the accounts.
-* Included Datatable helper which helps when working with pagination links in tables.
-
-Feb 21st 2011:
-
-* CRITICAL SECURITY BUG in Facebook login; it is strongly recommended that all users of Facebook login functionality upgrade (does not affect sites with Facebook login disabled). Thank you Euan McKay!
-* To support login via AJAX requests moved the processing of results from the Auth check to Controller_App->access_required and Controller_App->login_required. Override those in your app, using Request::$is_ajax to detect AJAX requests.
-* Workaround for email field for http://dev.kohanaframework.org/issues/3750 in messages/register.php
-
-Jan 28th 2011:
-
-* Added reCaptcha support (captcha on registration)
-* Upgraded to Kohana v3.0.9
-
-Jan 12th 2011: Pushed out new version with following improvements:
-
-* Facebook login! Yes, you can now have users register and log in using their Facebook account.
-* New tutorial! I tried to go through everything necessary to get started with the module, see this new post.
-* Transparent extending is now supported; you can start implementing your application by overriding Controller_User / Model_User with a class that extends Controller_Useradmin_User / Model_Useradmin_User.
-* Bug fixes (login using email, validation messages, saving empty password)
-
-Nov 25th 2010: Pushed out new version with following improvements:
-
-* Now includes Kohana-Email module for sending password reset emails (users can request password request by entering an email, and they will be sent a one-time reset token via email).
-* Validation code in model has been improved based on feedback from biakaveron.
-* Validation code is prettier: it uses the approach from my validation-with-forms tutorial.
-* Framework has been updated to v3.0.8 and minor compatibility bugs fixed.
-
-Sep 14th 2010:
-
-* Initial version.
 
 SCREENSHOT
 ==========
