@@ -13,6 +13,7 @@ interface Useradmin_Driver_iAuth {
 	 * fields, be sure they must respect the driver rules
 	 * 
 	 * @param array $fields An array witch contains the fields to be populate
+	 * @param boolean $throwException
 	 */
-	 public function register($fields);
+	 public function register($fields, $throwException = FALSE);
 }
