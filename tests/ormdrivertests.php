@@ -44,7 +44,7 @@ class ORMDriverTests extends UserTests {
 	 * @depends test_auth_register_valid_users
 	 * @depends test_if_auth_orm_driver_exists
 	 */
-	public function test_for_unitque_fileds( $fields ) {
+	public function test_for_unique_fileds( $fields ) {
 		$user = ORM::factory("user");
 		$this->assertTrue( $user->username_exist( $fields['username'] ) );
 		// Test for diferent username case
