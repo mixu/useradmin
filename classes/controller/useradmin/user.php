@@ -157,7 +157,6 @@ class Controller_Useradmin_User extends Controller_App {
       if ($_POST) {
          // Instantiate a new user
          $user = ORM::factory('user');
-         // load values from $_POST
          // optional checks (e.g. reCaptcha or some other additional check)
          $optional_checks = true;
          // if configured to use captcha, check the reCaptcha result
@@ -244,21 +243,21 @@ class Controller_Useradmin_User extends Controller_App {
       // ajax login
       if($this->request->is_ajax() && isset($_REQUEST['username'], $_REQUEST['password'])) {
          $this->auto_render = false;
-         $this->request->headers['Content-Type'] = 'application/json';
+         $this->request->headers('Content-Type', 'application/json');
          if(Auth::instance()->logged_in() != 0) {
-            $this->request->status = 200;
-            $this->template->content = $this->request->response = '{ "success": "true" }';
+            $this->response->status(200);
+            $this->template->content = $this->request->body('{ "success": "true" }');
             return;
          }
          $user = ORM::factory('user');
          $status = $user->login($_REQUEST);
          if($status) {
-            $this->request->status = 200;
-            $this->template->content = $this->request->response = '{ "success": "true" }';
+            $this->response->status(200);
+            $this->template->content = $this->request->body('{ "success": "true" }');
             return;
          }
-         $this->request->status = 500;
-         $this->template->content = $this->request->response = '{ "success": "false" }';
+         $this->response->status(500);
+         $this->template->content = $this->request->body('{ "success": "false" }');
          return;
       } else {
          // set the template title (see Controller_App for implementation)
@@ -287,7 +286,7 @@ class Controller_Useradmin_User extends Controller_App {
                $this->request->redirect('user/profile');
             } else {
                // Get errors for display in view
-               $view->set('errors', array('username', 'invalid'));
+               $view->set('errors', array('username' => 'invalid'));
             }
          }
          $providers = Kohana::config('useradmin.providers');
