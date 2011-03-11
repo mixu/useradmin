@@ -6,7 +6,7 @@
  * @author     Gabriel R. Giannattasio
  */
 class Useradmin_Auth_ORM extends Kohana_Auth_ORM implements Useradmin_Driver_iAuth {
-	
+
 	/**
 	 * Extends the Kohana Auth ORM driver to give useradmin module extras
 	 * @see Kohana_Auth_ORM::_login()

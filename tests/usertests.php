@@ -13,8 +13,8 @@
  * @author     gabrielgiannattasio <gabriel@l6.com.br>
  * @copyright  (c) 2011-2011 Fleep.me
  */
-class UserTests extends Unittest_TestCase 
-{
+class UserTests extends Unittest_TestCase {
+
 	static public $dbConnection = "test";
 	
 	/**
@@ -39,14 +39,16 @@ class UserTests extends Unittest_TestCase
 	/**
 	 * Configure database for test
 	 */
-	static public function useTestDB() {
+	static public function useTestDB() 
+	{
 		return Kohana::config('database')->set( "default", Kohana::config('database.'.UserTests::$dbConnection) );
 	}
 	
 	/**
 	 * Valid users Provider
 	 */
-	public function providerValidUsers() {
+	public function providerValidUsers() 
+	{
 		return array(
 			// Basic username
 			array(array(
@@ -82,7 +84,8 @@ class UserTests extends Unittest_TestCase
 	/**
 	 * Invalid users Provider
 	 */
-	public function providerInvalidUsers() {
+	public function providerInvalidUsers() 
+	{
 		return array(
 			// Userame with spaces
 			array(array(

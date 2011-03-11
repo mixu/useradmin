@@ -15,7 +15,7 @@ require_once Kohana::find_file('tests','usertests');
  * @copyright  (c) 2011-2011 Fleep.me
  */
 class ORMDriverTests extends UserTests {
-	
+
 	/**
 	 * test if auth orm driver exists
 	 * @author Gabriel Giannattasio
@@ -32,7 +32,8 @@ class ORMDriverTests extends UserTests {
 	 * @test
 	 * @dataProvider providerValidUsers
 	 */
-	public function test_auth_register_valid_users( $fields ) {
+	public function test_auth_register_valid_users( $fields ) 
+	{
 		parent::test_auth_register_valid_users( $fields );
 	}
 	
@@ -44,7 +45,8 @@ class ORMDriverTests extends UserTests {
 	 * @depends test_auth_register_valid_users
 	 * @depends test_if_auth_orm_driver_exists
 	 */
-	public function test_for_unique_fileds( $fields ) {
+	public function test_for_unique_fileds( $fields ) 
+	{
 		$user = ORM::factory("user");
 		$this->assertTrue( $user->username_exist( $fields['username'] ) );
 		// Test for diferent username case
