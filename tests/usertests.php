@@ -232,4 +232,17 @@ class UserTests extends Unittest_TestCase {
 		$this->assertTrue( Auth::instance()->login( $fields['username'], $fields['password']) );
 		$this->assertTrue( Auth::instance()->logout() );
 	}
+	
+	/**
+	 * test auth invalid logins and logout
+	 * @author Gabriel Giannattasio
+	 * @test
+	 * @dataProvider providerInvalidUsers
+	 * @depends test_auth_register_invalid_users
+	 */
+	public function test_auth_invalid_logins_and_logout( $fields )
+	{
+		$this->assertFalse( Auth::instance()->login( $fields['username'], $fields['password']) );
+		$this->assertTrue( Auth::instance()->logout() );
+	}
 }
