@@ -93,30 +93,37 @@ class Controller_Useradmin_User extends Controller_App {
       $view = View::factory('user/profile_edit');
 
       // save the data
-      if ( !empty($_POST) && is_numeric($id) ) {
-         if(empty($_POST['password']) || empty($_POST['password_confirm'])) {
+      if ( !empty($_POST) && is_numeric($id) ) 
+      {
+         if(empty($_POST['password']) || empty($_POST['password_confirm'])) 
+         {
             // force unsetting the password! Otherwise Kohana3 will automatically hash the empty string - preventing logins
             unset($_POST['password'], $_POST['password_confirm']);
          }
-         // editing requires that the username and email do not exist (EXCEPT for this ID)
-         $user->values($_POST);
-
-         // If the post data validates using the rules setup in the user model
-         if ($user->check_edit()) {
-            // save first, so that the model has an id when the relationships are added
-            $user->save();
+         
+         try 
+         {
+         	$user->update_user($_POST, array(
+				'username',
+				'password',
+				'email',
+			));
             // message: save success
             Message::add('success', __('Values saved.'));
             // redirect and exit
             $this->request->redirect('user/profile');
             return;
-         } else {
+         } 
+         catch (ORM_Validation_Exception $e) 
+         {
             // Get errors for display in view
             // Note how the first param is the path to the message file (e.g. /messages/register.php)
-            Message::add('error', __('Error: Values could not be saved.'));
-            $view->set('errors', $user->validate()->errors('register'));
+         	Message::add('error', __('Error: Values could not be saved.'));
+         	$errors = $e->errors('register');
+         	$errors = array_merge($errors, $errors["_external"]);
+            $view->set('errors', $errors);
             // Pass on the old form values
-            $user->password = $user->password_confirm = '';
+            $user->password = '';
             $view->set('data', $user->as_array());
          }
       } else {
