@@ -82,12 +82,6 @@ class UserTests extends Unittest_TestCase {
 				"password" => "verylongpasswordwith@chars!dix97",
 				"password_confirm" => "verylongpasswordwith@chars!dix97",
 				"email" => "separate@User.com",
-				"update" => array(
-					"username" => "MyOwnUserNew",
-					"password" => "ab38cab38c",
-					"password_confirm" => "ab38cab38c",
-					"email" => "MyOwn@User.com",
-				),
 			)),
 			// Single char username
 			array(array(
@@ -153,6 +147,66 @@ class UserTests extends Unittest_TestCase {
 				), 
 				// fields
 				array(
+				),
+			),
+			// Loop
+		);
+	}
+	
+	/**
+	 * Invalid user updates Provider
+	 */
+	public function providerInvalidUserUpdates()
+	{
+		return array(
+			// #0: Short password
+			array(
+				// login
+				array(
+					"username" => "MyOwnUser",
+					"password" => "ab38cab38c",
+				), 
+				// fields
+				array(
+					"password" => "12345",
+					"password_confirm" => "12345",
+				),
+			),
+			// #1: Wrong password confirmation
+			array(
+				// login
+				array(
+					"username" => "MyOwnUser",
+					"password" => "ab38cab38c",
+				), 
+				// fields
+				array(
+					"password" => "123456",
+					"password_confirm" => "654321",
+				),
+			),
+			// #2: Used username
+			array(
+				// login
+				array(
+					"username" => "MyOwnUser",
+					"password" => "ab38cab38c",
+				), 
+				// fields
+				array(
+					"username" => "a",
+				),
+			),
+			// #3: Used email
+			array(
+				// login
+				array(
+					"username" => "MyOwnUser",
+					"password" => "ab38cab38c",
+				), 
+				// fields
+				array(
+					"email" => "a@User.com",
 				),
 			),
 			// Loop
@@ -329,6 +383,34 @@ class UserTests extends Unittest_TestCase {
 		}
 		
 		$this->assertTrue( $status, "Do the user update");
+	}
+	
+	/**
+	 * test auth valid logins and invalid update_user
+	 * @author Gabriel Giannattasio
+	 * @test
+	 * @dataProvider providerInvalidUserUpdates
+	 * @depends test_auth_register_valid_users
+	 */
+	public function test_auth_valid_logins_and_invalid_update_user( $login, $fields )
+	{
+		$this->assertTrue( Auth::instance()->login( $login['username'], $login['password']), "Do the login" );
+		$user = Auth::instance()->get_user();
+		try 
+		{
+			$user->update_user( $fields, array(
+				'username',
+				'password',
+				'email',
+			) );
+			$status = TRUE;
+		} 
+		catch (ORM_Validation_Exception $e) 
+		{
+			$status = FALSE;
+		}
+		
+		$this->assertFalse( $status, "Do the user update");
 	}
 	
 	/**
