@@ -15,7 +15,15 @@
  */
 class UserTests extends Unittest_TestCase {
 
-	static public $dbConnection = "test";
+	const dbConnection = "unittest";
+	
+	/**
+	 * Configure database for test
+	 */
+	static public function useTestDB() 
+	{
+		Kohana::config('database')->set( "default", Kohana::config('database.'.UserTests::dbConnection) );
+	}
 	
 	/**
 	 * Populate Schema
@@ -36,12 +44,16 @@ class UserTests extends Unittest_TestCase {
 		return FALSE;
 	}
 	
-	/**
-	 * Configure database for test
-	 */
-	static public function useTestDB() 
+	public function setUp() 
+	{	
+		parent::setUp();
+		UserTests::useTestDB();
+	}
+	
+	static public function setUpBeforeClass()
 	{
-		return Kohana::config('database')->set( "default", Kohana::config('database.'.UserTests::$dbConnection) );
+		UserTests::useTestDB();
+		UserTests::runSchema( "clean-setup" );
 	}
 	
 	/**
@@ -160,18 +172,6 @@ class UserTests extends Unittest_TestCase {
 		);
 	}
 	
-	public function setUp() 
-	{	
-		parent::setUp();
-		UserTests::useTestDB();
-	}
-	
-	static public function setUpBeforeClass()
-	{
-		UserTests::useTestDB();
-		UserTests::runSchema("clean-setup" );
-	}
-	
 	/**
 	 * test if auth exists
 	 * @author Gabriel Giannattasio
@@ -191,7 +191,7 @@ class UserTests extends Unittest_TestCase {
 	 */
 	public function test_auth_register_valid_users( $fields )
 	{
-		// Start the tests
+		UserTests::useTestDB();
 		$this->assertTrue( Auth::instance()->register($fields), 'Must be a valid user.');
 	} // test auth register user
 	
@@ -218,5 +218,18 @@ class UserTests extends Unittest_TestCase {
 	public function test_auth_register_invalid_fields()
 	{
 		$this->assertFalse( Auth::instance()->register(NULL), 'Must be a invalid field user.');
-	} 
+	}
+	
+	/**
+	 * test auth valid logins and logout
+	 * @author Gabriel Giannattasio
+	 * @test
+	 * @dataProvider providerValidUsers
+	 * @depends test_auth_register_valid_users
+	 */
+	public function test_auth_valid_logins_and_logout( $fields )
+	{
+		$this->assertTrue( Auth::instance()->login( $fields['username'], $fields['password']) );
+		$this->assertTrue( Auth::instance()->logout() );
+	}
 }
