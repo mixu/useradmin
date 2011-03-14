@@ -194,7 +194,7 @@ class UserTests extends Unittest_TestCase {
 				), 
 				// fields
 				array(
-					"username" => "a",
+					"username" => "A",
 				),
 			),
 			// #3: Used email
@@ -207,6 +207,78 @@ class UserTests extends Unittest_TestCase {
 				// fields
 				array(
 					"email" => "a@User.com",
+				),
+			),
+			// #4: Username with spaces
+			array(
+				// login
+				array(
+					"username" => "MyOwnUser",
+					"password" => "ab38cab38c",
+				), 
+				// fields
+				array(
+					"username" => "name with spaces",
+				),
+			),
+			// #5: Username with invalid char
+			array(
+				// login
+				array(
+					"username" => "MyOwnUser",
+					"password" => "ab38cab38c",
+				), 
+				// fields
+				array(
+					"username" => "name with spaces",
+				),
+			),
+			// #6: Blank username
+			array(
+				// login
+				array(
+					"username" => "MyOwnUser",
+					"password" => "ab38cab38c",
+				), 
+				// fields
+				array(
+					"username" => "",
+				),
+			),
+			// #7: Too long username
+			array(
+				// login
+				array(
+					"username" => "MyOwnUser",
+					"password" => "ab38cab38c",
+				), 
+				// fields
+				array(
+					"username" => "anamewithtoomanycharacterscantwork",
+				),
+			),
+			// #8: Invalid e-mail
+			array(
+				// login
+				array(
+					"username" => "MyOwnUser",
+					"password" => "ab38cab38c",
+				), 
+				// fields
+				array(
+					"email" => "anamewithtoo@manychar@aar.sck",
+				),
+			),
+			// #9: Used username with space
+			array(
+				// login
+				array(
+					"username" => "MyOwnUser",
+					"password" => "ab38cab38c",
+				), 
+				// fields
+				array(
+					"username" => "A ",
 				),
 			),
 			// Loop
@@ -426,5 +498,24 @@ class UserTests extends Unittest_TestCase {
 		$this->assertFalse( Auth::instance()->login( $fields['email'], $fields['password']), "Check login using email" );
 		$this->assertFalse( Auth::instance()->get_user(), "get_user must fail.");
 		$this->assertTrue( Auth::instance()->logout() );
+	}
+	
+	/**
+	 * test auth login jail
+	 * @author Gabriel Giannattasio
+	 * @test
+	 * @depends test_auth_register_valid_users
+	 */
+	public function test_auth_login_jail()
+	{
+		$validUser = $this->providerValidUsers();
+		// Must fail 5 times before jail the user for 5 minutes
+		$this->assertFalse( Auth::instance()->login( $validUser[2][0]['username'], "*********"), "Check login using wrong password #1" );
+		$this->assertFalse( Auth::instance()->login( $validUser[2][0]['username'], "*********"), "Check login using wrong password #2" );
+		$this->assertFalse( Auth::instance()->login( $validUser[2][0]['username'], "*********"), "Check login using wrong password #3" );
+		$this->assertFalse( Auth::instance()->login( $validUser[2][0]['username'], "*********"), "Check login using wrong password #4" );
+		$this->assertFalse( Auth::instance()->login( $validUser[2][0]['username'], "*********"), "Check login using wrong password #5" );
+		// Try to login with the correct password must fail
+		$this->assertFalse( Auth::instance()->login( $validUser[2][0]['username'], $validUser[2][0]['password']), "Check login using correct password" );
 	}
 }
