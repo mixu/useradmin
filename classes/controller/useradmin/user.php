@@ -239,19 +239,21 @@ class Controller_Useradmin_User extends Controller_App {
    /**
     * View: Login form.
     */
-   public function action_login() {
+   public function action_login() 
+   {
       // ajax login
-      if($this->request->is_ajax() && isset($_REQUEST['username'], $_REQUEST['password'])) {
+      if($this->request->is_ajax() && isset($_REQUEST['username'], $_REQUEST['password'])) 
+      {
          $this->auto_render = false;
          $this->request->headers('Content-Type', 'application/json');
-         if(Auth::instance()->logged_in() != 0) {
+         if(Auth::instance()->logged_in() != 0) 
+         {
             $this->response->status(200);
             $this->template->content = $this->request->body('{ "success": "true" }');
             return;
          }
-         $user = ORM::factory('user');
-         $status = $user->login($_REQUEST);
-         if($status) {
+         elseif( Auth::instance()->login($_REQUEST['username'], $_REQUEST['password']) ) 
+         {
             $this->response->status(200);
             $this->template->content = $this->request->body('{ "success": "true" }');
             return;
@@ -276,12 +278,8 @@ class Controller_Useradmin_User extends Controller_App {
          // If there is a post and $_POST is not empty
          if ($_REQUEST && isset($_REQUEST['username'], $_REQUEST['password'])) {
 
-            // Check Auth
-            // more specifically, username and password fields need to be set.
-            $auth = Auth::instance();
-
-            // If the post data validates using the rules setup in the user model
-            if ( $auth->login($_REQUEST['username'], $_REQUEST['password']) ) {
+            // Check Auth if the post data validates using the rules setup in the user model
+            if ( Auth::instance()->login($_REQUEST['username'], $_REQUEST['password']) ) {
                // redirect to the user account
                $this->request->redirect('user/profile');
             } else {
