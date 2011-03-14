@@ -193,7 +193,7 @@ class UserTests extends Unittest_TestCase {
 	{
 		UserTests::useTestDB();
 		$this->assertTrue( Auth::instance()->register($fields), 'Must be a valid user.');
-	} // test auth register user
+	}
 	
 	/**
 	 * test auth register invalid users
@@ -204,9 +204,8 @@ class UserTests extends Unittest_TestCase {
 	 */
 	public function test_auth_register_invalid_users( $fields )
 	{
-		// Start the tests
 		$this->assertFalse( Auth::instance()->register($fields), 'Must be a invalid user.');
-	} // test auth register user
+	}
 	
 	/**
 	 * test auth register invalid fields
