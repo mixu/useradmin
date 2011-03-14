@@ -82,6 +82,12 @@ class UserTests extends Unittest_TestCase {
 				"password" => "verylongpasswordwith@chars!dix97",
 				"password_confirm" => "verylongpasswordwith@chars!dix97",
 				"email" => "separate@User.com",
+				"update" => array(
+					"username" => "MyOwnUserNew",
+					"password" => "ab38cab38c",
+					"password_confirm" => "ab38cab38c",
+					"email" => "MyOwn@User.com",
+				),
 			)),
 			// Single char username
 			array(array(
@@ -90,6 +96,66 @@ class UserTests extends Unittest_TestCase {
 				"password_confirm" => "verylongpasswordwith@chars!dix97",
 				"email" => "a@User.com",
 			)),
+		);
+	}
+	
+	/**
+	 * Valid user updates Provider
+	 */
+	public function providerValidUserUpdates()
+	{
+		return array(
+			// #0: Update email
+			array(
+				// login
+				array(
+					"username" => "validuser",
+					"password" => "123456",
+				), 
+				// fields
+				array(
+					"username" => "validuser",
+					"email" => "valid_changed@user.com",
+				),
+			),
+			// #1: Update username
+			array(
+				// login
+				array(
+					"username" => "validuser",
+					"password" => "123456",
+				), 
+				// fields
+				array(
+					"username" => "validuser_changed",
+					"email" => "valid_changed@user.com",
+				),
+			),
+			// #2: Update password
+			array(
+				// login
+				array(
+					"username" => "validuser_changed",
+					"password" => "123456",
+				), 
+				// fields
+				array(
+					"password" => "123456789",
+					"password_confirm" => "123456789",
+				),
+			),
+			// #3: Update nothing
+			array(
+				// login
+				array(
+					"username" => "validuser_changed",
+					"password" => "123456789",
+				), 
+				// fields
+				array(
+				),
+			),
+			// Loop
 		);
 	}
 	
@@ -228,8 +294,41 @@ class UserTests extends Unittest_TestCase {
 	 */
 	public function test_auth_valid_logins_and_logout( $fields )
 	{
-		$this->assertTrue( Auth::instance()->login( $fields['username'], $fields['password']) );
+		$this->assertTrue( Auth::instance()->login( $fields['username'], $fields['password']) , "Check login using username");
+		$this->assertTrue( Auth::instance()->login( $fields['email'], $fields['password']) , "Check login using email");
+		// Get the user model
+		$user = Auth::instance()->get_user();
+		$this->assertInstanceOf("Model_User", $user, "Checking the Model_User instance");
+		$this->assertSame($fields['username'], $user->username, "Check the logedin username");
 		$this->assertTrue( Auth::instance()->logout() );
+	}
+	
+	/**
+	 * test auth valid logins and update_user
+	 * @author Gabriel Giannattasio
+	 * @test
+	 * @dataProvider providerValidUserUpdates
+	 * @depends test_auth_register_valid_users
+	 */
+	public function test_auth_valid_logins_and_update_user( $login, $fields )
+	{
+		$this->assertTrue( Auth::instance()->login( $login['username'], $login['password']), "Do the login" );
+		$user = Auth::instance()->get_user();
+		try 
+		{
+			$user->update_user( $fields, array(
+				'username',
+				'password',
+				'email',
+			) );
+			$status = TRUE;
+		} 
+		catch (ORM_Validation_Exception $e) 
+		{
+			$status = FALSE;
+		}
+		
+		$this->assertTrue( $status, "Do the user update");
 	}
 	
 	/**
@@ -241,7 +340,9 @@ class UserTests extends Unittest_TestCase {
 	 */
 	public function test_auth_invalid_logins_and_logout( $fields )
 	{
-		$this->assertFalse( Auth::instance()->login( $fields['username'], $fields['password']) );
+		$this->assertFalse( Auth::instance()->login( $fields['username'], $fields['password']), "Check login using username" );
+		$this->assertFalse( Auth::instance()->login( $fields['email'], $fields['password']), "Check login using email" );
+		$this->assertFalse( Auth::instance()->get_user(), "get_user must fail.");
 		$this->assertTrue( Auth::instance()->logout() );
 	}
 }
