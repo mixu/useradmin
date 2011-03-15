@@ -2,8 +2,13 @@
 
 class Model_Useradmin_User extends Model_Auth_User {
 
-	// Model_Auth_User is a driver for Auth in ORM module
 	protected $_table_name = 'users';
+	
+	/**
+	 * A user has many tokens and roles
+	 *
+	 * @var array Relationhips
+	 */
 	protected $_has_many = array(
 		// auth
 		'roles' => array('through' => 'roles_users'),
@@ -32,6 +37,8 @@ class Model_Useradmin_User extends Model_Auth_User {
 		$parent['username'][1] = array('min_length', array(':value', 1));
 		return $parent;
 	}
+	
+	// TODO overload filters() and add username/created_on/updated_on coluns filters
 
 	/**
 	 * Password validation for plain passwords.

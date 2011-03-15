@@ -61,19 +61,19 @@ CREATE TABLE `roles_users` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user_identity`
+-- Table structure for table `user_identities`
 --
 
-DROP TABLE IF EXISTS `user_identity`;
+DROP TABLE IF EXISTS `user_identities`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `user_identity` (
+CREATE TABLE `user_identities` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `provider` varchar(255) NOT NULL,
   `identity` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
