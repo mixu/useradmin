@@ -8,7 +8,7 @@
  */
 interface Useradmin_Driver_iAuth {
 	/**
-	 * Register
+	 * Register a single user
 	 * Method to register new user by Useradmin Auth module, when you set the
 	 * fields, be sure they must respect the driver rules
 	 * 
@@ -18,11 +18,11 @@ interface Useradmin_Driver_iAuth {
 	 public function register($fields);
 	 
 	/**
-	 * Unegister
+	 * Unegister multiple users
 	 * Method to unregister existing user by Useradmin Auth module, when you set the
 	 * Model_User reference for removing a user.
 	 * 
-	 * @param mixed $users An array witch contains the Model_User or a array of Model_User
+	 * @param array(Model_User) $users An array witch contains Model_User's
 	 * @return boolean Operation final status
 	 */
 	 public function unregister($users);

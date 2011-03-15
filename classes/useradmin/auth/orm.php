@@ -52,10 +52,13 @@ class Useradmin_Auth_ORM extends Kohana_Auth_ORM implements Useradmin_Driver_iAu
 	}
 	
 	/**
-	 * Register a new user
+	 * Register a single user
+	 * Method to register new user by Useradmin Auth module, when you set the
+	 * fields, be sure they must respect the driver rules
 	 * 
-	 * @param array $fields contain $_POST array
-	 * @param boolean $throwExeptions
+	 * @param array $fields An array witch contains the fields to be populate
+	 * @returnboolean Operation final status
+	 * @see Useradmin_Driver_iAuth::register()
 	 */
 	public function register($fields) 
 	{
@@ -96,18 +99,37 @@ class Useradmin_Auth_ORM extends Kohana_Auth_ORM implements Useradmin_Driver_iAu
 	}
 	
 	/**
-	 * Unegister
+	 * Unegister multiple users
 	 * Method to unregister existing user by Useradmin Auth module, when you set the
 	 * Model_User reference for removing a user.
 	 * 
 	 * @param mixed $users An array witch contains the Model_User or a array of Model_User
-	 * @return boolean Operation final status
+	 * @return void
 	 * @see Useradmin_Driver_iAuth::unregister()
 	 */
 	public function unregister ($users)
 	{
-		// TODO Auto-generated method stub
+		if( ! is_array($users))
+			$users = array($users);
 		
+		foreach ($users as $user)
+		{
+			if($user instanceof Model_User) 
+			{
+				try 
+				{
+					$user->delete();
+				} 
+				catch (ORM_Validation_Exception $e) 
+				{
+					throw $e;
+				}
+			}
+			elseif( ! is_null($user) )
+			{
+				throw new Kohana_Exception("Invalid argument, must be instance of Model_User or array() containing Model_User's");
+			}
+		}
 	}
 
 }

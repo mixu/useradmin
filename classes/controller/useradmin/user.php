@@ -233,8 +233,6 @@ class Controller_Useradmin_User extends Controller_App {
          }
          // Delete the user
          $user->delete($id);
-         // Delete any associated identities
-         DB::delete('user_identities')->where('user_id', '=', $id)->execute();
          // message: save success
          Message::add('success', __('User deleted.'));
          $this->request->redirect('user/profile');

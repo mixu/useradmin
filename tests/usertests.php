@@ -534,12 +534,41 @@ class UserTests extends Unittest_TestCase {
 	}
 	
 	/**
-	 * test auth delete user
+	 * test auth delete loged user
 	 * @author Gabriel Giannattasio
 	 * @test
 	 */
-	public function test_auth_delete_user()
+	public function test_auth_delete_loged_user()
 	{
-		
+		$validUser = $this->providerValidUserUpdates();
+		$this->assertTrue( Auth::instance()->login( $validUser[3][0]['username'], $validUser[3][0]['password']), "Do the login" );
+		$this->assertInstanceOf("Model_User", $user = Auth::instance()->get_user(), "Get Model_User instance form Auth");
+		$this->assertNull( Auth::instance()->unregister($user), "Delete the loged user");
+		$this->assertNull( Auth::instance()->logged_in(), "The user was deleted, why this isn't Null?");
+	}
+	
+	/**
+	 * test auth delete multiple users
+	 * @author Gabriel Giannattasio
+	 * @test
+	 * @depends test_auth_delete_loged_user
+	 */
+	public function test_auth_delete_multiple_users()
+	{
+		$validUsers = $this->providerValidUsers();
+		array_pop($validUsers);
+		array_shift($validUsers);
+		array_walk ($validUsers, function(&$user)
+		{
+			$username = $user[0]['username'];
+			$user = new Model_User();
+			$user->where("username","=", $username)
+				 ->find();
+		});
+		$this->assertNull( Auth::instance()->unregister($validUsers), "Delete the users in array");
+		foreach ($validUsers as $user)
+		{
+			$this->assertFalse( $user->loaded(), "Ok, so you think the user was deleted? think again!");
+		}
 	}
 }
