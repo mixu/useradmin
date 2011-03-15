@@ -5,7 +5,6 @@
  * @group modules
  * @group modules.useradmin
  * @group modules.useradmin.auth
- * @group modules.useradmin.auth_class_only
  * 
  * @package    Useradmin
  * @category   Tests
