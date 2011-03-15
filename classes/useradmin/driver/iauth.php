@@ -23,7 +23,7 @@ interface Useradmin_Driver_iAuth {
 	 * Model_User reference for removing a user.
 	 * 
 	 * @param array(Model_User) $users An array witch contains Model_User's
-	 * @return boolean Operation final status
+	 * @return void
 	 */
 	 public function unregister($users);
 }
