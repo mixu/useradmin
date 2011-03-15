@@ -420,6 +420,7 @@ class UserTests extends Unittest_TestCase {
 	 */
 	public function test_auth_valid_logins_and_logout( $fields )
 	{
+		$this->assertTrue( Auth::instance()->logout(TRUE, TRUE), "Force logout all" );
 		$this->assertTrue( Auth::instance()->login( $fields['username'], $fields['password']) , "Check login using username");
 		$this->assertTrue( Auth::instance()->login( $fields['email'], $fields['password']) , "Check login using email");
 		// Get the user model
@@ -438,6 +439,7 @@ class UserTests extends Unittest_TestCase {
 	 */
 	public function test_auth_valid_logins_and_update_user( $login, $fields )
 	{
+		$this->assertTrue( Auth::instance()->logout(TRUE, TRUE), "Force logout all" );
 		$this->assertTrue( Auth::instance()->login( $login['username'], $login['password']), "Do the login" );
 		$user = Auth::instance()->get_user();
 		try 
@@ -466,6 +468,7 @@ class UserTests extends Unittest_TestCase {
 	 */
 	public function test_auth_valid_logins_and_invalid_update_user( $login, $fields )
 	{
+		$this->assertTrue( Auth::instance()->logout(TRUE, TRUE), "Force logout all" );
 		$this->assertTrue( Auth::instance()->login( $login['username'], $login['password']), "Do the login" );
 		$user = Auth::instance()->get_user();
 		try 
@@ -494,6 +497,7 @@ class UserTests extends Unittest_TestCase {
 	 */
 	public function test_auth_invalid_logins_and_logout( $fields )
 	{
+		$this->assertTrue( Auth::instance()->logout(TRUE, TRUE), "Force logout all" );
 		$this->assertFalse( Auth::instance()->login( $fields['username'], $fields['password']), "Check login using username" );
 		$this->assertFalse( Auth::instance()->login( $fields['email'], $fields['password']), "Check login using email" );
 		$this->assertFalse( Auth::instance()->get_user(), "get_user must fail.");
@@ -508,6 +512,7 @@ class UserTests extends Unittest_TestCase {
 	 */
 	public function test_auth_login_jail()
 	{
+		$this->assertTrue( Auth::instance()->logout(TRUE, TRUE), "Force logout all" );
 		$validUser = $this->providerValidUsers();
 		// Must fail 5 times before jail the user for 5 minutes
 		$this->assertFalse( Auth::instance()->login( $validUser[2][0]['username'], "*********"), "Check login using wrong password #1" );
