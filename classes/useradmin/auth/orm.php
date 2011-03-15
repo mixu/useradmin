@@ -57,22 +57,27 @@ class Useradmin_Auth_ORM extends Kohana_Auth_ORM implements Useradmin_Driver_iAu
 	 * @param array $fields contain $_POST array
 	 * @param boolean $throwExeptions
 	 */
-	public function register($fields, $throwExeptions = FALSE) 
+	public function register($fields) 
 	{
 		if( ! is_object($fields) ) 
 		{
 			// Load the user
 			$user = ORM::factory('user');
-		} else {
+		} 
+		else 
+		{
 			// Check for instanced model
 			if( $fields instanceof Model_User ) 
 			{
 				$user = $fields;
-			} else { 
+			} 
+			else 
+			{ 
 				throw new Kohana_Exception('Invalid user fields.');
 			}
 		}
-		try {
+		try 
+		{
 			$user->create_user($fields, array(
 				'username',
 				'password',
@@ -81,12 +86,28 @@ class Useradmin_Auth_ORM extends Kohana_Auth_ORM implements Useradmin_Driver_iAu
 			// Add the login role to the user (add a row to the db)
 			$login_role = new Model_Role(array('name' =>'login'));
             $user->add('roles', $login_role);
-		} catch (ORM_Validation_Exception $e) {
-			if($throwExeptions)
-				throw $e;
-			else
-				return FALSE;
+		} 
+		catch (ORM_Validation_Exception $e) 
+		{
+			throw $e;
+			return FALSE;
 		}
 		return TRUE;
 	}
+	
+	/**
+	 * Unegister
+	 * Method to unregister existing user by Useradmin Auth module, when you set the
+	 * Model_User reference for removing a user.
+	 * 
+	 * @param mixed $users An array witch contains the Model_User or a array of Model_User
+	 * @return boolean Operation final status
+	 * @see Useradmin_Driver_iAuth::unregister()
+	 */
+	public function unregister ($users)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
 }

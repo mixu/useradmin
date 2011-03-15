@@ -13,7 +13,17 @@ interface Useradmin_Driver_iAuth {
 	 * fields, be sure they must respect the driver rules
 	 * 
 	 * @param array $fields An array witch contains the fields to be populate
-	 * @param boolean $throwException
+	 * @returnboolean Operation final status
 	 */
-	 public function register($fields, $throwException = FALSE);
+	 public function register($fields);
+	 
+	/**
+	 * Unegister
+	 * Method to unregister existing user by Useradmin Auth module, when you set the
+	 * Model_User reference for removing a user.
+	 * 
+	 * @param mixed $users An array witch contains the Model_User or a array of Model_User
+	 * @return boolean Operation final status
+	 */
+	 public function unregister($users);
 }

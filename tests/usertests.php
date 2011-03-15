@@ -396,7 +396,16 @@ class UserTests extends Unittest_TestCase {
 	 */
 	public function test_auth_register_invalid_users( $fields )
 	{
-		$this->assertFalse( Auth::instance()->register($fields), 'Must be a invalid user.');
+		try 
+		{
+			$status = Auth::instance()->register($fields);
+		} 
+		catch (ORM_Validation_Exception $e) 
+		{
+			$status = FALSE;
+		}
+		
+		$this->assertFalse( $status, 'Must be a invalid user.');
 	}
 	
 	/**
@@ -522,5 +531,15 @@ class UserTests extends Unittest_TestCase {
 		$this->assertFalse( Auth::instance()->login( $validUser[2][0]['username'], "*********"), "Check login using wrong password #5" );
 		// Try to login with the correct password must fail
 		$this->assertFalse( Auth::instance()->login( $validUser[2][0]['username'], $validUser[2][0]['password']), "Check login using correct password" );
+	}
+	
+	/**
+	 * test auth delete user
+	 * @author Gabriel Giannattasio
+	 * @test
+	 */
+	public function test_auth_delete_user()
+	{
+		
 	}
 }
