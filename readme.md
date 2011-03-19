@@ -2,9 +2,9 @@
 TUTORIAL
 ========
 
-Note: I haven't had the time to look into upgrading from 3.0 to 3.1.x. Help me out and contribute if you need it quickly!
+NEW: Upgraded to support Kohana 3.1.x! Thank you gartz for this! If you need KO 3.0.x support, use the Feb 27th version.
 
-Most recent, detailed tutorial:
+Most recent, detailed tutorial - note, documentation still needs an update:
 
 * [Getting started with Useradmin, my Kohana 3 auth admin module](http://blog.mixu.net/2011/01/13/getting-started-with-useradmin-my-kohana-3-auth-admin-module/)
 
@@ -27,10 +27,19 @@ SUPPORTED PROVIDERS
 CONTRIBUTORS
 ============
 
-I would like to thank [jnbdz](https://bitbucket.org/jnbdz/useradmin/) for adding the reCaptcha support.
+I would like to thank:
+
+* [jnbdz](https://bitbucket.org/jnbdz/useradmin/) for adding the reCaptcha support.
+* [gartz](https://github.com/gartz/useradmin/) for doing upgrading the module to support Kohana 3.1.x.
 
 CHANGELOG
 =========
+
+March 19th 2011:
+
+* Upgraded to support Kohana 3.1.x! Thanks gartz!
+* Testing various actions to ensure KO 3.1.2 compatibility (admin in particular), improved validation message handling.
+* Added support for media file routing to make it easier to get started with the module.
 
 Feb 27th 2011:
 
