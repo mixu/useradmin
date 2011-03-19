@@ -19,7 +19,7 @@ echo $form->open('admin_user/edit/'.$id);
    <div class="content">
 <ul>
    <li><label><?php echo __('Username'); ?></label></li>
-   <?php echo $form->input('username', null, array('info' => __('Length between 4-32 characters. Letters, numbers, dot and underscore are allowed characters.'))); ?>
+   <?php echo $form->input('username', null, array('info' => __('Length between 1-32 characters. Letters, numbers, dot and underscore are allowed characters.'))); ?>
    <li><label><?php echo __('Email address'); ?></label></li>
    <?php echo $form->input('email') ?>
    <li><label><?php echo __('Password'); ?></label></li>
