@@ -129,7 +129,7 @@ class Helper_Datatable {
             if ( ($name == $sort && $dir == 'DESC') || $name != $sort ) {
                $result .= '<th scope="col">'.
                Html::anchor(
-                     URL::site(Request::current()->uri, true).URL::query(array(
+                     URL::site(Request::current()->uri(), true).URL::query(array(
                         'page' => $page,
                         'sort' => $name,
                         'dir' => null,
@@ -140,7 +140,7 @@ class Helper_Datatable {
             } else {
                $result .= '<th scope="col">'.
                Html::anchor(
-                     URL::site(Request::current()->uri, true).URL::query(array(
+                     URL::site(Request::current()->uri(), true).URL::query(array(
                         'page' => $page,
                         'sort' => $name,
                         'dir' => 'DESC',

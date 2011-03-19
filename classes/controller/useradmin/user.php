@@ -101,10 +101,10 @@ class Controller_Useradmin_User extends Controller_App {
 
          try {
             $user->update_user($_POST, array(
-            'username',
-            'password',
-            'email',
-         ));
+               'username',
+               'password',
+               'email',
+            ));
             // message: save success
             Message::add('success', __('Values saved.'));
             // redirect and exit
@@ -115,7 +115,7 @@ class Controller_Useradmin_User extends Controller_App {
             // Note how the first param is the path to the message file (e.g. /messages/register.php)
             Message::add('error', __('Error: Values could not be saved.'));
             $errors = $e->errors('register');
-            $errors = array_merge($errors, $errors["_external"]);
+            $errors = array_merge($errors, (isset($errors['_external']) ? $errors['_external'] : array()));
             $view->set('errors', $errors);
             // Pass on the old form values
             $user->password = '';
@@ -171,13 +171,13 @@ class Controller_Useradmin_User extends Controller_App {
                Message::add('error', __('The captcha text is incorrect, please try again.'));
             }
          }
-         
+
          try {
             if( ! $optional_checks ) {
                throw new ORM_Validation_Exception("Invalid option checks");
             }
             Auth::instance()->register( $_POST, TRUE );
-            
+
             // sign the user in
             Auth::instance()->login($_POST['username'], $_POST['password']);
             // redirect to the user account
@@ -187,7 +187,7 @@ class Controller_Useradmin_User extends Controller_App {
             // Note how the first param is the path to the message file (e.g. /messages/register.php)
             $errors = $e->errors('register');
             // Move external errors to main array, for post helper compatibility
-            $errors = array_merge($errors, $errors["_external"]);
+            $errors = array_merge($errors, (isset($errors['_external']) ? $errors['_external'] : array()));
             $view->set('errors', $errors);
             // Pass on the old form values
             $_POST['password'] = $_POST['password_confirm'] = '';
@@ -228,7 +228,7 @@ class Controller_Useradmin_User extends Controller_App {
          // Delete the user
          $user->delete($id);
          // Delete any associated identities
-         DB::delete('user_identities')->where('user_id', '=', $id)->execute();
+         DB::delete('user_identity')->where('user_id', '=', $id)->execute();
          // message: save success
          Message::add('success', __('User deleted.'));
          $this->request->redirect('user/profile');
@@ -250,7 +250,7 @@ class Controller_Useradmin_User extends Controller_App {
             $this->template->content = $this->request->body('{ "success": "true" }');
             return;
          }
-         else if( Auth::instance()->login($_REQUEST['username'], $_REQUEST['password']) ) 
+         else if( Auth::instance()->login($_REQUEST['username'], $_REQUEST['password']) )
          {
             $this->response->status(200);
             $this->template->content = $this->request->body('{ "success": "true" }');
@@ -268,11 +268,6 @@ class Controller_Useradmin_User extends Controller_App {
             $this->request->redirect('user/profile');
          }
          $view = View::factory('user/login');
-         // allow setting the username as a get param
-         if(isset($_GET['username'])) {
-            $view->set('username', Security::xss_clean($_GET['username']));
-         }
-
          // If there is a post and $_POST is not empty
          if ($_REQUEST && isset($_REQUEST['username'], $_REQUEST['password'])) {
 
@@ -280,10 +275,24 @@ class Controller_Useradmin_User extends Controller_App {
             if ( Auth::instance()->login($_REQUEST['username'], $_REQUEST['password']) ) {
                // redirect to the user account
                $this->request->redirect('user/profile');
+               return;
             } else {
+               $view->set('username', $_REQUEST['username']);
                // Get errors for display in view
-               $view->set('errors', array('username' => 'invalid'));
+               $validation = Validation::factory($_REQUEST)
+                  ->rule('username', 'not_empty')
+                  ->rule('username', 'min_length', array(':value', 1))
+                  ->rule('username', 'max_length', array(':value', 127))
+                  ->rule('password', 'not_empty');             
+               if ($validation->check()) {
+                  $validation->error('password', 'invalid');
+               }
+               $view->set('errors', $validation->errors('login'));  
             }
+         }
+         // allow setting the username as a get param
+         if(isset($_GET['username'])) {
+            $view->set('username', Security::xss_clean($_GET['username']));
          }
          $providers = Kohana::config('useradmin.providers');
          $view->set('facebook_enabled', isset($providers['facebook']) ? $providers['facebook'] : false);
@@ -614,5 +623,40 @@ class Controller_Useradmin_User extends Controller_App {
          Message::add('error', 'Retrieving information from the provider failed. Please register below.');
          $this->request->redirect('user/register');
       }
+   }
+
+   /**
+    * Media routing code. Allows lazy users to load images via Kohana. See also: init.php.
+    * I recommend just serving the files via apache, e.g. copy the public directory to your webroot.
+    */
+   public function action_media() {
+      // prevent auto render
+      $this->auto_render = FALSE;
+
+      // Generate and check the ETag for this file
+//		$this->request->check_cache(sha1($this->request->uri));
+      // Get the file path from the request
+      $file = Request::current()->param('file');
+      $dir = Request::current()->param('dir');
+
+      // Find the file extension
+      $ext = pathinfo($file, PATHINFO_EXTENSION);
+
+      // Remove the extension from the filename
+      $file = substr($file, 0, -(strlen($ext) + 1));
+
+      $file = Kohana::find_file('public', $dir.'/'.$file, $ext);
+      if ($file) {
+         // Send the file content as the response
+         $this->response->body(file_get_contents($file));
+      } else {
+         // Return a 404 status
+         $this->response->status(404);
+      }
+
+      // Set the proper headers to allow caching
+      $this->response->headers('Content-Type', File::mime_by_ext($ext));
+      $this->response->headers('Content-Length', (string)filesize($file));
+      $this->response->headers('Last-Modified', date('r', filemtime($file)));
    }
 }

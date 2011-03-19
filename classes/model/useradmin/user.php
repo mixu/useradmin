@@ -46,7 +46,7 @@ class Model_Useradmin_User extends Model_Auth_User {
     * @param array $values
     * @return Validation
     * @see Model_Auth_User::get_password_validation
-*/
+    */
    public static function get_password_validation($values) {
       return Validation::factory($values)
          ->rule('password', 'min_length', array(':value', 6))
