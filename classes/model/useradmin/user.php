@@ -1,8 +1,6 @@
 <?php defined('SYSPATH') or die('No direct access allowed.');
 
 class Model_Useradmin_User extends Model_Auth_User {
-
-	protected $_table_name = 'users';
 	
 	/**
 	 * A user has many tokens and roles
