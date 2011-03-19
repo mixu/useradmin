@@ -14,14 +14,12 @@
  */
 class UserTests extends Unittest_TestCase {
 
-	const dbConnection = "unittest";
-	
 	/**
 	 * Configure database for test
 	 */
 	static public function useTestDB() 
 	{
-		Kohana::config('database')->set( "default", Kohana::config('database.'.UserTests::dbConnection) );
+		Kohana::config('database')->set( "default", Kohana::config('database.'.Kohana::config('unittest.db_connection')) );
 	}
 	
 	/**
@@ -38,7 +36,11 @@ class UserTests extends Unittest_TestCase {
 		{
 			$command = "-u{$testDb['connection']['username']} -p{$testDb['connection']['password']} {$testDb['connection']['database']}";
 			// Set the default database to test connection
-			return (exec("mysql $command < $path "))?TRUE:FALSE;
+			try 
+			{
+				exec("mysql $command < $path ");
+				return TRUE;
+			} catch (Exception $e) {}
 		}
 		return FALSE;
 	}
@@ -364,6 +366,16 @@ class UserTests extends Unittest_TestCase {
 	}
 	
 	/**
+	 * test if database can be cleaned
+	 * @author Gabriel Giannattasio
+	 * @test
+	 */
+	public function test_if_database_can_be_cleaned()
+	{
+		$this->assertTrue( UserTests::runSchema( "clean-setup" ) );
+	}
+	
+	/**
 	 * test if auth exists
 	 * @author Gabriel Giannattasio
 	 * @test
@@ -383,7 +395,14 @@ class UserTests extends Unittest_TestCase {
 	public function test_auth_register_valid_users( $fields )
 	{
 		UserTests::useTestDB();
-		$this->assertTrue( Auth::instance()->register($fields), 'Must be a valid user.');
+		$status = TRUE;
+		try 
+		{
+			Auth::instance()->register($fields);
+		} catch (Exception $e) {
+			$status = FALSE;
+		}
+		$this->assertTrue( $status, 'Must be a valid user.');
 	}
 	
 	/**
@@ -412,11 +431,16 @@ class UserTests extends Unittest_TestCase {
 	 * @author Gabriel Giannattasio
 	 * @test
 	 * @depends test_if_auth_exists
-	 * @expectedException ErrorException
 	 */
 	public function test_auth_register_invalid_fields()
 	{
-		$this->assertFalse( Auth::instance()->register(NULL), 'Must be a invalid field user.');
+		$registerFail = FALSE;
+		try {
+			Auth::instance()->register(NULL);
+		} catch (Exception $e) {
+			$registerFail = TRUE;
+		} 
+		$this->assertTrue($registerFail);
 	}
 	
 	/**
