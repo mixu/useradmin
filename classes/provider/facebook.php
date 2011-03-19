@@ -1,4 +1,4 @@
-<?php
+<?php defined('SYSPATH') or die('No direct access allowed.');
 
 /**
  * Oauth 2.0 using Facebook's own API class.

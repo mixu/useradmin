@@ -1,4 +1,5 @@
-<?php
+<?php defined('SYSPATH') or die('No direct access allowed.');
+
 Route::set('user/provider', 'user/provider(/<provider>)', array('provider' => '.+'))
 	->defaults(array(
 		'controller' => 'user',

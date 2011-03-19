@@ -1,4 +1,4 @@
-<?php
+<?php defined('SYSPATH') or die('No direct access allowed.');
 
 /**
  * Oauth 1.0 using Kohana's bundled OAuth module.

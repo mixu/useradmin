@@ -1,4 +1,5 @@
 <?php defined('SYSPATH') or die('No direct access allowed.');
+
 /**
  * ORM Auth driver extended for Useradmin module support.
  *

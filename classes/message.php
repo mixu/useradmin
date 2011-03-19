@@ -1,7 +1,6 @@
-<?php
+<?php defined('SYSPATH') or die('No direct access allowed.');
 
 class Message {
-
 
    public static function add($type, $message) {
 

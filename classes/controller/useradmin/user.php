@@ -1,4 +1,4 @@
-<?php
+<?php defined('SYSPATH') or die('No direct access allowed.');
 
 /**
  * User controller: user administration, also user accounts/profiles.
@@ -7,7 +7,6 @@
  * @package default
  * @version 1.0
  */
-
 class Controller_Useradmin_User extends Controller_App {
 
    /**
