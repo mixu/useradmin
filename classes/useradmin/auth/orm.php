@@ -38,7 +38,9 @@ class Useradmin_Auth_ORM extends Kohana_Auth_ORM implements Useradmin_Driver_iAu
 			// Reset the login failed count
 			$user->failed_login_count = 0;
 			$user->save();
-		} else {
+		} 
+		else 
+		{
 			// Failed login
 			$user->failed_login_count = $user->failed_login_count+1;
 			$user->last_failed_login = date("Y-m-d H:i:s");
@@ -132,5 +134,4 @@ class Useradmin_Auth_ORM extends Kohana_Auth_ORM implements Useradmin_Driver_iAu
 			}
 		}
 	}
-
 }

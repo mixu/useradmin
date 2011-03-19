@@ -78,6 +78,7 @@ class Controller_Useradmin_Admin_User extends Controller_App {
 
       // save the data
       if (!empty($_POST)) {
+      	//FIXME: Use Model_User in the controller insteat ORM::factory() for model generic driver compatibility
          // sample code paths for edit and create
          if(is_numeric($id)) {
             // EDIT: load the model with ID
