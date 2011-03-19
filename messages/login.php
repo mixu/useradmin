@@ -8,6 +8,7 @@ return array(
        ),
       'password' => array(
          'not_empty'      => 'Password must not be empty.',
+         'invalid' => 'Password or username is incorrect.',
       ),
 );
 

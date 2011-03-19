@@ -13,6 +13,15 @@ Route::set('user/provider_return', 'user/provider_return(/<provider>)', array('p
 		'provider'       => NULL,
 	));
 
+// Static file serving (CSS, JS, images)
+Route::set('css', '<dir>(/<file>)', array('file' => '.+', 'dir' => '(css|img)'))
+   ->defaults(array(
+		'controller' => 'user',
+		'action'     => 'media',
+		'file'       => NULL,
+		'dir'       => NULL,
+	));
+
 /**
  * Set the default database to test database when testing env is detectd
  */

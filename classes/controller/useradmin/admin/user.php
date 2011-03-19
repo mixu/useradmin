@@ -73,7 +73,7 @@ class Controller_Useradmin_Admin_User extends Controller_App {
     */
    public function action_edit($id = NULL) {
       // set the template title (see Controller_App for implementation)
-      $this->template->title = 'Edit user';
+      $this->template->title = __('Edit user');
       // load the content from view
       $view = View::factory('user/admin/edit');
 
@@ -82,31 +82,50 @@ class Controller_Useradmin_Admin_User extends Controller_App {
          // sample code paths for edit and create
          if(is_numeric($id)) {
             // EDIT: load the model with ID
-            $model = ORM::factory('user', $id);
+            $user = ORM::factory('user', $id);
          } else {
             // CREATE: do not specify id
-            $model = ORM::factory('user');
+            $user = ORM::factory('user');
          }
          if(empty($_POST['password']) || empty($_POST['password_confirm'])) {
             // force unsetting the password! Otherwise Kohana3 will automatically hash the empty string - preventing logins
             unset($_POST['password'], $_POST['password_confirm']);
          }
-         // you can't change your user id or facebook id
-         unset($_POST['id'], $_POST['facebook_user_id']);
-         $model->values($_POST);
+         // you can't change your user id
+         unset($_POST['id']);
+         $user->values($_POST);
          // since we combine both editing and creating here we need a separate variable
          // you can get rid of it if your actions don't need to do that
          $result = false;
-         if(is_numeric($id)) {
+         $errors = null;
+         if(is_numeric($id)) {            
             // EDIT: check using alternative rules
-            $result = $model->check_edit();
+            try {
+               $user->update_user($_POST, array(
+                  'username',
+                  'password',
+                  'email',
+               ));
+               $result = true;
+            } catch (ORM_Validation_Exception $e) {
+               $errors = $e->errors('register');
+               $errors = array_merge($errors, (isset($errors['_external']) ? $errors['_external'] : array()) );
+            }
          } else {
             // CREATE: check using default rules
-            $result = $model->check();
+            try {
+               $user->create_user($_POST, array(
+                  'username',
+                  'password',
+                  'email',
+               ));
+               $result = true;
+            } catch (ORM_Validation_Exception $e) {
+               $errors = $e->errors('register');
+               $errors = array_merge($errors, (isset($errors['_external']) ? $errors['_external'] : array()) );
+            }
          }
          if($result) {
-            // validation passed, save model
-            $model->save();
             // roles have to be added separately, and all users have to have the login role
             // you first have to remove the items, otherwise add() will try to add duplicates
             if(is_numeric($id)) {
@@ -115,31 +134,31 @@ class Controller_Useradmin_Admin_User extends Controller_App {
             }
             foreach($_POST['roles'] as $role) {
                // add() executes the query immediately, and saves the data (unlike the KO2 docs say)
-               $model->add('roles', ORM::factory('role')->where('name', '=', $role)->find());
+               $user->add('roles', ORM::factory('role')->where('name', '=', $role)->find());
             }
             // message: save success
             Message::add('success', __('Values saved.'));
             // redirect and exit
-            Request::instance()->redirect('admin_user/index');
+            Request::current()->redirect('admin_user/index');
             return;
          } else {
             // Get errors for display in view --> to AppForm
             Message::add('error', __('Error: Values could not be saved.'));
             // Note how the first param is the path to the message file (e.g. /messages/register.php)
-            $view->set('errors', $model->validate()->errors('register'));
+            $view->set('errors', $errors);
             // Pass on the old form values --> to AppForm
-            $view->set('data', $model->as_array());
+            $view->set('data', $user->as_array());
          }
       }
 
       // if an ID is set, load the information
       if(is_numeric($id)) {
          // instantiatiate a new model
-         $model = ORM::factory('user', $id);
-         $view->set('data', $model->as_array());
+         $user = ORM::factory('user', $id);
+         $view->set('data', $user->as_array());
          // retrieve roles into array
          $roles = array();
-         foreach($model->roles->find_all() as $role) {
+         foreach($user->roles->find_all() as $role) {
             $roles[] = $role->name;
          }
          $view->set('user_roles', $roles);
@@ -165,18 +184,22 @@ class Controller_Useradmin_Admin_User extends Controller_App {
     */
    public function action_delete($id = NULL) {
       // set the template title (see Controller_App for implementation)
-      $this->template->title = 'Delete user';
+      $this->template->title = __('Delete user');
       $user = ORM::factory('user', $id);
       // check for confirmation
       if(is_numeric($id) && isset($_POST['confirmation']) && $_POST['confirmation'] == 'Y') {
-         // Delete the user
-         $user->delete($id);
-         // Delete any associated identities
-         DB::delete('user_identities')->where('user_id', '=', $id)->execute();
-         // message: save success
-         Message::add('success', 'User deleted.');
+         if($user->loaded()) {
+            // Delete the user
+            $user->delete($id);
+            // Delete any associated identities
+            DB::delete('user_identity')->where('user_id', '=', $id)->execute();
+            // message: save success
+            Message::add('success', __('User deleted.'));
+         } else {
+            Message::add('success', __('User is already deleted.'));
+         }
          // redirect and exit
-         Request::instance()->redirect('admin_user/index');
+         Request::current()->redirect('admin_user/index');
          return;
       }
       // display confirmation

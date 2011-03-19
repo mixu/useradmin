@@ -130,15 +130,14 @@ class Controller_Useradmin_App extends Controller {
     * is rendered.
     */
    public function after() {
-      if ($this->auto_render === TRUE) {
-         // Assign the template as the request response and render it
-         $this->response->body( $this->template );
-         
+      if ($this->auto_render === TRUE) {         
          $styles = array( 'css/style.css' => 'screen');
          $scripts = array();
 
          $this->template->styles = array_merge( $this->template->styles, $styles );
          $this->template->scripts = array_merge( $this->template->scripts, $scripts );
+         // Assign the template as the request response and render it
+         $this->response->body( $this->template );
       }
       parent::after();
    }
