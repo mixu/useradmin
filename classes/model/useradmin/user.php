@@ -100,8 +100,7 @@ class Model_Useradmin_User extends Model_Auth_User {
       $base = $this->transcribe($base);
       $username = $base;
       $i = 2;
-      // check returns false if not unique
-      while(!$this->check_username($username)) {
+      while($this->username_exist($username)) {
          $username = $base.$i;
          $i++;
       }
@@ -115,7 +114,7 @@ class Model_Useradmin_User extends Model_Auth_User {
     */
    public function username_exist($username) 
    {
-      return ( (bool) $this->unique_key_exists( $username, "username") ) ;
+      return ( (bool) $this->unique_key_exists( $username, 'username') ) ;
    }
 
 }

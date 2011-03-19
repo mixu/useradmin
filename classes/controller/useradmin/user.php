@@ -556,7 +556,7 @@ class Controller_Useradmin_User extends Controller_App {
             $user = $user_identity->user;
             if($user->loaded() && $user->id == $user_identity->user_id && is_numeric($user->id)) {
                // found, log user in
-               Auth_ORM::instance()->force_login($user);
+               Auth::instance()->force_login($user);
                // redirect to the user account
                $this->request->redirect('user/profile');
                return;
@@ -575,14 +575,16 @@ class Controller_Useradmin_User extends Controller_App {
                 'password' => $password,
                 'password_confirm' => $password,
             );
-            if(Validate::email($provider->email(), TRUE)) {
+            if(Valid::email($provider->email(), TRUE)) {
                $values['email'] = $provider->email();
-            }
-            $user->values($values);
-            // If the post data validates using the rules setup in the user model
-            if ($user->check()) {
-               // create the account
-               $user->save();
+            }            
+            try {
+               // If the post data validates using the rules setup in the user model
+               $user->create_user($values, array(
+                  'username',
+                  'password',
+                  'email',
+               ));
                // Add the login role to the user (add a row to the db)
                $login_role = new Model_Role(array('name' =>'login'));
                $user->add('roles', $login_role);
@@ -591,14 +593,12 @@ class Controller_Useradmin_User extends Controller_App {
                $user_identity->user_id = $user->id;
                $user_identity->provider = $provider_name;
                $user_identity->identity = $provider->user_id();
-               if($user_identity->check()) {
-                  $user_identity->save();
-               }
+               $user_identity->save();
                // sign the user in
                Auth::instance()->login($values['username'], $password);
                // redirect to the user account
                $this->request->redirect('user/profile');
-            } else {
+            } catch (ORM_Validation_Exception $e) {
                if($provider_name == 'twitter') {
                   Message::add('error', 'The Twitter API does not support retrieving your email address; you will have to enter it manually.');
                } else {
@@ -606,13 +606,21 @@ class Controller_Useradmin_User extends Controller_App {
                }
                // in case the data for some reason fails, the user will still see something sensible:
                // the normal registration form.
-               // Load the view
                $view = View::factory('user/register');
-               // Note how the first param is the path to the message file (e.g. /messages/register.php)
-               $view->errors = $user->validate()->errors('register');
+               $errors = $e->errors('register');
+               // Move external errors to main array, for post helper compatibility
+               $errors = array_merge($errors, (isset($errors['_external']) ? $errors['_external'] : array()));
+               $view->set('errors', $errors);
                // Pass on the old form values
                $values['password'] = $values['password_confirm'] = '';
                $view->set('defaults', $values);
+               if(Kohana::config('useradmin')->captcha) {
+                  include Kohana::find_file('vendor', 'recaptcha/recaptchalib');
+                  $recaptcha_config = Kohana::config('recaptcha');
+                  $recaptcha_error = null;
+                  $view->set('captcha_enabled', true);
+                  $view->set('recaptcha_html', recaptcha_get_html($recaptcha_config['publickey'], $recaptcha_error));
+               }
                $this->template->content = $view;
             }
          } else {

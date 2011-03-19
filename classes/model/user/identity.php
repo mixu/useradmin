@@ -33,11 +33,11 @@ class Model_User_Identity extends ORM {
     * Triggers error if identity exists.
     * Validation callback.
     *
-    * @param   Validate  Validate object
+    * @param   Validation  Validation object
     * @param   string    field name
     * @return  void
     */
-   public static function unique_identity (Validate $validation, $field)
+   public function unique_identity (Validation $validation, $field)
    {
       $identity_exists = (bool) DB::select(array('COUNT("*")', 'total_count'))
          ->from($this->_table_name)
