@@ -1,18 +1,26 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
 return array(
-	'auth' => array(
-		/**
-		 * Define the maximum failed attempts to login
-		 * set 0 to disable the login jail
-		 */
-		'max_failed_logins' => 5,
-		/**
-		 * Define the time that user who archive the max_failed_logins will need to 
-		 * wait before his next attempt
-		 */
-		'login_jail_time' => "5 minutes",
-	),
+    /**
+     * The number of failed logins allowed can be specified here:
+     * If the user mistypes their password X times, then they will not be permitted to log in during the jail time.
+     * This helps prevent brute-force attacks.
+     */
+   'auth' => array(
+      /**
+       * Define the maximum failed attempts to login
+       * set 0 to disable the login jail
+       */
+      'max_failed_logins' => 5,
+      /**
+       * Define the time that user who archive the max_failed_logins will need to 
+       * wait before his next attempt
+       */
+      'login_jail_time' => "5 minutes",
+    ),
+    /**
+     * 3rd party providers supported/allowed.
+     */
     'providers' => array(
        /**
         * Toggle Facebook support: if set, then users can log in using Facebook.
@@ -30,7 +38,7 @@ return array(
         * Setup:
         * - You need the extra table from schema.sql for storing 3rd party identifiers
         * - You must register your app with Twitter and add the information in /config/oauth.php (Kohana-Oauth's config)
-        * - You must enable the Kohana Core oauth module (bundled in the repo)
+        * - You must enable the Kohana Core oauth module
         */
        'twitter' => true,
        /**
@@ -38,7 +46,7 @@ return array(
         *
         * Setup:
         * - You need the extra table from schema.sql for storing 3rd party identifiers
-        * - You must have LightOpenID in /vendors/lightopenid/openid.php
+        * - You must have LightOpenID in /vendors/lightopenid/openid.php (bundled in the repo)
         */
        'google' => true,
        /**
@@ -46,7 +54,7 @@ return array(
         *
         * Setup:
         * - You need the extra table from schema.sql for storing 3rd party identifiers
-        * - You must have LightOpenID in /vendors/lightopenid/openid.php
+        * - You must have LightOpenID in /vendors/lightopenid/openid.php (bundled in the repo)
         */
        'yahoo' => true,
     ),
