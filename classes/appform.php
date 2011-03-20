@@ -1,4 +1,5 @@
-<?php defined('SYSPATH') or die('No direct access allowed.');
+<?php
+defined('SYSPATH') or die('No direct access allowed.');
 
 /**
  * AppForm class: generate application-specific markup for forms.
@@ -10,70 +11,110 @@
  */
 class Appform {
 
-   /**
-    * Set errors (fieldname => error) from Validation.
-    * @var array
-    */
-   public $errors;
-   /**
-    * Set default values (fieldname => default value). In the fields, use NULL if you want to use the default value.
-    * @var array
-    */
-   public $defaults;
-   /**
-    * Set actual values (fieldname => actual value). 
-    * @var array
-    */
-   public $values;
-   
-   /**
-    * CSS class strings for messages. You can override these.
-    * @var string
-    */
-   public $info_class = 'info';
-   public $error_class = 'error';
+	/**
+	 * Set errors (fieldname => error) from Validation.
+	 * @var array
+	 */
+	public $errors;
 
-   /**
-    * Add a class to the input attributes array.
-    * @param array $attributes
-    * @param string $class
-    * @return array
-    */
-   private static function add_class($attributes, $class) {
-      if(isset($attributes['class'])) {
-         $attributes['class'] .= ' '.$class;
-      } else {
-         $attributes['class'] = $class;
-      }
-      return $attributes;
-   }
+	/**
+	 * Set default values (fieldname => default value). In the fields, use NULL if you want to use the default value.
+	 * @var array
+	 */
+	public $defaults;
 
-   /**
-    * Load values for errors, defaults and values from AppForm instance.
-    * @param <type> $name
-    * @param <type> $value
-    * @param <type> $attributes 
-    */
-   private function load_values($name, &$value, &$attributes) {
-      if(isset($this->errors[$name])) {
-         $attributes = Appform::add_class($attributes, 'error');
-      }
-      if(isset($this->defaults[$name]) && $value == NULL) {
-         $value = $this->defaults[$name];
-      }
-      if(isset($this->values[$name]) && $value == NULL) {
-         $value = $this->values[$name];
-      }
-   }
+	/**
+	 * Set actual values (fieldname => actual value). 
+	 * @var array
+	 */
+	public $values;
 
-  /**
+	/**
+	 * CSS class strings for messages. You can override these.
+	 * @var string
+	 */
+	public $info_class = 'info';
+
+	public $error_class = 'error';
+
+	/**
+	 * Add a class to the input attributes array.
+	 * @param array $attributes
+	 * @param string $class
+	 * @return array
+	 */
+	private static function add_class ($attributes, $class)
+	{
+		if (isset($attributes['class']))
+		{
+			$attributes['class'] .= ' ' . $class;
+		}
+		else
+		{
+			$attributes['class'] = $class;
+		}
+		return $attributes;
+	}
+
+	/**
+	 * Load values for errors, defaults and values from AppForm instance.
+	 * @param <type> $name
+	 * @param <type> $value
+	 * @param <type> $attributes 
+	 */
+	private function load_values ($name, &$value, &$attributes)
+	{
+		if (isset($this->errors[$name]))
+		{
+			$attributes = Appform::add_class($attributes, 'error');
+		}
+		if (isset($this->defaults[$name]) && $value == NULL)
+		{
+			$value = $this->defaults[$name];
+		}
+		if (isset($this->values[$name]) && $value == NULL)
+		{
+			$value = $this->values[$name];
+		}
+	}
+
+	/**
+	 * Add alert span for error or field info
+	 * 
+	 * @param string $errorName $this->errors[$name]
+	 * @param string $attrInfo  $attributes['info']
+	 * @return string
+	 */
+	private function addAlertSpan($errorName, $attributes = NULL)
+	{
+		if (isset($errorName))
+		{
+			$result = '<span class="error">' 
+			        . ucfirst($errorName) 
+			        . '</span>';
+		}
+		else 
+		{
+			if (isset($attributes['info']))
+			{
+				// else add info span
+				$result = '<span class="'.$this->info_class.'">' 
+				        . $attributes['info'] 
+				        . '</span>';
+			}
+		}
+		return (string) (isset($result))?$result:'';
+	}
+	
+	/**
 	 * Generates an opening HTML form tag.
 	 *
 	 * @param   string  form action
 	 * @param   array   html attributes
 	 * @return  string
 	 */
-	public function open($action = NULL, array $attributes = NULL) {
+	public function open ($action = NULL, array $attributes = NULL)
+	{
 		return Kohana_Form::open($action, $attributes);
 	}
 
@@ -82,7 +123,8 @@ class Appform {
 	 *
 	 * @return  string
 	 */
-	public function close() {
+	public function close ()
+	{
 		return Kohana_Form::close();
 	}
 
@@ -95,19 +137,14 @@ class Appform {
 	 * @param   array   html attributes
 	 * @return  string
 	 */
-	public function input($name, $value = NULL, array $attributes = NULL) {
-      $attributes = Appform::add_class($attributes, 'text');
-      $this->load_values($name, $value, $attributes);
-      $result = '<li>'.Kohana_Form::input($name, $value, $attributes);
-      // add error span
-      if (isset($this->errors[$name])) {
-         $result .= '<span class="error">'.ucfirst($this->errors[$name]).'</span>';
-      } else if (isset($attributes['info'])) {
-         // else add info span
-         $result .= '<span class="'.$this->info_class.'">'.$attributes['info'].'</span>';
-      }
-      $result .= '</li>';
-      return $result;
+	public function input($name, $value = NULL, array $attributes = NULL)
+	{
+		$attributes = Appform::add_class($attributes, 'text');
+		$this->load_values($name, $value, $attributes);
+		return '<li>'
+			. Kohana_Form::input($name, $value, $attributes)
+			. $this->addAlertSpan((isset($this->errors[$name])?$this->errors[$name]:NULL), $attributes)
+			. '</li>';
 	}
 
 	/**
@@ -118,8 +155,9 @@ class Appform {
 	 * @param   array   html attributes
 	 * @return  string
 	 */
-	public function hidden($name, $value = NULL, array $attributes = NULL) {
-      $this->load_values($name, $value, $attributes);
+	public function hidden($name, $value = NULL, array $attributes = NULL)
+	{
+		$this->load_values($name, $value, $attributes);
 		return Kohana_Form::hidden($name, $value, $attributes);
 	}
 
@@ -131,19 +169,14 @@ class Appform {
 	 * @param   array   html attributes
 	 * @return  string
 	 */
-	public function password($name, $value = NULL, array $attributes = NULL) {
-      $attributes = Appform::add_class($attributes, 'password');
-      $this->load_values($name, $value, $attributes);
-      $result = '<li>'.Kohana_Form::password($name, $value, $attributes);
-      // add error span
-      if (isset($this->errors[$name])) {
-         $result .= '<span class="error">'.ucfirst($this->errors[$name]).'</span>';
-      } else if (isset($attributes['info'])) {
-         // else add info span
-         $result .= '<span class="'.$this->info_class.'">'.$attributes['info'].'</span>';
-      }
-      $result .= '</li>';
-      return $result;
+	public function password($name, $value = NULL, array $attributes = NULL)
+	{
+		$attributes = Appform::add_class($attributes, 'password');
+		$this->load_values($name, $value, $attributes);
+		return '<li>'
+			. Kohana_Form::password($name, $value, $attributes)
+			. $this->addAlertSpan((isset($this->errors[$name])?$this->errors[$name]:NULL), $attributes)
+			. '</li>';
 	}
 
 	/**
@@ -154,18 +187,13 @@ class Appform {
 	 * @param   array   html attributes
 	 * @return  string
 	 */
-	public function file($name, array $attributes = NULL) {
-      $this->load_values($name, $dummy, $attributes);
-      $result = '<li>'.Kohana_Form::file($name, $attributes);
-      // add error span
-      if (isset($this->errors[$name])) {
-         $result .= '<span class="'.$this->error_class.'">'.ucfirst($this->errors[$name]).'</span>';
-      } else if (isset($attributes['info'])) {
-         // else add info span
-         $result .= '<span class="'.$this->info_class.'">'.$attributes['info'].'</span>';
-      }
-      $result .= '</li>';
-      return $result;
+	public function file($name, array $attributes = NULL)
+	{
+		$this->load_values($name, $dummy, $attributes);
+		return '<li>'
+			. Kohana_Form::file($name, $attributes)
+			. $this->addAlertSpan((isset($this->errors[$name])?$this->errors[$name]:NULL), $attributes)
+			. '</li>';
 	}
 
 	/**
@@ -177,18 +205,13 @@ class Appform {
 	 * @param   array    html attributes
 	 * @return  string
 	 */
-	public function checkbox($name, $value = NULL, $checked = FALSE, array $attributes = NULL) {
-      $this->load_values($name, $value, $attributes);
-      $result = '<li>'.Kohana_Form::checkbox($name, $value, $checked, $attributes);
-      // add error span
-      if (isset($this->errors[$name])) {
-         $result .= '<span class="'.$this->error_class.'">'.ucfirst($this->errors[$name]).'</span>';
-      } else if (isset($attributes['info'])) {
-         // else add info span
-         $result .= '<span class="'.$this->info_class.'">'.$attributes['info'].'</span>';
-      }
-      $result .= '</li>';
-      return $result;
+	public function checkbox($name, $value = NULL, $checked = FALSE, array $attributes = NULL)
+	{
+		$this->load_values($name, $value, $attributes);
+		return '<li>'
+			. Kohana_Form::checkbox($name, $value, $checked, $attributes)
+			. $this->addAlertSpan((isset($this->errors[$name])?$this->errors[$name]:NULL), $attributes)
+			. '</li>';
 	}
 
 	/**
@@ -200,18 +223,13 @@ class Appform {
 	 * @param   array    html attributes
 	 * @return  string
 	 */
-	public function radio($name, $value = NULL, $checked = FALSE, array $attributes = NULL) {
-      $this->load_values($name, $value, $attributes);
-      $result = '<li>'.Kohana_Form::radio($name, $value, $checked, $attributes);
-      // add error span
-      if (isset($this->errors[$name])) {
-         $result .= '<span class="'.$this->error_class.'">'.ucfirst($this->errors[$name]).'</span>';
-      } else if (isset($attributes['info'])) {
-         // else add info span
-         $result .= '<span class="'.$this->info_class.'">'.$attributes['info'].'</span>';
-      }
-      $result .= '</li>';
-      return $result;
+	public function radio($name, $value = NULL, $checked = FALSE, array $attributes = NULL)
+	{
+		$this->load_values($name, $value, $attributes);
+		return '<li>'
+			. Kohana_Form::radio($name, $value, $checked, $attributes)
+			. $this->addAlertSpan((isset($this->errors[$name])?$this->errors[$name]:NULL), $attributes)
+			. '</li>';
 	}
 
 	/**
@@ -223,18 +241,13 @@ class Appform {
 	 * @param   boolean  encode existing HTML characters
 	 * @return  string
 	 */
-	public function textarea($name, $body = '', array $attributes = NULL, $double_encode = TRUE) {
-      $this->load_values($name, $body, $attributes);
-      $result = '<li>'.Kohana_Form::textarea($name, $body, $attributes, $double_encode);
-      // add error span
-      if (isset($this->errors[$name])) {
-         $result .= '<span class="'.$this->error_class.'">'.ucfirst($this->errors[$name]).'</span>';
-      } else if (isset($attributes['info'])) {
-         // else add info span
-         $result .= '<span class="'.$this->info_class.'">'.$attributes['info'].'</span>';
-      }
-      $result .= '</li>';
-      return $result;
+	public function textarea($name, $body = '', array $attributes = NULL, $double_encode = TRUE)
+	{
+		$this->load_values($name, $body, $attributes);
+		return '<li>'
+			. Kohana_Form::textarea($name, $body, $attributes, $double_encode)
+			. $this->addAlertSpan((isset($this->errors[$name])?$this->errors[$name]:NULL), $attributes)
+			. '</li>';
 	}
 
 	/**
@@ -246,18 +259,13 @@ class Appform {
 	 * @param   array    html attributes
 	 * @return  string
 	 */
-	public function select($name, array $options = NULL, $selected = NULL, array $attributes = NULL) {
-      $this->load_values($name, $selected, $attributes);
-      $result = '<li>'.Kohana_Form::select($name, $options, $selected, $attributes);
-      // add error span
-      if (isset($this->errors[$name])) {
-         $result .= '<span class="'.$this->error_class.'">'.ucfirst($this->errors[$name]).'</span>';
-      } else if (isset($attributes['info'])) {
-         // else add info span
-         $result .= '<span class="'.$this->info_class.'">'.$attributes['info'].'</span>';
-      }
-      $result .= '</li>';
-      return $result;
+	public function select($name, array $options = NULL, $selected = NULL, array $attributes = NULL)
+	{
+		$this->load_values($name, $selected, $attributes);
+		return '<li>'
+			. Kohana_Form::select($name, $options, $selected, $attributes)
+			. $this->addAlertSpan((isset($this->errors[$name])?$this->errors[$name]:NULL), $attributes)
+			. '</li>';
 	}
 
 	/**
@@ -268,8 +276,10 @@ class Appform {
 	 * @param   array   html attributes
 	 * @return  string
 	 */
-	public function submit($name, $value, array $attributes = NULL) {
-		return Kohana_Form::submit($name, $value, Appform::add_class($attributes, 'submit'));
+	public function submit($name, $value, array $attributes = NULL)
+	{
+		return Kohana_Form::submit($name, $value, 
+		Appform::add_class($attributes, 'submit'));
 	}
 
 	/**
@@ -281,7 +291,8 @@ class Appform {
 	 * @param   array   html attributes
 	 * @return  string
 	 */
-	public function button($name, $body, array $attributes = NULL) {
+	public function button($name, $body, array $attributes = NULL)
+	{
 		return Kohana_Form::button($name, $body, $attributes);
 	}
 
@@ -293,7 +304,8 @@ class Appform {
 	 * @param   array   html attributes
 	 * @return  string
 	 */
-	public function label($input, $text = NULL, array $attributes = NULL) {
+	public function label($input, $text = NULL, array $attributes = NULL)
+	{
 		return Kohana_Form::label($input, $text, $attributes);
 	}
 }
