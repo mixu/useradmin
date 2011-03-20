@@ -39,9 +39,8 @@ class Model_User_Identity extends ORM {
 	 */
 	public function unique_identity (Validation $validation, $field)
 	{
-		$identity_exists = (bool) DB::select(
-			array('COUNT("*")', 'total_count')
-		)	->from($this->_table_name)
+		$identity_exists = (bool) DB::select(array('COUNT("*")', 'total_count'))
+			->from($this->_table_name)
 			->where('identity', '=', $validation['identity'])
 			->and_where('provider', '=', $validation['provider'])
 			->execute($this->_db)

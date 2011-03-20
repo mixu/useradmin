@@ -14,9 +14,12 @@ class Model_Useradmin_User extends Model_Auth_User {
 		// for facebook / twitter / google / yahoo identities
 		'user_identity' => array(),
 	);
+	
 	protected $_has_one= array(
 	);
+	
 	protected $_created_column = array('column' => 'created', 'format' => 'Y-m-d H:i:s');
+	
 	protected $_updated_column = array('column' => 'modified', 'format' => 'Y-m-d H:i:s');
 
 	/**
@@ -63,14 +66,12 @@ class Model_Useradmin_User extends Model_Auth_User {
 		$password = "";
 		// define possible characters (does not include l, number relatively likely)
 		$possible = "123456789abcdefghjkmnpqrstuvwxyz123456789";
-		$i = 0;
 		// add random characters to $password until $length is reached
-		while ($i < $length) {
+		for ($i = 0; $i < $length; $i++) 
+		{
 			// pick a random character from the possible ones
 			$char = substr($possible, mt_rand(0, strlen($possible)-1), 1);
-
 			$password .= $char;
-			$i++;
 		}
 		return $password;
 	}
@@ -84,7 +85,8 @@ class Model_Useradmin_User extends Model_Auth_User {
 	{
 		$string = strtr($string,
 			"\xA1\xAA\xBA\xBF\xC0\xC1\xC2\xC3\xC5\xC7\xC8\xC9\xCA\xCB\xCC\xCD\xCE\xCF\xD0\xD1\xD2\xD3\xD4\xD5\xD8\xD9\xDA\xDB\xDD\xE0\xE1\xE2\xE3\xE5\xE7\xE8\xE9\xEA\xEB\xEC\xED\xEE\xEF\xF0\xF1\xF2\xF3\xF4\xF5\xF8\xF9\xFA\xFB\xFD\xFF\xC4\xD6\xE4\xF6",
-			"_ao_AAAAACEEEEIIIIDNOOOOOUUUYaaaaaceeeeiiiidnooooouuuyyAOao");
+			"_ao_AAAAACEEEEIIIIDNOOOOOUUUYaaaaaceeeeiiiidnooooouuuyyAOao"
+		);
 		$string = strtr($string, array("\xC6"=>"AE", "\xDC"=>"Ue", "\xDE"=>"TH", "\xDF"=>"ss",	"\xE6"=>"ae", "\xFC"=>"ue", "\xFE"=>"th"));
 		$string = preg_replace("/([^a-z0-9\\.]+)/", "", strtolower($string));
 		return($string);

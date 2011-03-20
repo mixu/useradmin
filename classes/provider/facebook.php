@@ -6,79 +6,91 @@
  */
 class Provider_Facebook extends Provider {
 
-   private $facebook = null;
-   private $me = null;
-   private $uid = null;
+	private $facebook = null;
 
-   public function  __construct() {
-      include_once Kohana::find_file('vendor', 'facebook/src/facebook');
-      // Create our Facebook SDK instance.
-      $this->facebook = new Facebook(
-         array(
-            'appId'  => Kohana::config('facebook')->app_id,
-            'secret' => Kohana::config('facebook')->secret,
-            'cookie' => true, // enable optional cookie support
-         )
-      );
-   }
+	private $me = null;
 
-   /**
-    * Get the URL to redirect to.
-    * @return string
-    */
-   public function redirect_url($return_url) {
-      return $this->facebook->getLoginUrl(array(
-          'next' => URL::site($return_url, true),
-          'cancel_url' => URL::site($return_url, true),
-          'req_perms' => 'email',
-      ));
-   }
+	private $uid = null;
 
-   /**
-    * Verify the login result and do whatever is needed to access the user data from this provider.
-    * @return bool
-    */
-   public function verify() {
-      if ($this->facebook->getSession()) {
-         try {
-            $this->uid = $this->facebook->getUser();
-            // read user info as array from Graph API
-            $this->me = $this->facebook->api('/me');
-         } catch (FacebookApiException $e) {
-            return false;
-         }
-         return true;
-      }
-      return false;
-   }
+	public function __construct()
+	{
+		include_once Kohana::find_file('vendor', 'facebook/src/facebook');
+		// Create our Facebook SDK instance.
+		$this->facebook = new Facebook(array(
+			'appId'  => Kohana::config('facebook')->app_id, 
+			'secret' => Kohana::config('facebook')->secret, 
+			'cookie' => true // enable optional cookie support
+		));
+	}
 
-   /**
-    * Attempt to get the provider user ID.
-    * @return mixed
-    */
-   public function user_id() {
-      return $this->uid;
-   }
+	/**
+	 * Get the URL to redirect to.
+	 * @return string
+	 */
+	public function redirect_url($return_url)
+	{
+		return $this->facebook->getLoginUrl(array(
+			'next'       => URL::site($return_url, true), 
+			'cancel_url' => URL::site($return_url, true), 
+			'req_perms'  => 'email'
+		));
+	}
 
-   /**
-    * Attempt to get the email from the provider (e.g. for finding an existing account to associate with).
-    * @return string
-    */
-   public function email() {
-      if(isset($this->me['email'])) {
-         return $this->me['email'];
-      }
-      return '';
-   }
+	/**
+	 * Verify the login result and do whatever is needed to access the user data from this provider.
+	 * @return bool
+	 */
+	public function verify()
+	{
+		if ($this->facebook->getSession())
+		{
+			try
+			{
+				$this->uid = $this->facebook->getUser();
+				// read user info as array from Graph API
+				$this->me = $this->facebook->api('/me');
+			}
+			catch (FacebookApiException $e)
+			{
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
 
-   /**
-    * Get the full name (firstname surname) from the provider.
-    * @return string
-    */
-   public function name() {
-      if(isset($this->me['first_name'])) {
-         return $this->me['first_name'].' '.$this->me['last_name'];
-      }
-      return '';
-   }
+	/**
+	 * Attempt to get the provider user ID.
+	 * @return mixed
+	 */
+	public function user_id()
+	{
+		return $this->uid;
+	}
+
+	/**
+	 * Attempt to get the email from the provider (e.g. for finding an existing account to associate with).
+	 * @return string
+	 */
+	public function email()
+	{
+		if (isset($this->me['email']))
+		{
+			return $this->me['email'];
+		}
+		return '';
+	}
+
+	/**
+	 * Get the full name (firstname surname) from the provider.
+	 * @return string
+	 */
+	public function name()
+	{
+		if (isset($this->me['first_name']))
+		{
+			return $this->me['first_name'] . ' ' . $this->me['last_name'];
+		}
+		return '';
+	}
 }
