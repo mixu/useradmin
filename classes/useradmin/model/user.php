@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct access allowed.');
 
-class Model_Useradmin_User extends Model_Auth_User {
+class Useradmin_Model_User extends Model_Auth_User {
 	
 	/**
 	 * A user has many tokens and roles
