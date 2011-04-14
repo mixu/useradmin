@@ -7,7 +7,7 @@
  * @package default
  * @version 1.0
  */
-class Controller_Useradmin_User extends Controller_App {
+class Useradmin_Controller_User extends Controller_App {
 
 	/**
 	 * @var string Filename of the template file.
