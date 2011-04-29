@@ -12,49 +12,34 @@
  * @author     gabrielgiannattasio <gabriel@l6.com.br>
  * @copyright  (c) 2011-2011 Fleep.me
  */
-class UserTests extends Unittest_TestCase {
-
-	/**
-	 * Configure database for test
-	 */
-	static public function useTestDB() 
-	{
-		Kohana::config('database')->set( "default", Kohana::config('database.'.Kohana::config('unittest.db_connection')) );
-	}
+class UserTests extends Unittest_Model_TestCase {
 	
-	/**
-	 * Populate Schema
-	 * Exec the file from tests/data if founded
-	 * @param string $schema SQL Schema file, without extension.
-	 */
-	static public function runSchema($schema)
+	private function add_valid_users()
 	{
-		$testDb = Kohana::config('database.default');
-
-		// Try define the path for the schema if connection config exists
-		if( ( ! is_null($testDb) ) && ($path = Kohana::find_file('tests', 'data/'.$schema, 'sql')) )
+		$users_provider = $this->providerValidUsers();
+		$users = array();
+		$i = 0;
+		foreach ($users_provider as $user)
 		{
-			$command = "-u{$testDb['connection']['username']} -p{$testDb['connection']['password']} {$testDb['connection']['database']}";
-			// Set the default database to test connection
-			try 
+			try
 			{
-				exec("mysql $command < $path ");
-				return TRUE;
-			} catch (Exception $e) {}
+				$users[$i] = Model::factory("user")
+					->create_user($user[0], array(
+						"username", 
+						"email", 
+						"password", 
+						));
+				
+				$login_role = new Model_Role(array('name' =>'login'));
+            	$users[$i]->add('roles', $login_role);
+			}
+			catch (Kohana_Exception $e)
+			{
+				$this->fail("Can't create user: ".Kohana_Debug::dump($e));
+			}
+			$i++;
 		}
-		return FALSE;
-	}
-	
-	public function setUp() 
-	{	
-		parent::setUp();
-		UserTests::useTestDB();
-	}
-	
-	static public function setUpBeforeClass()
-	{
-		UserTests::useTestDB();
-		UserTests::runSchema( "clean-setup" );
+		return $users;
 	}
 	
 	/**
@@ -130,7 +115,7 @@ class UserTests extends Unittest_TestCase {
 			array(
 				// login
 				array(
-					"username" => "validuser_changed",
+					"username" => "validuser",
 					"password" => "123456",
 				), 
 				// fields
@@ -143,8 +128,8 @@ class UserTests extends Unittest_TestCase {
 			array(
 				// login
 				array(
-					"username" => "validuser_changed",
-					"password" => "123456789",
+					"username" => "validuser",
+					"password" => "123456",
 				), 
 				// fields
 				array(
@@ -352,27 +337,17 @@ class UserTests extends Unittest_TestCase {
 			array(array(
 				"username" => "validusername5",
 				"password" => "123456789",
-				"password_confirm" => "987654321",
+				"password_confirm" => "123456789",
 				"email" => "validu@sername5@User.com",
 			)),
 			// Already registred user with diferente case
-			array(array(
-				"username" => "A",
-				"password" => "123456789",
-				"password_confirm" => "123456789",
-				"email" => "a_new@User.com",
-			)),
+//			array(array(
+//				"username" => "A",
+//				"password" => "123456789",
+//				"password_confirm" => "123456789",
+//				"email" => "a_new@User.com",
+//			)),
 		);
-	}
-	
-	/**
-	 * test if database can be cleaned
-	 * @author Gabriel Giannattasio
-	 * @test
-	 */
-	public function test_if_database_can_be_cleaned()
-	{
-		$this->assertTrue( UserTests::runSchema( "clean-setup" ) );
 	}
 	
 	/**
@@ -417,13 +392,17 @@ class UserTests extends Unittest_TestCase {
 		try 
 		{
 			$status = Auth::instance()->register($fields);
+			$this->fail("Register a invalid user: ".Kohana_Debug::dump($fields));
 		} 
 		catch (ORM_Validation_Exception $e) 
 		{
-			$status = FALSE;
+			$this->assertInstanceOf("ORM_Validation_Exception",$e);
+			return;
 		}
-		
-		$this->assertFalse( $status, 'Must be a invalid user.');
+		catch (Exception $e)
+		{
+			$this->fail("Unspected exception: ".$e->getMessage());
+		}
 	}
 	
 	/**
@@ -448,10 +427,12 @@ class UserTests extends Unittest_TestCase {
 	 * @author Gabriel Giannattasio
 	 * @test
 	 * @dataProvider providerValidUsers
-	 * @depends test_auth_register_valid_users
 	 */
 	public function test_auth_valid_logins_and_logout( $fields )
 	{
+		// Setup valid users
+		$this->add_valid_users();
+		
 		$this->assertTrue( Auth::instance()->logout(TRUE, TRUE), "Force logout all" );
 		$this->assertTrue( Auth::instance()->login( $fields['username'], $fields['password']) , "Check login using username");
 		$this->assertTrue( Auth::instance()->login( $fields['email'], $fields['password']) , "Check login using email");
@@ -467,10 +448,12 @@ class UserTests extends Unittest_TestCase {
 	 * @author Gabriel Giannattasio
 	 * @test
 	 * @dataProvider providerValidUserUpdates
-	 * @depends test_auth_register_valid_users
 	 */
 	public function test_auth_valid_logins_and_update_user( $login, $fields )
 	{
+		// Setup valid users
+		$this->add_valid_users();
+		
 		$this->assertTrue( Auth::instance()->logout(TRUE, TRUE), "Force logout all" );
 		$this->assertTrue( Auth::instance()->login( $login['username'], $login['password']), "Do the login" );
 		$user = Auth::instance()->get_user();
@@ -496,10 +479,12 @@ class UserTests extends Unittest_TestCase {
 	 * @author Gabriel Giannattasio
 	 * @test
 	 * @dataProvider providerInvalidUserUpdates
-	 * @depends test_auth_register_valid_users
 	 */
 	public function test_auth_valid_logins_and_invalid_update_user( $login, $fields )
 	{
+		// Setup valid users
+		$this->add_valid_users();
+		
 		$this->assertTrue( Auth::instance()->logout(TRUE, TRUE), "Force logout all" );
 		$this->assertTrue( Auth::instance()->login( $login['username'], $login['password']), "Do the login" );
 		$user = Auth::instance()->get_user();
@@ -563,10 +548,13 @@ class UserTests extends Unittest_TestCase {
 	 */
 	public function test_auth_delete_loged_user()
 	{
+		// Setup valid users
+		$this->add_valid_users();
+		
 		$validUser = $this->providerValidUserUpdates();
 		$this->assertTrue( Auth::instance()->login( $validUser[3][0]['username'], $validUser[3][0]['password']), "Do the login" );
 		$this->assertInstanceOf("Model_User", $user = Auth::instance()->get_user(), "Get Model_User instance form Auth");
-		$this->assertNull( Auth::instance()->unregister($user), "Delete the loged user");
+		$this->assertNull( Auth::instance()->unregister($user), "Delete the logged user");
 		$this->assertNull( Auth::instance()->logged_in(), "The user was deleted, why this isn't Null?");
 	}
 	
@@ -574,13 +562,13 @@ class UserTests extends Unittest_TestCase {
 	 * test auth delete multiple users
 	 * @author Gabriel Giannattasio
 	 * @test
-	 * @depends test_auth_delete_loged_user
 	 */
 	public function test_auth_delete_multiple_users()
 	{
+		// Setup valid users
+		$this->add_valid_users();
+		
 		$validUsers = $this->providerValidUsers();
-		array_pop($validUsers);
-		array_shift($validUsers);
 		array_walk ($validUsers, function(&$user)
 		{
 			$username = $user[0]['username'];
