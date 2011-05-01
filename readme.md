@@ -28,7 +28,7 @@ MODULES USED
 
 * Core: Auth, ORM, Database
 * Core (but not included by default in KO 3.1): pagination
-* Other: kohana-email, kohana-oauth.
+* Other: kohana-email, kohana-oauth, fleepme-unittest.
 
 CONTRIBUTORS
 ============

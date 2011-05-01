@@ -156,6 +156,10 @@ class Useradmin_Controller_App extends Controller {
 			$scripts = array();
 			$this->template->styles = array_merge($this->template->styles, $styles);
 			$this->template->scripts = array_merge($this->template->scripts, $scripts);
+			
+			// Display profile if its enabled and request by query profile
+			$this->template->profile = (isset($_REQUEST['profile']) && Kohana::$profiling)?"<div id=\"kohana-profiler\">".View::factory('profiler/stats')."</div>":"";
+			
 			// Assign the template as the request response and render it
 			$this->response->body($this->template);
 		}

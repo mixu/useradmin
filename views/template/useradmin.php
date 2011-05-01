@@ -40,8 +40,6 @@
    </div>
 </div>
    
-<?php 
-// echo '<div id="kohana-profiler">'.View::factory('profiler/stats').'</div>';
-?>
+<?=$profile?>
 </body>
 </html>

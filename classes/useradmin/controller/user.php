@@ -344,8 +344,6 @@ class Useradmin_Controller_User extends Controller_App {
 					// Get errors for display in view
 					$validation = Validation::factory($_REQUEST)
 						->rule('username', 'not_empty')
-						->rule('username', 'min_length', array(':value', 1))
-						->rule('username', 'max_length', array(':value', 127))
 						->rule('password', 'not_empty');
 					if ($validation->check())
 					{
