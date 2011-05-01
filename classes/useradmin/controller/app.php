@@ -38,6 +38,8 @@ class Useradmin_Controller_App extends Controller {
 	 */
 	public $secure_actions = FALSE;
 
+    protected $session;
+    
 	/**
 	 * Called from before() when the user does not have the correct rights to access a controller/action.
 	 *
@@ -89,6 +91,14 @@ class Useradmin_Controller_App extends Controller {
 		parent::before();
 		// Open session
 		$this->session = Session::instance();
+
+        //if we're not logged in, but auth type is orm. gives us chance to auto login
+        $supports_auto_login = new ReflectionClass(get_class(Auth::instance()));
+        $supports_auto_login = $supports_auto_login->hasMethod('auto_login');
+        if(!Auth::instance()->logged_in() && $supports_auto_login){
+            Auth::instance()->auto_login();
+        }
+
 		// Check user auth and role
 		$action_name = Request::current()->action();
 		if 

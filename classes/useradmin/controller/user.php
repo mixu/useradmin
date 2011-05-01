@@ -41,6 +41,26 @@ class Useradmin_Controller_User extends Controller_App {
 	); // the others are public (forgot, login, register, reset, noaccess)
 	// logout is also public to avoid confusion (e.g. easier to specify and test post-logout page)
 
+    public function before(){
+        $baseUrl = Url::base(true);
+        if(substr($this->request->referrer(),0,strlen($baseUrl)) == $baseUrl){
+            $urlPath = ltrim(parse_url($this->request->referrer(),PHP_URL_PATH),'/');
+            $processedRef = Request::process_uri($urlPath);
+            $referrerController = Arr::path(
+                $processedRef,
+                'params.controller',
+                false
+            );
+            if($referrerController && $referrerController != 'user' && !Session::instance()->get('noReturn',false)){
+                Session::instance()->set('returnUrl',$this->request->referrer());
+            }
+
+        }
+
+        parent::before();
+        
+    }
+
 	// USER SELF-MANAGEMENT
 	/**
 	 * View: Redirect admins to admin index, users to user profile.
@@ -200,7 +220,7 @@ class Useradmin_Controller_User extends Controller_App {
 				// sign the user in
 				Auth::instance()->login($_POST['username'], $_POST['password']);
 				// redirect to the user account
-				$this->request->redirect('user/profile');
+				$this->request->redirect(Session::instance()->get_once('returnUrl','user/profile'));
 			}
 			catch (ORM_Validation_Exception $e)
 			{
@@ -259,7 +279,7 @@ class Useradmin_Controller_User extends Controller_App {
 			                           ->execute();
 			// message: save success
 			Message::add('success', __('User deleted.'));
-			$this->request->redirect('user/profile');
+			$this->request->redirect(Session::instance()->get_once('returnUrl','user/profile'));
 		}
 		// display confirmation
 		$this->template->content = View::factory('user/unregister')
@@ -283,14 +303,15 @@ class Useradmin_Controller_User extends Controller_App {
 				$this->template->content = $this->request->body('{ "success": "true" }');
 				return;
 			}
-			else 
-				if (Auth::instance()->login($_REQUEST['username'], 
-				$_REQUEST['password']))
-				{
+			else {
+				if (Auth::instance()->login($_REQUEST['username'],$_REQUEST['password'],
+                                            Arr::get($_REQUEST,'remember',false)!=false)
+                ){
 					$this->response->status(200);
 					$this->template->content = $this->request->body('{ "success": "true" }');
 					return;
 				}
+            }
 			$this->response->status(500);
 			$this->template->content = $this->request->body('{ "success": "false" }');
 			return;
@@ -303,17 +324,18 @@ class Useradmin_Controller_User extends Controller_App {
 			if (Auth::instance()->logged_in() != 0)
 			{
 				// redirect to the user account
-				$this->request->redirect('user/profile');
+				$this->request->redirect(Session::instance()->get_once('returnUrl','user/profile'));
 			}
 			$view = View::factory('user/login');
 			// If there is a post and $_POST is not empty
 			if ($_REQUEST && isset($_REQUEST['username'], $_REQUEST['password']))
 			{
 				// Check Auth if the post data validates using the rules setup in the user model
-				if (Auth::instance()->login($_REQUEST['username'], $_REQUEST['password']))
-				{
+				if (Auth::instance()->login($_REQUEST['username'], $_REQUEST['password'],
+                                            Arr::get($_REQUEST,'remember',false)!=false)
+                ){
 					// redirect to the user account
-					$this->request->redirect('user/profile');
+					$this->request->redirect(Session::instance()->get_once('returnUrl','user/profile'));
 					return;
 				}
 				else
@@ -335,7 +357,7 @@ class Useradmin_Controller_User extends Controller_App {
 			// allow setting the username as a get param
 			if (isset($_GET['username']))
 			{
-				$view->set('username', Security::xss_clean($_GET['username']));
+				$view->set('username', htmlspecialchars($_GET['username']));
 			}
 			$providers = Kohana::config('useradmin.providers');
 			$view->set('facebook_enabled', 
@@ -352,7 +374,7 @@ class Useradmin_Controller_User extends Controller_App {
 		// Sign out the user
 		Auth::instance()->logout();
 		// redirect to the user account and then the signin page if logout worked as expected
-		$this->request->redirect('user/profile');
+		$this->request->redirect(Session::instance()->get_once('returnUrl','user/profile'));
 	}
 
 	/**
@@ -442,7 +464,7 @@ class Useradmin_Controller_User extends Controller_App {
 					->and_where('reset_token', '=', $_REQUEST['reset_token'])
 					->find();
 				// The admin password cannot be reset by email
-				if ($user->username == 'admin')
+				if ($user->has('roles',ORM::factory('role',array('name'=>'admin'))))
 				{
 					Message::add('failure', __('The admin password cannot be reset by email.'));
 				}
@@ -494,7 +516,7 @@ class Useradmin_Controller_User extends Controller_App {
 				// message: save success
 				Message::add('success', __('Values saved.'));
 				// redirect and exit
-				$this->role_redirect();
+				$this->request->redirect('user/index'); //index will redir ya whereever you need
 				return;
 			}
 			else
