@@ -1,5 +1,9 @@
 <?php defined('SYSPATH') or die('No direct access allowed.');
-
+/**
+ * Useradmin custom auth user
+ *
+ * @package    Useradmin/Auth
+ */
 class Useradmin_Model_User extends Model_Auth_User {
 	
 	/**
@@ -57,6 +61,7 @@ class Useradmin_Model_User extends Model_Auth_User {
 	
 	/**
 	 * Generates a password of given length using mt_rand.
+	 * 
 	 * @param int $length
 	 * @return string
 	 */
@@ -78,6 +83,7 @@ class Useradmin_Model_User extends Model_Auth_User {
 
 	/**
 	 * Transcribe name to ASCII
+	 * 
 	 * @param string $string
 	 * @return string
 	 */
