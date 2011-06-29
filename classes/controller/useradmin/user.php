@@ -448,6 +448,11 @@ class Controller_Useradmin_User extends Controller_App {
          $this->request->redirect('user/profile');
       }
       $provider = Provider::factory($provider_name);
+	  if ($this->request->query('code') && $this->request->query('state'))
+      {
+            $this->action_provider_return($provider_name);
+            return;
+	  }
       if(is_object($provider)) {
          $this->request->redirect($provider->redirect_url('/user/provider_return/'.$provider_name));
          return;
@@ -458,6 +463,11 @@ class Controller_Useradmin_User extends Controller_App {
    }
 
    function action_associate($provider_name = null) {
+		if ($this->request->query('code') && $this->request->query('state'))
+        {
+            $this->action_associate_return($provider_name);
+            return;
+        }
       if(Auth::instance()->logged_in()){
          if(isset($_POST['confirmation']) && $_POST['confirmation'] == 'Y') {
             $provider = Provider::factory($provider_name);
