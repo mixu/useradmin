@@ -96,7 +96,11 @@ CREATE TABLE `user_tokens` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL,
   `user_agent` varchar(40) NOT NULL,
+<<<<<<< HEAD
   `token` varchar(40) NOT NULL, /* sha1 (which is Cookie:salt hashing method) hash - is 40 bytes long*/
+=======
+  `token` varchar(40) NOT NULL,
+>>>>>>> brennan87/develop
   `created` int(10) unsigned NOT NULL,
   `expires` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
@@ -122,10 +126,10 @@ CREATE TABLE `users` (
   `password` char(64) NOT NULL,
   `logins` int(10) unsigned NOT NULL DEFAULT '0',
   `last_login` int(10) unsigned DEFAULT NULL,
-  `reset_token` char(64) NOT NULL,
-  `status` varchar(20) NOT NULL,
+  `reset_token` char(64) NOT NULL DEFAULT '',
+  `status` varchar(20) NOT NULL DEFAULT '',
   `last_failed_login` datetime NOT NULL,
-  `failed_login_count` int(11) NOT NULL,
+  `failed_login_count` int(11) NOT NULL DEFAULT '0',
   `created` datetime NOT NULL,
   `modified` datetime NOT NULL,
   PRIMARY KEY (`id`),
