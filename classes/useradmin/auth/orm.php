@@ -1,4 +1,5 @@
 <?php defined('SYSPATH') or die('No direct access allowed.');
+
 /**
  * ORM Auth driver extended for Useradmin module support.
  *
@@ -37,7 +38,9 @@ class Useradmin_Auth_ORM extends Kohana_Auth_ORM implements Useradmin_Driver_iAu
 			// Reset the login failed count
 			$user->failed_login_count = 0;
 			$user->save();
-		} else {
+		} 
+		else 
+		{
 			// Failed login
 			$user->failed_login_count = $user->failed_login_count+1;
 			$user->last_failed_login = date("Y-m-d H:i:s");
@@ -86,9 +89,9 @@ class Useradmin_Auth_ORM extends Kohana_Auth_ORM implements Useradmin_Driver_iAu
 				'password',
 				'email',
 			));
-         // Add the login role to the user (add a row to the db)
-         $login_role = new Model_Role(array('name' =>'login'));
-         $user->add('roles', $login_role);
+			// Add the login role to the user (add a row to the db)
+			$login_role = new Model_Role(array('name' =>'login'));
+            $user->add('roles', $login_role);
 		} 
 		catch (ORM_Validation_Exception $e) 
 		{
@@ -131,5 +134,4 @@ class Useradmin_Auth_ORM extends Kohana_Auth_ORM implements Useradmin_Driver_iAu
 			}
 		}
 	}
-
 }

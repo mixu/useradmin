@@ -35,9 +35,6 @@
    </div>
 </div>
    
-<div id="kohana-profiler">
-<?php echo View::factory('profiler/stats');
-?>
-</div>
+<?=$profile?>
 </body>
 </html>
