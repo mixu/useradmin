@@ -28,7 +28,7 @@ MODULES USED
 
 * Core: Auth, ORM, Database
 * Core (but not included by default in KO 3.1): pagination
-* Other: kohana-email, kohana-oauth.
+* Other: kohana-email, kohana-oauth, fleepme-unittest.
 
 CONTRIBUTORS
 ============
@@ -106,7 +106,6 @@ INSERT INTO `useradmin`.`user_identities` (`user_id`, `provider`, `identity`) SE
 after creating the new table. You can drop `facebook_user_id` after this.
 
 LICENCE (Simplified BSD licence)
-=======
 
 NOTE: This licence applies to the useradmin module only, as written by Mikito
 Takada (found under /modules/user/). Different licences may apply to the other

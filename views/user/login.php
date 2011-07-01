@@ -19,13 +19,30 @@ $form->info_class = 'info block';
 echo $form->open('user/login');
 echo '<table><tr><td style="vertical-align: top;">';
 echo '<ul>';
+
 echo '<li>'.$form->label('username', __('Email or Username')).'</li>';
 echo $form->input('username', null, array('class' => 'text twothirds'));
-echo '<li>'.$form->label('password', __('Password')).'</li>';
+
+echo '<li>'.$form->label('password', __('Password'),array('style'=>'display: inline; margin-right:10px;')).
+     '<small> '.Html::anchor('user/forgot', __('Forgot your password?')).'<br></small>'.
+     '</li>';
 echo $form->password('password', null, array('class' => 'text twothirds'));
-echo '</ul>';
-echo $form->submit(NULL, __('Login'));
-echo '<small> '.Html::anchor('user/forgot', __('Forgot your password?')).'<br></small>';
+
+
+$authClass = new ReflectionClass(get_class(Auth::instance()));
+if($authClass->hasMethod('auto_login'))
+{
+echo '<li>'.Kohana_Form::checkbox('remember','remember',false,array('style'=>'margin-right: 10px','id'=>'remember')).
+            $form->label('remember', __('Remember me'),array('style'=>'display: inline')).
+            $form->submit(NULL, __('Login'),array('style'=>'float: right;')).
+     '</li>';
+    echo '</ul>';
+}
+else
+{
+    echo '</ul>';
+    echo $form->submit(NULL, __('Login'));
+}
 echo $form->close();
 echo '</td><td width="5" style="border-right: 1px solid #DDD;">&nbsp;</td><td><td style="padding-left: 2px; vertical-align: top;">';
 
