@@ -26,7 +26,7 @@ abstract class Useradmin_Provider_OAuth extends Provider {
 	{
 		$this->provider_name = $provider;
 		// Load the configuration for this provider
-		$config = Kohana::config('oauth.' . $this->provider_name);
+		$config = Kohana::$config->load('oauth.' . $this->provider_name);
 		// Create an consumer from the config
 		$this->consumer = OAuth_Consumer::factory($config);
 		// Load the provider

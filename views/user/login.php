@@ -48,7 +48,7 @@ echo '</td><td width="5" style="border-right: 1px solid #DDD;">&nbsp;</td><td><t
 
 echo '<ul>';
 echo '<li style="height: 61px">'.__('Don\'t have an account?').' '.Html::anchor('user/register', __('Register a new account')).'.</li>';
-$options = array_filter(Kohana::config('useradmin.providers'));
+$options = array_filter(Kohana::$config->load('useradmin.providers'));
 if(!empty($options)) {
    echo '<li style="padding-bottom: 8px;"><label>'.__('To register / log in using another account, please click your provider').':</label></li>';
    echo '<li>';

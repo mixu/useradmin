@@ -173,10 +173,10 @@ class Useradmin_Controller_User extends Controller_App {
 	public function action_register()
 	{
 		// Load reCaptcha if needed
-		if (Kohana::config('useradmin')->captcha)
+		if (Kohana::$config->load('useradmin')->captcha)
 		{
 			include Kohana::find_file('vendor', 'recaptcha/recaptchalib');
-			$recaptcha_config = Kohana::config('recaptcha');
+			$recaptcha_config = Kohana::$config->load('recaptcha');
 			$recaptcha_error = null;
 		}
 		// set the template title (see Controller_App for implementation)
@@ -195,7 +195,7 @@ class Useradmin_Controller_User extends Controller_App {
 			// optional checks (e.g. reCaptcha or some other additional check)
 			$optional_checks = true;
 			// if configured to use captcha, check the reCaptcha result
-			if (Kohana::config('useradmin')->captcha)
+			if (Kohana::$config->load('useradmin')->captcha)
 			{
 				$recaptcha_resp = recaptcha_check_answer(
 					$recaptcha_config['privatekey'], 
@@ -235,7 +235,7 @@ class Useradmin_Controller_User extends Controller_App {
 				$view->set('defaults', $_POST);
 			}
 		}
-		if (Kohana::config('useradmin')->captcha)
+		if (Kohana::$config->load('useradmin')->captcha)
 		{
 			$view->set('captcha_enabled', true);
 			$view->set('recaptcha_html', recaptcha_get_html($recaptcha_config['publickey'], $recaptcha_error));
@@ -357,7 +357,7 @@ class Useradmin_Controller_User extends Controller_App {
 			{
 				$view->set('username', htmlspecialchars($_GET['username']));
 			}
-			$providers = Kohana::config('useradmin.providers');
+			$providers = Kohana::$config->load('useradmin.providers');
 			$view->set('facebook_enabled', 
 			isset($providers['facebook']) ? $providers['facebook'] : false);
 			$this->template->content = $view;
@@ -381,7 +381,7 @@ class Useradmin_Controller_User extends Controller_App {
 	public function action_forgot()
 	{
 		// Password reset must be enabled in config/useradmin.php
-		if (! Kohana::config('useradmin')->email)
+		if (! Kohana::$config->load('useradmin')->email)
 		{
 			Message::add('error', 'Password reset via email is not enabled. Please contact the site administrator to reset your password.');
 			$this->request->redirect('user/register');
@@ -407,7 +407,7 @@ class Useradmin_Controller_User extends Controller_App {
 				// MUST PASS ALL PARAMS AS REFS
 				$subject = __('Account password reset');
 				$to = $_POST['reset_email'];
-				$from = Kohana::config('useradmin')->email_address;
+				$from = Kohana::$config->load('useradmin')->email_address;
 				$body = __($message, array(
 					':reset_token_link' => URL::site('user/reset?reset_token='.$user->reset_token.'&reset_email='.$_POST['reset_email'], TRUE), 
 					':reset_link' => URL::site('user/reset', TRUE), 
@@ -445,7 +445,7 @@ class Useradmin_Controller_User extends Controller_App {
 	function action_reset()
 	{
 		// Password reset must be enabled in config/useradmin.php
-		if (! Kohana::config('useradmin')->email)
+		if (! Kohana::$config->load('useradmin')->email)
 		{
 			Message::add('error', 'Password reset via email is not enabled. Please contact the site administrator to reset your password.');
 			$this->request->redirect('user/register');
@@ -762,11 +762,11 @@ class Useradmin_Controller_User extends Controller_App {
 					// Pass on the old form values
 					$values['password'] = $values['password_confirm'] = '';
 					$view->set('defaults', $values);
-					if (Kohana::config('useradmin')->captcha)
+					if (Kohana::$config->load('useradmin')->captcha)
 					{
 						// FIXME: Is this the best place to include and use recaptcha?
 						include Kohana::find_file('vendor', 'recaptcha/recaptchalib');
-						$recaptcha_config = Kohana::config('recaptcha');
+						$recaptcha_config = Kohana::$config->load('recaptcha');
 						$recaptcha_error = null;
 						$view->set('captcha_enabled', true);
 						$view->set('recaptcha_html', recaptcha_get_html($recaptcha_config['publickey'], $recaptcha_error));
