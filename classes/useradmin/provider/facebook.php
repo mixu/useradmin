@@ -17,8 +17,8 @@ class Useradmin_Provider_Facebook extends Provider {
 		include_once Kohana::find_file('vendor', 'facebook/src/facebook');
 		// Create our Facebook SDK instance.
 		$this->facebook = new Facebook(array(
-			'appId'  => Kohana::config('facebook')->app_id, 
-			'secret' => Kohana::config('facebook')->secret, 
+			'appId'  => Kohana::$config->load('facebook')->app_id, 
+			'secret' => Kohana::$config->load('facebook')->secret, 
 			'cookie' => true // enable optional cookie support
 		));
 	}

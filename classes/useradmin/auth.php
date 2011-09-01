@@ -20,7 +20,7 @@ abstract class Useradmin_Auth extends Kohana_Auth {
 		if ( ! isset(Auth::$_instance))
 		{
 			// Load the configuration for this type
-			$config = Kohana::config('auth');
+			$config = Kohana::$config->load('auth');
 
 			if ( ! $type = $config->get('driver'))
 			{
@@ -30,7 +30,7 @@ abstract class Useradmin_Auth extends Kohana_Auth {
 			// Set the session class name
 			$class = 'Auth_'.ucfirst($type);
 			
-			$config->set("useradmin", Kohana::config('useradmin.auth') );
+			$config->set("useradmin", Kohana::$config->load('useradmin.auth') );
 
 			// Create a new session instance
 			Auth::$_instance = new $class($config);
