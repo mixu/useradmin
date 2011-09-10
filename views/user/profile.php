@@ -18,7 +18,7 @@
       <p>Last login was <?php echo date('F jS, Y', $user->last_login) ?>, at <?php echo date('h:i:s a', $user->last_login) ?>.<br/>Total logins: <?php echo $user->logins ?></p>
 
       <?php
-      $providers = array_filter(Kohana::config('useradmin.providers'));
+      $providers = array_filter(Kohana::$config->load('useradmin.providers'));
       $identities = $user->user_identity->find_all();
       if($identities->count() > 0) {
          echo '<h2>Accounts associated with your user profile</h2><p>';
