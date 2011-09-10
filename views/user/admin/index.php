@@ -19,7 +19,7 @@ echo $paging->render();
 // format data for DataTable
 $data = array();
 $merge = null;
-$providers = array_filter(Kohana::config('useradmin.providers'));
+$providers = array_filter(Kohana::$config->load('useradmin.providers'));
 foreach ($users as $user) {
    $row = $user->as_array();
    // reformat dates
