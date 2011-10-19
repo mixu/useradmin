@@ -275,8 +275,7 @@ class Useradmin_Controller_User extends Controller_App {
 			// Delete the user
 			$user->delete($id);
 			// Delete any associated identities
-			DB::delete('user_identity')->where('user_id', '=', $id)
-			                           ->execute();
+			ORM::factory('user_identity')->where(array('user_id' => $id))->delete_all();
 			// message: save success
 			Message::add('success', __('User deleted.'));
 			$this->request->redirect(Session::instance()->get_once('returnUrl','user/profile'));
@@ -541,6 +540,8 @@ class Useradmin_Controller_User extends Controller_App {
 	 */
 	function action_provider ($provider_name = null)
 	{
+		$provider_name = $this->request->param('provider', $provider_name);
+
 		if (Auth::instance()->logged_in())
 		{
 			Message::add('success', 'Already logged in.');
@@ -566,11 +567,13 @@ class Useradmin_Controller_User extends Controller_App {
 
 	function action_associate($provider_name = null)
 	{
-	if ($this->request->query('code') && $this->request->query('state'))
-	{
-		$this->action_associate_return($provider_name);
-		return;
-	}
+		$provider_name = $this->request->param('provider', $provider_name);
+		
+		if ($this->request->query('code') && $this->request->query('state'))
+		{
+			$this->action_associate_return($provider_name);
+			return;
+		}
 		if (Auth::instance()->logged_in())
 		{
 			if (isset($_POST['confirmation']) && $_POST['confirmation'] == 'Y')
@@ -626,6 +629,8 @@ class Useradmin_Controller_User extends Controller_App {
 	 */
 	function action_associate_return($provider_name = null)
 	{
+		$provider_name = $this->request->param('provider', $provider_name);
+
 		if (Auth::instance()->logged_in())
 		{
 			$provider = Provider::factory($provider_name);
@@ -670,6 +675,8 @@ class Useradmin_Controller_User extends Controller_App {
 	 */
 	function action_provider_return($provider_name = null)
 	{
+		$provider_name = $this->request->param('provider', $provider_name);
+		
 		$provider = Provider::factory($provider_name);
 		if (! is_object($provider))
 		{

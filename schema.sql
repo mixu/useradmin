@@ -69,13 +69,13 @@ INSERT INTO `roles_users` (`user_id`, `role_id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user_identity`
+-- Table structure for table `user_identities`
 --
 
-DROP TABLE IF EXISTS `user_identity`;
+DROP TABLE IF EXISTS `user_identities`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `user_identity` (
+CREATE TABLE `user_identities` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `provider` varchar(255) NOT NULL,
