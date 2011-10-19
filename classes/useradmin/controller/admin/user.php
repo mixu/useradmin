@@ -226,8 +226,7 @@ class Useradmin_Controller_Admin_User extends Controller_App {
 				// Delete the user
 				$user->delete($id);
 				// Delete any associated identities
-				DB::delete('user_identity')->where('user_id', '=', $id)
-				                           ->execute();
+				ORM::factory('user_identity')->where(array('user_id' => $id))->delete_all();
 				// message: save success
 				Message::add('success', __('User deleted.'));
 			}

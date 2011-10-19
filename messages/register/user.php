@@ -10,6 +10,7 @@ return array(
          'email' => 'This is not a valid email.', // Workaround for Bug Report #3750
          'email_available' => 'This email address is already in use.',
          'email_not_unique' => 'This email address is already in use.',
+         'unique' => 'This email address is already in use.',
        ),
       'email_confirm' => array(
          'email' => 'This is not a valid email.', // Workaround for Bug Report #3750
