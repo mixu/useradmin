@@ -96,11 +96,7 @@ CREATE TABLE `user_tokens` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) unsigned NOT NULL,
   `user_agent` varchar(40) NOT NULL,
-<<<<<<< HEAD
-  `token` varchar(40) NOT NULL, /* sha1 (which is Cookie:salt hashing method) hash - is 40 bytes long*/
-=======
   `token` varchar(40) NOT NULL,
->>>>>>> brennan87/develop
   `created` int(10) unsigned NOT NULL,
   `expires` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
