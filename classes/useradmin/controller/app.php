@@ -52,7 +52,7 @@ class Useradmin_Controller_App extends Controller {
 	 */
 	public function access_required()
 	{
-		$this->request->redirect('user/noaccess');
+		Request::current()->redirect('user/noaccess');
 	}
 
 	/**

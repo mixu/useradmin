@@ -32,7 +32,7 @@ class Useradmin_Provider_Facebook extends Provider {
 		return $this->facebook->getLoginUrl(array(
 			'next'       => URL::site($return_url, true), 
 			'cancel_url' => URL::site($return_url, true), 
-			'req_perms'  => 'email'
+			'scope'  => 'email'
 		));
 	}
 
@@ -42,7 +42,7 @@ class Useradmin_Provider_Facebook extends Provider {
 	 */
 	public function verify()
 	{
-		if ($this->facebook->getSession())
+		if ($this->facebook->getUser())
 		{
 			try
 			{
@@ -90,6 +90,11 @@ class Useradmin_Provider_Facebook extends Provider {
 		if (isset($this->me['first_name']))
 		{
 			return $this->me['first_name'] . ' ' . $this->me['last_name'];
+		}
+		else if (isset($this->me['email']))
+		{
+			$name = explode('@',$this->me['email']);
+			return $name[0];
 		}
 		return '';
 	}

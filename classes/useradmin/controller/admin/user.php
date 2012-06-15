@@ -32,6 +32,15 @@ class Useradmin_Controller_Admin_User extends Controller_App {
 	 * 'moderatorpanel' => array('login', 'moderator') will only allow users with the roles login and moderator to access action_moderatorpanel
 	 */
 	public $secure_actions = array();
+	
+	/** User Model Fields
+	 * Override in your app to add fields
+	 */
+	public $user_model_fields = array(
+		'username', 
+		'password', 
+		'email'
+	);
 
 	// USER ADMINISTRATION
 	/**
@@ -73,8 +82,9 @@ class Useradmin_Controller_Admin_User extends Controller_App {
 	 * @param string $id
 	 * @return void
 	 */
-	public function action_edit($id = NULL)
+	public function action_edit()
 	{
+		$id = $this->request->param('id');
 		// set the template title (see Controller_App for implementation)
 		$this->template->title = __('Edit user');
 		// load the content from view
@@ -111,11 +121,7 @@ class Useradmin_Controller_Admin_User extends Controller_App {
 				// EDIT: check using alternative rules
 				try
 				{
-					$user->update_user($_POST, array(
-						'username', 
-						'password', 
-						'email'
-					));
+					$user->update_user($_POST, $this->user_model_fields);
 					$result = true;
 				}
 				catch (ORM_Validation_Exception $e)
@@ -129,11 +135,7 @@ class Useradmin_Controller_Admin_User extends Controller_App {
 				// CREATE: check using default rules
 				try
 				{
-					$user->create_user($_POST, array(
-						'username', 
-						'password', 
-						'email'
-					));
+					$user->create_user($_POST, $this->user_model_fields);
 					$result = true;
 				}
 				catch (ORM_Validation_Exception $e)
@@ -199,7 +201,7 @@ class Useradmin_Controller_Admin_User extends Controller_App {
 		// get all roles
 		$all_roles = array();
 		$role_model = ORM::factory('role');
-		foreach ($role_model->find_all() as $role)
+		foreach ($role_model->order_by('name')->find_all() as $role)
 		{
 			$all_roles[$role->name] = $role->description;
 		}
@@ -213,8 +215,9 @@ class Useradmin_Controller_Admin_User extends Controller_App {
 	 * @param string $id
 	 * @return void
 	 */
-	public function action_delete($id = NULL)
+	public function action_delete()
 	{
+		$id = $this->request->param('id');
 		// set the template title (see Controller_App for implementation)
 		$this->template->title = __('Delete user');
 		$user = ORM::factory('user', $id);
@@ -226,7 +229,10 @@ class Useradmin_Controller_Admin_User extends Controller_App {
 				// Delete the user
 				$user->delete($id);
 				// Delete any associated identities
-				DB::delete('user_identity')->where('user_id', '=', $id)
+				DB::delete('user_identities')->where('user_id', '=', $id)
+				                           ->execute();
+				// Delete any associated roles
+				DB::delete('roles_users')->where('user_id', '=', $id)
 				                           ->execute();
 				// message: save success
 				Message::add('success', __('User deleted.'));

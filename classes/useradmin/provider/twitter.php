@@ -21,10 +21,11 @@ class Useradmin_Provider_Twitter extends Provider_OAuth {
 	 */
 	public function verify()
 	{
+		$config_secret = Kohana::$config->load('oauth')->get('twitter');
 		// create token
 		$request_token = OAuth_Token::factory('request', array(
-			'token' => Session::instance()->get('oauth_token'), 
-			'secret' => Session::instance()->get('oauth_token_secret')
+			'token' => $_REQUEST['oauth_token'],
+			'secret' => $config_secret['secret']
 		));
 		// Store the verifier in the token
 		$request_token->verifier($_REQUEST['oauth_verifier']);
