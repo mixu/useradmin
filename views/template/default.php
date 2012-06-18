@@ -13,17 +13,19 @@
       <div id="navigation">
          <ul class="menu">
 
-             <?php
-             $session = Session::instance();
+			<?php
+			$session = Session::instance();
+			$registerEnabled = Kohana::$config->load('useradmin.register_enabled');
 
-             if (Auth::instance()->logged_in()){
-                echo '<li>'.Html::anchor('admin_user', 'User admin').'</li>';
-                echo '<li>'.Html::anchor('user/profile', 'My profile').'</li>';
-                echo '<li>'.Html::anchor('user/logout', 'Log out').'</li>';
-             } else {
-                echo '<li>'.Html::anchor('user/register', 'Register').'</li>';
-                echo '<li>'.Html::anchor('user/login', 'Log in').'</li>';
-             }
+			if (Auth::instance()->logged_in()){
+				echo '<li>'.Html::anchor('admin_user', 'User admin').'</li>';
+				echo '<li>'.Html::anchor('user/profile', 'My profile').'</li>';
+				echo '<li>'.Html::anchor('user/logout', 'Log out').'</li>';
+			} else {
+				if($registerEnabled)
+					echo '<li>'.Html::anchor('user/register', 'Register').'</li>';
+				echo '<li>'.Html::anchor('user/login', 'Log in').'</li>';
+			}
            ?>
          </ul>
       </div>
