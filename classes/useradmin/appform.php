@@ -43,7 +43,7 @@ class Useradmin_Appform {
 	 * @param string $class
 	 * @return array
 	 */
-	private static function add_class ($attributes, $class)
+	protected static function add_class ($attributes, $class)
 	{
 		if (isset($attributes['class']))
 		{
@@ -62,7 +62,7 @@ class Useradmin_Appform {
 	 * @param <type> $value
 	 * @param <type> $attributes 
 	 */
-	private function load_values ($name, &$value, &$attributes)
+	protected function load_values ($name, &$value, &$attributes)
 	{
 		if (isset($this->errors[$name]))
 		{
@@ -85,7 +85,7 @@ class Useradmin_Appform {
 	 * @param string $attrInfo  $attributes['info']
 	 * @return string
 	 */
-	private function addAlertSpan($errorName, $attributes = NULL)
+	protected function addAlertSpan($errorName, $attributes = NULL)
 	{
 		if (isset($errorName))
 		{
