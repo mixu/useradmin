@@ -1,6 +1,7 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
 return array(
+	'register_enabled' => true,
     /**
      * The number of failed logins allowed can be specified here:
      * If the user mistypes their password X times, then they will not be permitted to log in during the jail time.
