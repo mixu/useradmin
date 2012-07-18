@@ -13,7 +13,13 @@ class Useradmin_Controller_App extends Controller {
 	 * @var string Filename of the template file.
 	 */
 	public $template = 'template/default';
-
+	
+	public $default_styles = array(
+		'css/style.css' => 'screen'
+	);
+	
+	public $default_scripts = array();
+	
 	/**
 	 * @var boolean Whether the template file should be rendered automatically.
 	 * 
@@ -150,10 +156,8 @@ class Useradmin_Controller_App extends Controller {
 	{
 		if ($this->auto_render === TRUE)
 		{
-			$styles = array(
-				'css/style.css' => 'screen'
-			);
-			$scripts = array();
+			$styles = $this->default_styles;
+			$scripts = $this->default_scripts;
 			$this->template->styles = array_merge($this->template->styles, $styles);
 			$this->template->scripts = array_merge($this->template->scripts, $scripts);
 			
