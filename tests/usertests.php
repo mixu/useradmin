@@ -12,7 +12,7 @@
  * @author     gabrielgiannattasio <gabriel@l6.com.br>
  * @copyright  (c) 2011-2011 Fleep.me
  */
-class UserTests extends Unittest_Model_TestCase {
+class UserTests extends Unittest_TestCase {
 	
 	private function add_valid_users()
 	{
