@@ -369,7 +369,6 @@ class UserTests extends Unittest_Model_TestCase {
 	 */
 	public function test_auth_register_valid_users( $fields )
 	{
-		UserTests::useTestDB();
 		$status = TRUE;
 		try 
 		{
