@@ -191,7 +191,7 @@ class Useradmin_Controller_User extends Controller_App {
 		if (Auth::instance()->logged_in() != false)
 		{
 			// redirect to the user account
-			$this->request->redirect('user/profile');
+			$this->request->redirect('/');
 		}
 		// Load the view
 		$view = View::factory('user/register');
@@ -226,7 +226,7 @@ class Useradmin_Controller_User extends Controller_App {
 				// sign the user in
 				Auth::instance()->login($_POST['username'], $_POST['password']);
 				// redirect to the user account
-				$this->request->redirect(Session::instance()->get_once('returnUrl','user/profile'));
+				$this->request->redirect(Session::instance()->get_once('returnUrl','/'));
 			}
 			catch (ORM_Validation_Exception $e)
 			{
@@ -333,7 +333,7 @@ class Useradmin_Controller_User extends Controller_App {
 			if (Auth::instance()->logged_in() != 0)
 			{
 				// redirect to the user account
-				$this->request->redirect(Session::instance()->get_once('returnUrl','user/profile'));
+				$this->request->redirect(Session::instance()->get_once('returnUrl','/'));
 			}
 			$view = View::factory('user/login');
 			// If there is a post and $_POST is not empty
@@ -344,7 +344,7 @@ class Useradmin_Controller_User extends Controller_App {
                                             Arr::get($_REQUEST,'remember',false)!=false)
                 ){
 					// redirect to the user account
-					$this->request->redirect(Session::instance()->get_once('returnUrl','user/profile'));
+					$this->request->redirect(Session::instance()->get_once('returnUrl','/'));
 					return;
 				}
 				else
@@ -381,7 +381,7 @@ class Useradmin_Controller_User extends Controller_App {
 		// Sign out the user
 		Auth::instance()->logout();
 		// redirect to the user account and then the signin page if logout worked as expected
-		$this->request->redirect(Session::instance()->get_once('returnUrl','user/profile'));
+		$this->request->redirect(Session::instance()->get_once('returnUrl','/'));
 	}
 
 	/**
@@ -555,7 +555,7 @@ class Useradmin_Controller_User extends Controller_App {
 		{
 			Message::add('success', 'Already logged in.');
 			// redirect to the user account
-			$this->request->redirect('user/profile');
+			$this->request->redirect('/');
 		}
 		$provider = Provider::factory($provider_name);
 		if ($this->request->query('code') && $this->request->query('state'))
