@@ -68,6 +68,7 @@ class Useradmin_Controller_App extends Controller {
 	 */
 	public function login_required()
 	{
+		Cookie::set('returnUrl', $_SERVER['REQUEST_URI']);
 		Request::current()->redirect('user/login');
 	}
 

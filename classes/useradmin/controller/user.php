@@ -49,6 +49,12 @@ class Useradmin_Controller_User extends Controller_App {
 		'password', 
 		'email'
 	);
+	
+	/** Default Redirect URL
+	 * The module defaults to the user's profile page,
+	 * but this can be changed by overriding in your app.
+	 */
+	public $default_redirect_url = 'user/profile';
 
     public function before(){
         $baseUrl = Url::base(true);
@@ -191,7 +197,7 @@ class Useradmin_Controller_User extends Controller_App {
 		if (Auth::instance()->logged_in() != false)
 		{
 			// redirect to the user account
-			$this->request->redirect('/');
+			$this->request->redirect($this->default_redirect_url);
 		}
 		// Load the view
 		$view = View::factory('user/register');
@@ -226,7 +232,7 @@ class Useradmin_Controller_User extends Controller_App {
 				// sign the user in
 				Auth::instance()->login($_POST['username'], $_POST['password']);
 				// redirect to the user account
-				$this->request->redirect(Session::instance()->get_once('returnUrl','/'));
+				$this->request->redirect(Cookie::get('returnUrl', Session::instance()->get_once('returnUrl',$this->default_redirect_url)));
 			}
 			catch (ORM_Validation_Exception $e)
 			{
@@ -288,7 +294,7 @@ class Useradmin_Controller_User extends Controller_App {
 			                           ->execute();
 			// message: save success
 			Message::add('success', __('User deleted.'));
-			$this->request->redirect(Session::instance()->get_once('returnUrl','user/profile'));
+			$this->request->redirect(Cookie::get('returnUrl', Session::instance()->get_once('returnUrl','user/profile')));
 		}
 		// display confirmation
 		$this->template->content = View::factory('user/unregister')
@@ -333,7 +339,7 @@ class Useradmin_Controller_User extends Controller_App {
 			if (Auth::instance()->logged_in() != 0)
 			{
 				// redirect to the user account
-				$this->request->redirect(Session::instance()->get_once('returnUrl','/'));
+				$this->request->redirect(Cookie::get('returnUrl', Session::instance()->get_once('returnUrl',$this->default_redirect_url)));
 			}
 			$view = View::factory('user/login');
 			// If there is a post and $_POST is not empty
@@ -344,7 +350,7 @@ class Useradmin_Controller_User extends Controller_App {
                                             Arr::get($_REQUEST,'remember',false)!=false)
                 ){
 					// redirect to the user account
-					$this->request->redirect(Session::instance()->get_once('returnUrl','/'));
+					$this->request->redirect(Cookie::get('returnUrl', Session::instance()->get_once('returnUrl',$this->default_redirect_url)));
 					return;
 				}
 				else
@@ -381,7 +387,7 @@ class Useradmin_Controller_User extends Controller_App {
 		// Sign out the user
 		Auth::instance()->logout();
 		// redirect to the user account and then the signin page if logout worked as expected
-		$this->request->redirect(Session::instance()->get_once('returnUrl','/'));
+		$this->request->redirect(Cookie::get('returnUrl', Session::instance()->get_once('returnUrl',$this->default_redirect_url)));
 	}
 
 	/**
@@ -555,7 +561,7 @@ class Useradmin_Controller_User extends Controller_App {
 		{
 			Message::add('success', 'Already logged in.');
 			// redirect to the user account
-			$this->request->redirect('/');
+			$this->request->redirect($this->default_redirect_url);
 		}
 		$provider = Provider::factory($provider_name);
 		if ($this->request->query('code') && $this->request->query('state'))
@@ -707,7 +713,7 @@ class Useradmin_Controller_User extends Controller_App {
 					// found, log user in
 					Auth::instance()->force_login($user);
 					// redirect to the user account
-					$this->request->redirect(Session::instance()->get_once('returnUrl','user/profile'));
+					$this->request->redirect(Cookie::get('returnUrl', Session::instance()->get_once('returnUrl','user/profile')));
 					return;
 				}
 			}
@@ -752,7 +758,7 @@ class Useradmin_Controller_User extends Controller_App {
 					// sign the user in
 					Auth::instance()->login($values['username'], $password);
 					// redirect to the user account
-					$this->request->redirect(Session::instance()->get_once('returnUrl','user/profile'));
+					$this->request->redirect(Cookie::get('returnUrl', Session::instance()->get_once('returnUrl','user/profile')));
 				}
 				catch (ORM_Validation_Exception $e)
 				{
