@@ -411,33 +411,37 @@ class Useradmin_Controller_User extends Controller_App {
 			{
 				// send an email with the account reset token
 				$user->reset_token = $user->generate_password(32);
-				$user->save();
-				$message = "You have requested a password reset. You can reset password to your account by visiting the page at:\n\n" .
-				           ":reset_token_link\n\n" .
-				           "If the above link is not clickable, please visit the following page:\n" .
-				           ":reset_link\n\n" .
-				           "and copy/paste the following Reset Token: :reset_token\nYour user account name is: :username\n";
-				$mailer = Email::connect();
-				// Create complex Swift_Message object stored in $message
-				// MUST PASS ALL PARAMS AS REFS
-				$subject = __('Account password reset');
-				$to = $_POST['reset_email'];
-				$from = Kohana::$config->load('useradmin')->email_address;
-				$body = __($message, array(
-					':reset_token_link' => URL::site('user/reset?reset_token='.$user->reset_token.'&reset_email='.$_POST['reset_email'], TRUE), 
-					':reset_link' => URL::site('user/reset', TRUE), 
-					':reset_token' => $user->reset_token, 
-					':username' => $user->username
-				));
-				// FIXME: Test if Swift_Message has been found.
-				$message_swift = Swift_Message::newInstance($subject, $body)->setFrom($from)->setTo($to);
-				if ($mailer->send($message_swift))
-				{
-					Message::add('success', __('Password reset email sent.'));
-					$this->request->redirect('user/login');
-				}
-				else
-				{
+				try {
+					$user->save();
+					$message = "You have requested a password reset. You can reset password to your account by visiting the page at:\n\n" .
+					           ":reset_token_link\n\n" .
+					           "If the above link is not clickable, please visit the following page:\n" .
+					           ":reset_link\n\n" .
+					           "and copy/paste the following Reset Token: :reset_token\nYour user account name is: :username\n";
+					$mailer = Email::connect();
+					// Create complex Swift_Message object stored in $message
+					// MUST PASS ALL PARAMS AS REFS
+					$subject = __('Account password reset');
+					$to = $_POST['reset_email'];
+					$from = Kohana::$config->load('useradmin')->email_address;
+					$body = __($message, array(
+						':reset_token_link' => URL::site('user/reset?reset_token='.$user->reset_token.'&reset_email='.$_POST['reset_email'], TRUE), 
+						':reset_link' => URL::site('user/reset', TRUE), 
+						':reset_token' => $user->reset_token, 
+						':username' => $user->username
+					));
+					// FIXME: Test if Swift_Message has been found.
+					$message_swift = Swift_Message::newInstance($subject, $body)->setFrom($from)->setTo($to);
+					if ($mailer->send($message_swift))
+					{
+						Message::add('success', __('Password reset email sent.'));
+						$this->request->redirect('user/login');
+					}
+					else
+					{
+						Message::add('failure', __('Could not send email.'));
+					}
+				} catch(Exception $e) {
 					Message::add('failure', __('Could not send email.'));
 				}
 			}
