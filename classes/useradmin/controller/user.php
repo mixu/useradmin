@@ -411,6 +411,7 @@ class Useradmin_Controller_User extends Controller_App {
 			{
 				// send an email with the account reset token
 				$user->reset_token = $user->generate_password(32);
+				$user->validation_required(false);
 				try {
 					$user->save();
 					$message = "You have requested a password reset. You can reset password to your account by visiting the page at:\n\n" .
