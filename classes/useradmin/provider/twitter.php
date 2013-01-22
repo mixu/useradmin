@@ -6,9 +6,9 @@ class Useradmin_Provider_Twitter extends Provider_OAuth {
 	 * Data storage
 	 * @var int
 	 */
-	private $uid = null;
+	protected $uid = null;
 
-	private $data = null;
+	protected $data = null;
 
 	public function __construct()
 	{
