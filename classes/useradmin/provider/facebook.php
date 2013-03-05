@@ -6,11 +6,11 @@
  */
 class Useradmin_Provider_Facebook extends Provider {
 
-	private $facebook = null;
+	protected $facebook = null;
 
-	private $me = null;
+	protected $me = null;
 
-	private $uid = null;
+	protected $uid = null;
 
 	public function __construct()
 	{
