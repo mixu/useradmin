@@ -39,7 +39,7 @@ class Useradmin_Model_User extends Model_Auth_User {
 	 */
 	public function rules()
 	{
-		if ($this->validation_required())
+		if ($this->_validation_required)
 		{
 			$parent = parent::rules();
 			// fixes the min_length username value

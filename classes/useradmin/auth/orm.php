@@ -30,6 +30,8 @@ class Useradmin_Auth_ORM extends Kohana_Auth_ORM implements Useradmin_Driver_iAu
 			// Load the user
 			$user = ORM::factory('user');
 			$user->where($user->unique_key($username), '=', $username)->find();
+			if($user->loaded())
+				$user->validation_required(false);
 		}
 		
 		// if there are too many recent failed logins, fail now
