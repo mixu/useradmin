@@ -493,6 +493,7 @@ class Useradmin_Controller_User extends Controller_App {
 						$user->password = $password;
 						// This field does not exist in the default config:
 						//               $user->failed_login_count = 0;
+						$user->validation_required(false);
 						$user->save();
 						Message::add('success', __('Password reset.'));
 						Message::add('success', '<p>' 
