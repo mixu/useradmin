@@ -61,6 +61,28 @@ class Useradmin_Model_User extends Model_Auth_User {
 		return $this;
 	}
 
+	/**
+	 * Complete the login for a user by incrementing the logins and saving login timestamp
+	 *
+	 * @return void
+	 */
+	public function complete_login()
+	{
+		if ($this->_loaded)
+		{
+			// Update the number of logins
+			$this->logins = new Database_Expression('logins + 1');
+
+			// Set the last login date
+			$this->last_login = time();
+			
+			$this->validation_required(false);
+
+			// Save the user
+			$this->update();
+		}
+	}
+
 	// TODO overload filters() and add username/created_on/updated_on coluns filters
 
 	/**
