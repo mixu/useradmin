@@ -6,9 +6,9 @@ class Useradmin_Provider_Twitter extends Provider_OAuth {
 	 * Data storage
 	 * @var int
 	 */
-	private $uid = null;
+	protected $uid = null;
 
-	private $data = null;
+	protected $data = null;
 
 	public function __construct()
 	{
@@ -21,10 +21,11 @@ class Useradmin_Provider_Twitter extends Provider_OAuth {
 	 */
 	public function verify()
 	{
+		$config_secret = Kohana::$config->load('oauth')->get('twitter');
 		// create token
 		$request_token = OAuth_Token::factory('request', array(
-			'token' => Session::instance()->get('oauth_token'), 
-			'secret' => Session::instance()->get('oauth_token_secret')
+			'token' => $_REQUEST['oauth_token'],
+			'secret' => $config_secret['secret']
 		));
 		// Store the verifier in the token
 		$request_token->verifier($_REQUEST['oauth_verifier']);
@@ -33,7 +34,7 @@ class Useradmin_Provider_Twitter extends Provider_OAuth {
 		if ($access_token and $access_token->name === 'access')
 		{
 			// @link  http://dev.twitter.com/doc/get/account/verify_credentials
-			$request = OAuth_Request::factory('resource', 'GET', 'http://api.twitter.com/1/account/verify_credentials.json', array(
+			$request = OAuth_Request::factory('resource', 'GET', 'http://api.twitter.com/1.1/account/verify_credentials.json', array(
 				'oauth_consumer_key' => $this->consumer->key, 
 				'oauth_token' => $access_token->token
 			));

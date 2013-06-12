@@ -26,6 +26,8 @@ class Useradmin_Model_User extends Model_Auth_User {
 	
 	protected $_updated_column = array('column' => 'modified', 'format' => 'Y-m-d H:i:s');
 
+	protected $_validation_required = TRUE;
+	
 	/**
 	 * Rules for the user model. Because the password is _always_ a hash
 	 * when it's set,you need to run an additional not_empty rule in your controller
@@ -37,12 +39,50 @@ class Useradmin_Model_User extends Model_Auth_User {
 	 */
 	public function rules()
 	{
-		$parent = parent::rules();
-		// fixes the min_length username value
-		$parent['username'][1] = array('min_length', array(':value', 1));
-		return $parent;
+		if ($this->_validation_required)
+		{
+			$parent = parent::rules();
+			// fixes the min_length username value
+			$parent['username'][1] = array('min_length', array(':value', 1));
+			return $parent;
+		}
+		return array();
 	}
 	
+	public function validation_required($required = null)
+	{
+		if ($required === NULL)
+		{
+			// work as getter
+			return $this->_validation_required;
+		}
+		// set value
+		$this->_validation_required = (bool)$required;
+		return $this;
+	}
+
+	/**
+	 * Complete the login for a user by incrementing the logins and saving login timestamp
+	 *
+	 * @return void
+	 */
+	public function complete_login()
+	{
+		if ($this->_loaded)
+		{
+			// Update the number of logins
+			$this->logins = new Database_Expression('logins + 1');
+
+			// Set the last login date
+			$this->last_login = time();
+			
+			$this->validation_required(false);
+
+			// Save the user
+			$this->update();
+		}
+	}
+
 	// TODO overload filters() and add username/created_on/updated_on coluns filters
 
 	/**

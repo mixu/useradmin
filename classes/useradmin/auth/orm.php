@@ -7,6 +7,15 @@
  * @author     Gabriel R. Giannattasio
  */
 class Useradmin_Auth_ORM extends Kohana_Auth_ORM implements Useradmin_Driver_iAuth {
+	
+	/** User Model Fields
+	 * Override in your app to add fields
+	 */
+	public $user_model_fields = array(
+		'username',
+		'password',
+		'email',
+	);
 
 	/**
 	 * Extends the Kohana Auth ORM driver to give useradmin module extras
@@ -21,6 +30,8 @@ class Useradmin_Auth_ORM extends Kohana_Auth_ORM implements Useradmin_Driver_iAu
 			// Load the user
 			$user = ORM::factory('user');
 			$user->where($user->unique_key($username), '=', $username)->find();
+			if($user->loaded())
+				$user->validation_required(false);
 		}
 		
 		// if there are too many recent failed logins, fail now
@@ -84,11 +95,7 @@ class Useradmin_Auth_ORM extends Kohana_Auth_ORM implements Useradmin_Driver_iAu
 		}
 		try 
 		{
-			$user->create_user($fields, array(
-				'username',
-				'password',
-				'email',
-			));
+			$user->create_user($fields, $this->user_model_fields);
 			// Add the login role to the user (add a row to the db)
 			$login_role = new Model_Role(array('name' =>'login'));
             $user->add('roles', $login_role);

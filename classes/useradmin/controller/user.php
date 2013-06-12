@@ -40,11 +40,26 @@ class Useradmin_Controller_User extends Controller_App {
 		'change_password' => 'login'
 	); // the others are public (forgot, login, register, reset, noaccess)
 	// logout is also public to avoid confusion (e.g. easier to specify and test post-logout page)
+	
+	/** User Model Fields
+	 * Override in your app to add fields
+	 */
+	public $user_model_fields = array(
+		'username', 
+		'password', 
+		'email'
+	);
+	
+	/** Default Redirect URL
+	 * The module defaults to the user's profile page,
+	 * but this can be changed by overriding in your app.
+	 */
+	public $default_redirect_url = 'user/profile';
 
     public function before(){
         $baseUrl = Url::base(true);
         if(substr($this->request->referrer(),0,strlen($baseUrl)) == $baseUrl){
-            $urlPath = ltrim(parse_url($this->request->referrer(),PHP_URL_PATH),'/');
+            $urlPath = str_replace($baseUrl,'',$this->request->referrer());
             $processedRef = Request::process_uri($urlPath);
             $referrerController = Arr::path(
                 $processedRef,
@@ -126,12 +141,7 @@ class Useradmin_Controller_User extends Controller_App {
 			}
 			try
 			{
-				$user->update_user($_POST, 
-				array(
-					'username', 
-					'password', 
-					'email'
-				));
+				$user->update_user($_POST, $this->user_model_fields);
 				// message: save success
 				Message::add('success', __('Values saved.'));
 				// redirect and exit
@@ -172,6 +182,8 @@ class Useradmin_Controller_User extends Controller_App {
 	 */
 	public function action_register()
 	{
+		if(!Kohana::$config->load('useradmin.register_enabled'))
+			$this->request->redirect('user/login');
 		// Load reCaptcha if needed
 		if (Kohana::$config->load('useradmin')->captcha)
 		{
@@ -185,7 +197,7 @@ class Useradmin_Controller_User extends Controller_App {
 		if (Auth::instance()->logged_in() != false)
 		{
 			// redirect to the user account
-			$this->request->redirect('user/profile');
+			$this->request->redirect($this->default_redirect_url);
 		}
 		// Load the view
 		$view = View::factory('user/register');
@@ -220,7 +232,7 @@ class Useradmin_Controller_User extends Controller_App {
 				// sign the user in
 				Auth::instance()->login($_POST['username'], $_POST['password']);
 				// redirect to the user account
-				$this->request->redirect(Session::instance()->get_once('returnUrl','user/profile'));
+				$this->request->redirect(Cookie::get('returnUrl', Session::instance()->get_once('returnUrl',$this->default_redirect_url)));
 			}
 			catch (ORM_Validation_Exception $e)
 			{
@@ -274,12 +286,15 @@ class Useradmin_Controller_User extends Controller_App {
 			}
 			// Delete the user
 			$user->delete($id);
+			// Delete any associated roles
+			DB::delete('roles_users')->where('user_id', '=', $id)
+			                           ->execute();
 			// Delete any associated identities
-			DB::delete('user_identity')->where('user_id', '=', $id)
+			DB::delete('user_identities')->where('user_id', '=', $id)
 			                           ->execute();
 			// message: save success
 			Message::add('success', __('User deleted.'));
-			$this->request->redirect(Session::instance()->get_once('returnUrl','user/profile'));
+			$this->request->redirect(Cookie::get('returnUrl', Session::instance()->get_once('returnUrl','user/profile')));
 		}
 		// display confirmation
 		$this->template->content = View::factory('user/unregister')
@@ -324,7 +339,7 @@ class Useradmin_Controller_User extends Controller_App {
 			if (Auth::instance()->logged_in() != 0)
 			{
 				// redirect to the user account
-				$this->request->redirect(Session::instance()->get_once('returnUrl','user/profile'));
+				$this->request->redirect(Cookie::get('returnUrl', Session::instance()->get_once('returnUrl',$this->default_redirect_url)));
 			}
 			$view = View::factory('user/login');
 			// If there is a post and $_POST is not empty
@@ -335,7 +350,7 @@ class Useradmin_Controller_User extends Controller_App {
                                             Arr::get($_REQUEST,'remember',false)!=false)
                 ){
 					// redirect to the user account
-					$this->request->redirect(Session::instance()->get_once('returnUrl','user/profile'));
+					$this->request->redirect(Cookie::get('returnUrl', Session::instance()->get_once('returnUrl',$this->default_redirect_url)));
 					return;
 				}
 				else
@@ -372,7 +387,7 @@ class Useradmin_Controller_User extends Controller_App {
 		// Sign out the user
 		Auth::instance()->logout();
 		// redirect to the user account and then the signin page if logout worked as expected
-		$this->request->redirect(Session::instance()->get_once('returnUrl','user/profile'));
+		$this->request->redirect(Cookie::get('returnUrl', Session::instance()->get_once('returnUrl',$this->default_redirect_url)));
 	}
 
 	/**
@@ -396,33 +411,38 @@ class Useradmin_Controller_User extends Controller_App {
 			{
 				// send an email with the account reset token
 				$user->reset_token = $user->generate_password(32);
-				$user->save();
-				$message = "You have requested a password reset. You can reset password to your account by visiting the page at:\n\n" .
-				           ":reset_token_link\n\n" .
-				           "If the above link is not clickable, please visit the following page:\n" .
-				           ":reset_link\n\n" .
-				           "and copy/paste the following Reset Token: :reset_token\nYour user account name is: :username\n";
-				$mailer = Email::connect();
-				// Create complex Swift_Message object stored in $message
-				// MUST PASS ALL PARAMS AS REFS
-				$subject = __('Account password reset');
-				$to = $_POST['reset_email'];
-				$from = Kohana::$config->load('useradmin')->email_address;
-				$body = __($message, array(
-					':reset_token_link' => URL::site('user/reset?reset_token='.$user->reset_token.'&reset_email='.$_POST['reset_email'], TRUE), 
-					':reset_link' => URL::site('user/reset', TRUE), 
-					':reset_token' => $user->reset_token, 
-					':username' => $user->username
-				));
-				// FIXME: Test if Swift_Message has been found.
-				$message_swift = Swift_Message::newInstance($subject, $body)->setFrom($from)->setTo($to);
-				if ($mailer->send($message_swift))
-				{
-					Message::add('success', __('Password reset email sent.'));
-					$this->request->redirect('user/login');
-				}
-				else
-				{
+				$user->validation_required(false);
+				try {
+					$user->save();
+					$message = "You have requested a password reset. You can reset password to your account by visiting the page at:\n\n" .
+					           ":reset_token_link\n\n" .
+					           "If the above link is not clickable, please visit the following page:\n" .
+					           ":reset_link\n\n" .
+					           "and copy/paste the following Reset Token: :reset_token\nYour user account name is: :username\n";
+					$mailer = Email::connect();
+					// Create complex Swift_Message object stored in $message
+					// MUST PASS ALL PARAMS AS REFS
+					$subject = __('Account password reset');
+					$to = $_POST['reset_email'];
+					$from = Kohana::$config->load('useradmin')->email_address;
+					$body = __($message, array(
+						':reset_token_link' => URL::site('user/reset?reset_token='.$user->reset_token.'&reset_email='.$_POST['reset_email'], TRUE), 
+						':reset_link' => URL::site('user/reset', TRUE), 
+						':reset_token' => $user->reset_token, 
+						':username' => $user->username
+					));
+					// FIXME: Test if Swift_Message has been found.
+					$message_swift = Swift_Message::newInstance($subject, $body)->setFrom($from)->setTo($to);
+					if ($mailer->send($message_swift))
+					{
+						Message::add('success', __('Password reset email sent.'));
+						$this->request->redirect('user/login');
+					}
+					else
+					{
+						Message::add('failure', __('Could not send email.'));
+					}
+				} catch(Exception $e) {
 					Message::add('failure', __('Could not send email.'));
 				}
 			}
@@ -473,6 +493,7 @@ class Useradmin_Controller_User extends Controller_App {
 						$user->password = $password;
 						// This field does not exist in the default config:
 						//               $user->failed_login_count = 0;
+						$user->validation_required(false);
 						$user->save();
 						Message::add('success', __('Password reset.'));
 						Message::add('success', '<p>' 
@@ -539,13 +560,14 @@ class Useradmin_Controller_User extends Controller_App {
 	 * Redirect to the provider's auth URL
 	 * @param string $provider
 	 */
-	function action_provider ($provider_name = null)
+	function action_provider ()
 	{
+		$provider_name = $this->request->param('provider');
 		if (Auth::instance()->logged_in())
 		{
 			Message::add('success', 'Already logged in.');
 			// redirect to the user account
-			$this->request->redirect('user/profile');
+			$this->request->redirect($this->default_redirect_url);
 		}
 		$provider = Provider::factory($provider_name);
 		if ($this->request->query('code') && $this->request->query('state'))
@@ -564,13 +586,14 @@ class Useradmin_Controller_User extends Controller_App {
 		return;
 	}
 
-	function action_associate($provider_name = null)
+	function action_associate()
 	{
-	if ($this->request->query('code') && $this->request->query('state'))
-	{
-		$this->action_associate_return($provider_name);
-		return;
-	}
+		$provider_name = $this->request->param('id');
+		if ($this->request->query('code') && $this->request->query('state'))
+		{
+			$this->action_associate_return($provider_name);
+			return;
+		}
 		if (Auth::instance()->logged_in())
 		{
 			if (isset($_POST['confirmation']) && $_POST['confirmation'] == 'Y')
@@ -624,8 +647,9 @@ class Useradmin_Controller_User extends Controller_App {
 	 * prove that they want to trust that identity provider on your application.
 	 *
 	 */
-	function action_associate_return($provider_name = null)
+	function action_associate_return()
 	{
+		$provider_name = $this->request->param('id');
 		if (Auth::instance()->logged_in())
 		{
 			$provider = Provider::factory($provider_name);
@@ -668,8 +692,9 @@ class Useradmin_Controller_User extends Controller_App {
 	/**
 	 * Allow the user to login and register using a 3rd party provider.
 	 */
-	function action_provider_return($provider_name = null)
+	function action_provider_return()
 	{
+		$provider_name = $this->request->param('provider');
 		$provider = Provider::factory($provider_name);
 		if (! is_object($provider))
 		{
@@ -694,10 +719,13 @@ class Useradmin_Controller_User extends Controller_App {
 					// found, log user in
 					Auth::instance()->force_login($user);
 					// redirect to the user account
-					$this->request->redirect('user/profile');
+					$this->request->redirect(Cookie::get('returnUrl', Session::instance()->get_once('returnUrl','user/profile')));
 					return;
 				}
 			}
+			// If register is disabled, don't create new account
+			if(!Kohana::$config->load('useradmin.register_enabled'))
+				$this->request->redirect('user/login');
 			// create new account
 			if (! Auth::instance()->logged_in())
 			{
@@ -721,11 +749,7 @@ class Useradmin_Controller_User extends Controller_App {
 				try
 				{
 					// If the post data validates using the rules setup in the user model
-					$user->create_user($values, array(
-						'username', 
-						'password', 
-						'email'
-					));
+					$user->create_user($values, $this->user_model_fields);
 					// Add the login role to the user (add a row to the db)
 					$login_role = new Model_Role(array(
 						'name' => 'login'
@@ -740,7 +764,7 @@ class Useradmin_Controller_User extends Controller_App {
 					// sign the user in
 					Auth::instance()->login($values['username'], $password);
 					// redirect to the user account
-					$this->request->redirect('user/profile');
+					$this->request->redirect(Cookie::get('returnUrl', Session::instance()->get_once('returnUrl','user/profile')));
 				}
 				catch (ORM_Validation_Exception $e)
 				{
