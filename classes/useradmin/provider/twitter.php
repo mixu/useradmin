@@ -34,7 +34,7 @@ class Useradmin_Provider_Twitter extends Provider_OAuth {
 		if ($access_token and $access_token->name === 'access')
 		{
 			// @link  http://dev.twitter.com/doc/get/account/verify_credentials
-			$request = OAuth_Request::factory('resource', 'GET', 'http://api.twitter.com/1/account/verify_credentials.json', array(
+			$request = OAuth_Request::factory('resource', 'GET', 'http://api.twitter.com/1.1/account/verify_credentials.json', array(
 				'oauth_consumer_key' => $this->consumer->key, 
 				'oauth_token' => $access_token->token
 			));
